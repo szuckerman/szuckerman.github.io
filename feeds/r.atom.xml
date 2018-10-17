@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>programming notes - R</title><link href="https://szuckerman.github.io/" rel="alternate"></link><link href="https://szuckerman.github.io/feeds/r.atom.xml" rel="self"></link><id>https://szuckerman.github.io/</id><updated>2018-10-10T17:30:00-04:00</updated><entry><title>How to make a sequence of days in R</title><link href="https://szuckerman.github.io/make_date_range_r.html" rel="alternate"></link><published>2018-10-10T17:30:00-04:00</published><updated>2018-10-10T17:30:00-04:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2018-10-10:/make_date_range_r.html</id><summary type="html">&lt;p&gt;Sometimes I need to make a sequence of dates to help with analysis. Here's a quick 1-liner in R.&lt;/p&gt;</summary><content type="html">&lt;p&gt;I usually use the &lt;a href="https://lubridate.tidyverse.org/"&gt;lubridate&lt;/a&gt; package for date manipulation, however, there's one item in that package that I haven't really gotten the hold of, which is making an array of dates. &lt;/p&gt;
+&lt;p&gt;I usually have a situation where I'm missing data, such as with sales data. If a sale didn't take place on a certain day, then that date value won't show up. I want that date to have a value of zero.&lt;/p&gt;
+&lt;p&gt;I can make a sequence of dates with the following (base-R) command:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;date_sequence &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kp"&gt;seq&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kp"&gt;as.Date&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;2018/01/01&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="kp"&gt;as.Date&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;2018/12/31&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;days&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;You can then put this in a &lt;code&gt;data.frame&lt;/code&gt; which is easy to use with &lt;code&gt;dplyr&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;all_dates &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;data.frame&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;date_sequence&lt;span class="o"&gt;=&lt;/span&gt;date_sequence&lt;span class="p"&gt;)&lt;/span&gt;
+
+full_dataset &lt;span class="o"&gt;=&lt;/span&gt; all_dates &lt;span class="o"&gt;%&amp;gt;%&lt;/span&gt;
+    left_join&lt;span class="p"&gt;(&lt;/span&gt;sales_data&lt;span class="p"&gt;)&lt;/span&gt;
+
+full_dataset&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="kp"&gt;is.na&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;full_dataset&lt;span class="o"&gt;$&lt;/span&gt;product_sales&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="s"&gt;&amp;#39;product_sales&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;</content><category term="r"></category><category term="dates"></category></entry></feed>
