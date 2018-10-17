@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>programming notes</title><link href="https://szuckerman.github.io/" rel="alternate"></link><link href="https://szuckerman.github.io/feeds/all.atom.xml" rel="self"></link><id>https://szuckerman.github.io/</id><updated>2018-10-10T17:30:00-04:00</updated><entry><title>How to make a sequence of days in R</title><link href="https://szuckerman.github.io/make_date_range_r.html" rel="alternate"></link><published>2018-10-10T17:30:00-04:00</published><updated>2018-10-10T17:30:00-04:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2018-10-10:/make_date_range_r.html</id><summary type="html">&lt;p&gt;Sometimes I need to make a sequence of dates to help with analysis. Here's a quick 1-liner in R.&lt;/p&gt;</summary><content type="html">&lt;p&gt;I usually use the &lt;a href="https://lubridate.tidyverse.org/"&gt;lubridate&lt;/a&gt; package for date manipulation, however, there's one item in that package that I haven't really gotten the hold of, which is making an array of dates. &lt;/p&gt;
+&lt;p&gt;I usually have a situation where I'm missing data, such as with sales data. If a sale didn't take place on a certain day, then that date value won't show up. I want that date to have a value of zero.&lt;/p&gt;
+&lt;p&gt;I can make a sequence of dates with the following (base-R) command:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;date_sequence &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kp"&gt;seq&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kp"&gt;as.Date&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;2018/01/01&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="kp"&gt;as.Date&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;2018/12/31&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;days&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;You can then put this in a &lt;code&gt;data.frame&lt;/code&gt; which is easy to use with &lt;code&gt;dplyr&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;all_dates &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;data.frame&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;date_sequence&lt;span class="o"&gt;=&lt;/span&gt;date_sequence&lt;span class="p"&gt;)&lt;/span&gt;
+
+full_dataset &lt;span class="o"&gt;=&lt;/span&gt; all_dates &lt;span class="o"&gt;%&amp;gt;%&lt;/span&gt;
+    left_join&lt;span class="p"&gt;(&lt;/span&gt;sales_data&lt;span class="p"&gt;)&lt;/span&gt;
+
+full_dataset&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="kp"&gt;is.na&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;full_dataset&lt;span class="o"&gt;$&lt;/span&gt;product_sales&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="s"&gt;&amp;#39;product_sales&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;</content><category term="r"></category><category term="dates"></category></entry><entry><title>Finding Local Python Packages</title><link href="https://szuckerman.github.io/finding-local-python-packages.html" rel="alternate"></link><published>2017-12-21T12:45:00-05:00</published><updated>2017-12-21T12:45:00-05:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2017-12-21:/finding-local-python-packages.html</id><summary type="html">&lt;p&gt;Finding Local Python Packages&lt;/p&gt;</summary><content type="html">&lt;h2&gt;Problem&lt;/h2&gt;
+&lt;p&gt;I had a problem where I couldn't get Python to notice a package I just made.&lt;/p&gt;
+&lt;p&gt;What's great about Python is that you can work on a module, say &lt;code&gt;my_file.py&lt;/code&gt;, and in another script write 'import my_file' to include that script in the current one. To include this module in a package, you merely add a blank &lt;code&gt;__init__.py&lt;/code&gt; file to the folder the script is in. If the script is in a folder called 'my_folder', adding a &lt;code&gt;__init__.py&lt;/code&gt; file to that folder will allow you to run:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;my_folder&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;my_script&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;However, Python only knows about this package if it's in the same directory. I was trying to run some tests recently by having a separate 'tests' folder and I kept on getting an error of &lt;code&gt;ModuleNotFoundError: No module named my_folder&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;The reason it can't find the package is because Python only knows about packages loaded into the site-packages section of your Python installation.&lt;/p&gt;
+&lt;p&gt;For example, I use a virtual environment on my mac which loads all my packages (such as pandas, scipy, etc) here:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;/Users/my_username/.virtualenvs/virtualenv_name/lib/python3.6/site-packages&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;When you install with pip, the packages get loaded there.&lt;/p&gt;
+&lt;p&gt;If I decided to build the package, then it would go there too, but I don't really want to do that while I'm just doing some brief testing.&lt;/p&gt;
+&lt;h2&gt;Solution&lt;/h2&gt;
+&lt;p&gt;Add a .pth file to the site-packages/ directory.&lt;/p&gt;
+&lt;p&gt;It's fairly simple. Let's say my &lt;code&gt;my_folder&lt;/code&gt; package is in the following &lt;code&gt;my_folder&lt;/code&gt; directory (it's a common design to have a package in a folder of the same name).&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;/Users/my_username/Documents/my_folder/my_folder/&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;I would take this line and put it in a file called &lt;code&gt;my_folder.pth&lt;/code&gt; (it can be named anything, though) and put that pth file in the site-packages/ directory. It might seem odd to just have a text file with that one line of a directory, but it works.&lt;/p&gt;
+&lt;p&gt;The file's location would be &lt;code&gt;/Users/my_username/.virtualenvs/virtualenv_name/lib/python3.6/site-packages/my_folder.pth&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Now you can run &lt;code&gt;from my_folder import my_script&lt;/code&gt; without any errors!&lt;/p&gt;</content><category term="python"></category><category term="packages"></category></entry><entry><title>Using Slice Objects in Python</title><link href="https://szuckerman.github.io/slice-objects.html" rel="alternate"></link><published>2017-10-03T15:30:00-04:00</published><updated>2017-10-03T15:30:00-04:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2017-10-03:/slice-objects.html</id><summary type="html">&lt;p&gt;Slice objects in Python&lt;/p&gt;</summary><content type="html">&lt;h1&gt;Using Slice Objects in Python&lt;/h1&gt;
+&lt;p&gt;Here's a cool little helpful piece of code I found for Python, it's called a slice object.&lt;/p&gt;
+&lt;p&gt;You know when you write &lt;code&gt;my_list[:2]&lt;/code&gt; and you get the first two values? Well, the ":2" section is actually a slice object which you can input directly.&lt;/p&gt;
+&lt;p&gt;The notation for the object is &lt;code&gt;slice(None, 2)&lt;/code&gt; or &lt;code&gt;slice(None, 2, None)&lt;/code&gt;, similar to when you subset a list using one or two colons.&lt;/p&gt;
+&lt;p&gt;Therefore, if we want to get the first two values of the list we can write:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;my_list&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nb"&gt;slice&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;None&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;)]&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Now, this doesn't actually save us anything from the usual syntax, but we can now save the slice object as its own variable:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;first_two&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;slice&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;None&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="n"&gt;my_list&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;first_two&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;My most common use case for slice objects is with pandas dataframes.&lt;/p&gt;
+&lt;p&gt;In one case I was generating a report with many different subsets of a few tables. Sometimes I needed the last column, which was a 'total' column, and othertimes not.&lt;/p&gt;
+&lt;p&gt;Therefore, it was much easier to write:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;subset_my_df&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;df&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;include_total&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="bp"&gt;True&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="sd"&gt;&amp;#39;&amp;#39;&amp;#39;This function takes a pandas dataframe and includes the &amp;#39;total&amp;#39; column at the end, or not.&amp;#39;&amp;#39;&amp;#39;&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;include_total&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;df_slice&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;slice&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;None&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;df_slice&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;slice&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;None&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;cols&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;df&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;columns&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;df_slice&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+
+    &lt;span class="n"&gt;subset_df&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;df&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;cols&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;subset_df&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Than to try to hardcode the columns without the total, especially if you have dataframes with different column names.&lt;/p&gt;
+&lt;p&gt;You need the &lt;code&gt;cols=df.columns[df_slice]&lt;/code&gt; line to subset the columns.  If you don't include that line you'll be subsetting by rows instead.&lt;/p&gt;</content><category term="python"></category></entry></feed>
