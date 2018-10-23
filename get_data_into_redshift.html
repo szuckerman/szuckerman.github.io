@@ -157,14 +157,22 @@
 <p>There's additional commands to add (full list <a href="https://docs.aws.amazon.com/redshift/latest/dg/r_COPY.html">can be found here</a>).</p>
 <p>I find that I use the following most often:</p>
 <ul>
-<li><a href="https://docs.aws.amazon.com/redshift/latest/dg/copy-parameters-data-format.html#copy-csv">CSV</a></li>
+<li><a href="https://docs.aws.amazon.com/redshift/latest/dg/copy-parameters-data-format.html#copy-csv">CSV</a><ul>
 <li>This takes care of the fact that the file is a CSV and has defaults for the format.</li>
-<li><a href="https://docs.aws.amazon.com/redshift/latest/dg/copy-parameters-data-format.html#copy-csv">QUOTE [AS] 'quote_character'</a></li>
+</ul>
+</li>
+<li><a href="https://docs.aws.amazon.com/redshift/latest/dg/copy-parameters-data-format.html#copy-csv">QUOTE [AS] 'quote_character'</a><ul>
 <li>This can only be used with the <code>CSV</code> command and is useful if there's user input where there might be hanging apostrophes or something like that. If you change the quote character to something random it will ignore the single apostrophes. </li>
-<li><a href="https://docs.aws.amazon.com/redshift/latest/dg/copy-parameters-data-format.html#copy-delimiter">DELIMITER</a></li>
+</ul>
+</li>
+<li><a href="https://docs.aws.amazon.com/redshift/latest/dg/copy-parameters-data-format.html#copy-delimiter">DELIMITER</a><ul>
 <li>You can change <code>DELIMITER</code> to <code>\t</code> if you have a txt file. You don't need the <code>CSV</code> command in this case.</li>
-<li><a href="https://docs.aws.amazon.com/redshift/latest/dg/copy-parameters-data-conversion.html#copy-ignoreheader">IGNOREHEADER</a> </li>
+</ul>
+</li>
+<li><a href="https://docs.aws.amazon.com/redshift/latest/dg/copy-parameters-data-conversion.html#copy-ignoreheader">IGNOREHEADER</a> <ul>
 <li>If your file has column headers you'll get an error when loading. Use <code>IGNOREHEADER 1</code> to skip the first line.</li>
+</ul>
+</li>
 </ul>
 <p>With some of these commands added, your <code>COPY</code> command might look more like this:</p>
 <div class="highlight"><pre><span></span><span class="k">copy</span> <span class="k">schema</span><span class="p">.</span><span class="n">tablename</span><span class="p">(</span><span class="n">column3</span><span class="p">,</span> <span class="n">column1</span><span class="p">)</span> <span class="k">from</span> <span class="s1">&#39;s3://bucket-name/filename.txt&#39;</span> <span class="n">iam_role</span> <span class="s1">&#39;arn:aws:iam::&lt;account_number&gt;:role/&lt;your_redshift_role&gt;&#39;</span> <span class="k">DELIMITER</span> <span class="s1">&#39;\t&#39;</span> <span class="n">QUOTE</span> <span class="s1">&#39;^&#39;</span> <span class="n">IGNOREHEADER</span> <span class="mi">1</span><span class="p">;</span>
