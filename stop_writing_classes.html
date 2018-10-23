@@ -6,7 +6,7 @@
         <meta name="author" content="Sam Zuckerman" />
         <meta name="copyright" content="Sam Zuckerman" />
 
-<meta name="keywords" content="python, youtube, videos, R, " />
+<meta name="keywords" content="python, videos, pycon, Python, " />
         <title>Thoughts on "Stop Writing Classes" PyCon 2012 talk  · programming notes
 </title>
         <link href="http://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css">
@@ -23,6 +23,7 @@
         <link href="https://szuckerman.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="programming notes - Full Atom Feed" />
         <link href="https://szuckerman.github.io/feeds/Python.atom.xml" type="application/atom+xml" rel="alternate" title="programming notes - Python Category Atom Feed" />
         <link href="https://szuckerman.github.io/feeds/R.atom.xml" type="application/atom+xml" rel="alternate" title="programming notes - R Category Atom Feed" />
+        <link href="https://szuckerman.github.io/feeds/Redshift.atom.xml" type="application/atom+xml" rel="alternate" title="programming notes - Redshift Category Atom Feed" />
     </head>
     <body>
         <div id="content-sans-footer">
@@ -62,6 +63,7 @@
         <div class="span8 offset2 article-content">
 
             <h1>Writing Classes for Data Analysis</h1>
+<p>There's a <a href="https://www.youtube.com/watch?v=o9pEzgHorH0">famous talk by Jack Diederich</a> about clean and readable Python code from PyCon 2012. The main point of his talk (and the title) is called "Stop Writing Classes".</p>
 <p>As someone who works mainly in the data space, I thought this talk was interesting since I don't usually write classes at all.  Usually when working with a Jupyter notebook or some other interactive REPL scripting session, it doesn't make sense to have many custom objects floating around; usually the fanciest objects are relegated to Pandas Dataframes or SciKit-Learn models.</p>
 <p>That being said, there have been some cases where I did make 'crazy' objects as containers for data (this is pre-Python 3.7 dataclasses, btw). In my specific use case I would have an object to represent the item my company is selling and then have various 'getters' that do some sort of math on the data and return specific metrics.</p>
 <p>For example, the class might look something like this:</p>
@@ -138,6 +140,8 @@
             <ul class="articles_timeline">
  
                 <li class="previous_article">« <a href="https://szuckerman.github.io/make_date_range_r.html" title="Previous: How to make a sequence of days in R">How to make a sequence of days in R</a></li>
+ 
+                <li class="next_article"><a href="https://szuckerman.github.io/get_data_into_redshift.html" title="Next: The easiest way to get data into Redshift">The easiest way to get data into Redshift</a> »</li>
             </ul>
             </nav>
             </aside>
@@ -151,16 +155,16 @@
             <h4>Last Updated</h4>
             <div class="last_updated">2018-10-17 17:30:00-04:00</div>
             <h4>Category</h4>
-            <a class="category-link" href="/categories.html#R-ref">R</a> 
+            <a class="category-link" href="/categories.html#Python-ref">Python</a> 
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
-                <li><a href="/tags.html#python-ref">python
-                    <span>3</span>
-</a></li>
-                <li><a href="/tags.html#videos-ref">videos
+                <li><a href="/tags.html#pycon-ref">pycon
                     <span>1</span>
 </a></li>
-                <li><a href="/tags.html#youtube-ref">youtube
+                <li><a href="/tags.html#python-ref">python
+                    <span>4</span>
+</a></li>
+                <li><a href="/tags.html#videos-ref">videos
                     <span>1</span>
 </a></li>
             </ul>
