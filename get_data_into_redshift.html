@@ -75,14 +75,14 @@
 
 
 <p>since it only needs to look at those two columns, versus a system like Oracle that needs to read the entire row up to the necessary column, basically wasting time reading unnecessary data.</p>
-<h1>Problem - How do we get the data to Redshift?</h1>
+<h1>Problem: Getting the data to Redshift</h1>
 <p>However, this presents us with a bit of a problem. We like a lot of data being stored in Redshift, but how can we 'get' it there? If I'm performing a transform and load from another table, the answer is trivial, but let's say I have a lot of data sitting on my computer I want in Redshift.</p>
 <p>For example, I could have:
 - Created a model in Python or R and want to add a table of the predictions to Redshift. This is especially true if you're manually tagging millions of customers. 
 - Data not created from a standard format, such as disparate Excel files or even an Access DB (yes, I've had to do that...)</p>
 <p>If the data is in the "few Gbs" of size, it won't take very long to upload, but for data integrity it's not the best idea to be loading row by row across a network for a huge table, but for Redshift row-by-row inserts aren't the best idea anyway, since, as mentioned above with the columnar storage, the columns are optimized based on the data types and Redshift doesn't like these individual row inserts as much as other relational databases do.</p>
 <p>That's assuming you even have proper database credentials and connections. If you can't even connect directly, this is pretty much impossible.  </p>
-<h1>Solution - S3 to the rescue!</h1>
+<h1>Solution: S3 to the rescue!</h1>
 <p>Since Redshift and S3 are both part of AWS, they have baked in functionality together.</p>
 <p>Here's the workflow:</p>
 <ol>
