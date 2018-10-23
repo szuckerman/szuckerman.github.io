@@ -1,5 +1,118 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>programming notes</title><link href="https://szuckerman.github.io/" rel="alternate"></link><link href="https://szuckerman.github.io/feeds/all.atom.xml" rel="self"></link><id>https://szuckerman.github.io/</id><updated>2018-10-17T17:30:00-04:00</updated><entry><title>Thoughts on "Stop Writing Classes" PyCon 2012 talk</title><link href="https://szuckerman.github.io/stop_writing_classes.html" rel="alternate"></link><published>2018-10-17T17:30:00-04:00</published><updated>2018-10-17T17:30:00-04:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2018-10-17:/stop_writing_classes.html</id><summary type="html">&lt;p&gt;There's a &lt;a href="https://www.youtube.com/watch?v=o9pEzgHorH0"&gt;famous talk by Jack Diederich&lt;/a&gt; about clean and readable Python code from PyCon 2012. The main point of his talk (and the title) is called "Stop Writing Classes".&lt;/p&gt;</summary><content type="html">&lt;h1&gt;Writing Classes for Data Analysis&lt;/h1&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>programming notes</title><link href="https://szuckerman.github.io/" rel="alternate"></link><link href="https://szuckerman.github.io/feeds/all.atom.xml" rel="self"></link><id>https://szuckerman.github.io/</id><updated>2018-10-23T11:30:00-04:00</updated><entry><title>The easiest way to get data into Redshift</title><link href="https://szuckerman.github.io/get_data_into_redshift.html" rel="alternate"></link><published>2018-10-23T11:30:00-04:00</published><updated>2018-10-23T11:30:00-04:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2018-10-23:/get_data_into_redshift.html</id><summary type="html">&lt;p&gt;There are many ways to load data into Redshift, this method, using the &lt;code&gt;COPY&lt;/code&gt; command, should be the most efficient and reliable.&lt;/p&gt;</summary><content type="html">&lt;p&gt;When using AWS and working in an analytical environment, you most likely have encountered Redshift at some point. Now, Redshift is awesome since it can contain a lot of data and query that data quickly. Due to its columnar storage, it's more effiecient to run a query such as:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;select&lt;/span&gt; 
+  &lt;span class="n"&gt;customer_id&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+  &lt;span class="k"&gt;sum&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;amount&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;total_amount&lt;/span&gt;
+
+&lt;span class="k"&gt;from&lt;/span&gt; &lt;span class="n"&gt;customer_table&lt;/span&gt;
+
+&lt;span class="k"&gt;group&lt;/span&gt; &lt;span class="k"&gt;by&lt;/span&gt; 
+  &lt;span class="n"&gt;customer_id&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;since it only needs to look at those two columns, versus a system like Oracle that needs to read the entire row up to the necessary column, basically wasting time reading unnecessary data.&lt;/p&gt;
+&lt;h1&gt;Problem - How do we get the data to Redshift?&lt;/h1&gt;
+&lt;p&gt;However, this presents us with a bit of a problem. We like a lot of data being stored in Redshift, but how can we 'get' it there? If I'm performing a transform and load from another table, the answer is trivial, but let's say I have a lot of data sitting on my computer I want in Redshift.&lt;/p&gt;
+&lt;p&gt;For example, I could have:
+- Created a model in Python or R and want to add a table of the predictions to Redshift. This is especially true if you're manually tagging millions of customers. 
+- Data not created from a standard format, such as disparate Excel files or even an Access DB (yes, I've had to do that...)&lt;/p&gt;
+&lt;p&gt;If the data is in the "few Gbs" of size, it won't take very long to upload, but for data integrity it's not the best idea to be loading row by row across a network for a huge table, but for Redshift row-by-row inserts aren't the best idea anyway, since, as mentioned above with the columnar storage, the columns are optimized based on the data types and Redshift doesn't like these individual row inserts as much as other relational databases do.&lt;/p&gt;
+&lt;p&gt;That's assuming you even have proper database credentials and connections. If you can't even connect directly, this is pretty much impossible.  &lt;/p&gt;
+&lt;h1&gt;Solution - S3 to the rescue!&lt;/h1&gt;
+&lt;p&gt;Since Redshift and S3 are both part of AWS, they have baked in functionality together.&lt;/p&gt;
+&lt;p&gt;Here's the workflow:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Do your work in Python/R and save to a CSV or TXT file&lt;/li&gt;
+&lt;li&gt;Upload that file to S3&lt;/li&gt;
+&lt;li&gt;Create the table in Redshift (or truncate a previous one, depending on your use-case)&lt;/li&gt;
+&lt;li&gt;Use the Redshift COPY command to move the file from S3 to Redshift&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Let's look at these in turn:&lt;/p&gt;
+&lt;h2&gt;Saving a CSV file&lt;/h2&gt;
+&lt;p&gt;First, you need to make sure that your data is in a friendly format to save to a Redshift table. That means: try to stay UTF-8 and also try to avoid any quoting characters if possible. One single quote without another to close the quote will give you a lot of headaches later. Similarly, make sure that you have all the columns that you need for this insert.&lt;/p&gt;
+&lt;h2&gt;Uploading that file to S3&lt;/h2&gt;
+&lt;h3&gt;Using boto3&lt;/h3&gt;
+&lt;p&gt;There's various ways to upload a file to S3. The first, using &lt;a href="https://boto3.readthedocs.io/"&gt;AWS's Boto3 library&lt;/a&gt; goes a bit like this:&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;The first example from the &lt;a href="https://boto3.amazonaws.com/v1/documentation/api/latest/guide/s3.html"&gt;S3 section&lt;/a&gt; on boto3&lt;/em&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;boto3&lt;/span&gt;
+
+&lt;span class="c1"&gt;# Get the service client&lt;/span&gt;
+&lt;span class="n"&gt;s3&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;boto3&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;client&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;s3&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="c1"&gt;# Upload tmp.txt to bucket-name at key-name&lt;/span&gt;
+&lt;span class="n"&gt;s3&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;upload_file&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;tmp.txt&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;bucket-name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;key-name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;There are also other upload methods depending on what you're doing; see the S3 section for more examples.&lt;/p&gt;
+&lt;p&gt;This obviously assumes you already have a bucket to upload to. That's easy enough to do from the S3 UI console or the other methods in the boto3 library.&lt;/p&gt;
+&lt;h3&gt;Using AWS CLI&lt;/h3&gt;
+&lt;p&gt;I personally prefer to use the AWS CLI to upload to S3 since I like the separation between 'modeling work' in Python/R and I/O to S3.&lt;/p&gt;
+&lt;p&gt;The S3 command works very much like the &lt;code&gt;cp&lt;/code&gt; and &lt;code&gt;mv&lt;/code&gt; commands in Unix systems, so it's easy to get get used to and also easy to use if you're used to moving files around your system anyway.&lt;/p&gt;
+&lt;p&gt;You can see all the commands available at their &lt;a href="https://docs.aws.amazon.com/cli/latest/reference/s3/index.html"&gt;S3 documentation for the CLI&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;This is as easy as:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;aws s3 cp filename s3://bucket-name/
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;You can do &lt;code&gt;cp&lt;/code&gt; or &lt;code&gt;mv&lt;/code&gt; to get the file to S3, but I usually prefer &lt;code&gt;cp&lt;/code&gt; since I'll have a backup of the file in case something goes wrong with the flow to Redshift. I can then delete the file later after I'm done with the whole process.&lt;/p&gt;
+&lt;h2&gt;Create the table in Redshift&lt;/h2&gt;
+&lt;p&gt;I'm not going to go into the specifics on creating a table in this section, as table creation is an entirely different beast by itself, but there are two important ideas to keep in mind:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Make sure that you have your sort keys set up properly when making the table, or else you'll need to &lt;code&gt;drop&lt;/code&gt; the table and start again. According to the &lt;a href="https://docs.aws.amazon.com/redshift/latest/dg/r_ALTER_TABLE.html"&gt;AWS Redshift documentation&lt;/a&gt;: &lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;You can't add a column that is the distribution key (DISTKEY) or a sort key (SORTKEY) of the table.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;The columns don't have to be in the same order as the CSV, but we'll discuss that more in the next section.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2&gt;Using the Redshift COPY command&lt;/h2&gt;
+&lt;h3&gt;Access Rights&lt;/h3&gt;
+&lt;p&gt;Before being able to move the file from S3 to Redshift, you need a role with the correct permissions. The role should (at least) have S3 read access and Redshift insert/write access. In the IAM console, you can create a new Redshift role and attach the &lt;code&gt;RedshiftAdminAccess&lt;/code&gt; policy and &lt;code&gt;S3&lt;/code&gt; policy. You use the ARN reference in the command. In this example, I'm using &lt;code&gt;'arn:aws:iam::&amp;lt;account_number&amp;gt;:role/&amp;lt;your_redshift_role&amp;gt;'&lt;/code&gt; as the ARN.&lt;/p&gt;
+&lt;h3&gt;Syntax&lt;/h3&gt;
+&lt;p&gt;The basic syntax to move a file from S3 to Redshift is the following:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;copy&lt;/span&gt; &lt;span class="k"&gt;schema&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;tablename&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;column1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;column2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;from&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;s3://bucket-name/filename.txt&amp;#39;&lt;/span&gt; &lt;span class="n"&gt;iam_role&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;arn:aws:iam::&amp;lt;account_number&amp;gt;:role/&amp;lt;your_redshift_role&amp;gt;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;If the columns in the file in S3 are in the exact order you need them for the table, you can just do:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;copy&lt;/span&gt; &lt;span class="k"&gt;schema&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;tablename&lt;/span&gt; &lt;span class="k"&gt;from&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;s3://bucket-name/filename.txt&amp;#39;&lt;/span&gt; &lt;span class="n"&gt;iam_role&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;arn:aws:iam::&amp;lt;account_number&amp;gt;:role/&amp;lt;your_redshift_role&amp;gt;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;But I think it's more clear when the columns are explicit. Also, you can change the order of the columns, or even skip some columns like so:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;copy&lt;/span&gt; &lt;span class="k"&gt;schema&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;tablename&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;column3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;column1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;from&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;s3://bucket-name/filename.txt&amp;#39;&lt;/span&gt; &lt;span class="n"&gt;iam_role&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;arn:aws:iam::&amp;lt;account_number&amp;gt;:role/&amp;lt;your_redshift_role&amp;gt;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;I also like to have a &lt;code&gt;default&lt;/code&gt; value on the table of &lt;code&gt;DATE_CREATED TIMESTAMP DEFAULT SYSDATE&lt;/code&gt;, therefore if you're explicit with the column names when loading from Redshift, and don't include a column name of &lt;code&gt;DATE_CREATED&lt;/code&gt;, that column will automatically populate to the load date.&lt;/p&gt;
+&lt;h3&gt;Other Useful COPY Commands&lt;/h3&gt;
+&lt;p&gt;There's additional commands to add (full list &lt;a href="https://docs.aws.amazon.com/redshift/latest/dg/r_COPY.html"&gt;can be found here&lt;/a&gt;).&lt;/p&gt;
+&lt;p&gt;I find that I use the following most often:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://docs.aws.amazon.com/redshift/latest/dg/copy-parameters-data-format.html#copy-csv"&gt;CSV&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;This takes care of the fact that the file is a CSV and has defaults for the format.&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.aws.amazon.com/redshift/latest/dg/copy-parameters-data-format.html#copy-csv"&gt;QUOTE [AS] 'quote_character'&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;This can only be used with the &lt;code&gt;CSV&lt;/code&gt; command and is useful if there's user input where there might be hanging apostrophes or something like that. If you change the quote character to something random it will ignore the single apostrophes. &lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.aws.amazon.com/redshift/latest/dg/copy-parameters-data-format.html#copy-delimiter"&gt;DELIMITER&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;You can change &lt;code&gt;DELIMITER&lt;/code&gt; to &lt;code&gt;\t&lt;/code&gt; if you have a txt file. You don't need the &lt;code&gt;CSV&lt;/code&gt; command in this case.&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.aws.amazon.com/redshift/latest/dg/copy-parameters-data-conversion.html#copy-ignoreheader"&gt;IGNOREHEADER&lt;/a&gt; &lt;/li&gt;
+&lt;li&gt;If your file has column headers you'll get an error when loading. Use &lt;code&gt;IGNOREHEADER 1&lt;/code&gt; to skip the first line.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;With some of these commands added, your &lt;code&gt;COPY&lt;/code&gt; command might look more like this:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;copy&lt;/span&gt; &lt;span class="k"&gt;schema&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;tablename&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;column3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;column1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;from&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;s3://bucket-name/filename.txt&amp;#39;&lt;/span&gt; &lt;span class="n"&gt;iam_role&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;arn:aws:iam::&amp;lt;account_number&amp;gt;:role/&amp;lt;your_redshift_role&amp;gt;&amp;#39;&lt;/span&gt; &lt;span class="k"&gt;DELIMITER&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;\t&amp;#39;&lt;/span&gt; &lt;span class="n"&gt;QUOTE&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;^&amp;#39;&lt;/span&gt; &lt;span class="n"&gt;IGNOREHEADER&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;There you have it! Your data is now safely, and securely, in Redshift to be able to be joined with other tables for efficient data processing.&lt;/p&gt;
+&lt;p&gt;After this is all done, you might want to go back and delete the local file from your computer and the file from S3 (if it's not needed anymore).&lt;/p&gt;
+&lt;h1&gt;Summary&lt;/h1&gt;
+&lt;p&gt;In this post we looked at how to save data as a &lt;code&gt;CSV&lt;/code&gt; or &lt;code&gt;TXT&lt;/code&gt; file, upload to S3 and then use the &lt;code&gt;COPY&lt;/code&gt; command in Redshift to quickly and efficiently move said data to the Redshift cluster, streamlining an often painful process of moving large amounts of data through various systems. &lt;/p&gt;</content><category term="python"></category><category term="s3"></category><category term="redshift"></category><category term="aws"></category><category term="data transfer"></category></entry><entry><title>Thoughts on "Stop Writing Classes" PyCon 2012 talk</title><link href="https://szuckerman.github.io/stop_writing_classes.html" rel="alternate"></link><published>2018-10-17T17:30:00-04:00</published><updated>2018-10-17T17:30:00-04:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2018-10-17:/stop_writing_classes.html</id><summary type="html">&lt;p&gt;There's a &lt;a href="https://www.youtube.com/watch?v=o9pEzgHorH0"&gt;famous talk by Jack Diederich&lt;/a&gt; about clean and readable Python code from PyCon 2012. The main point of his talk (and the title) is called "Stop Writing Classes".&lt;/p&gt;</summary><content type="html">&lt;h1&gt;Writing Classes for Data Analysis&lt;/h1&gt;
+&lt;p&gt;There's a &lt;a href="https://www.youtube.com/watch?v=o9pEzgHorH0"&gt;famous talk by Jack Diederich&lt;/a&gt; about clean and readable Python code from PyCon 2012. The main point of his talk (and the title) is called "Stop Writing Classes".&lt;/p&gt;
 &lt;p&gt;As someone who works mainly in the data space, I thought this talk was interesting since I don't usually write classes at all.  Usually when working with a Jupyter notebook or some other interactive REPL scripting session, it doesn't make sense to have many custom objects floating around; usually the fanciest objects are relegated to Pandas Dataframes or SciKit-Learn models.&lt;/p&gt;
 &lt;p&gt;That being said, there have been some cases where I did make 'crazy' objects as containers for data (this is pre-Python 3.7 dataclasses, btw). In my specific use case I would have an object to represent the item my company is selling and then have various 'getters' that do some sort of math on the data and return specific metrics.&lt;/p&gt;
 &lt;p&gt;For example, the class might look something like this:&lt;/p&gt;
@@ -38,7 +151,7 @@
 
 
 &lt;p&gt;I think this is cleaner in terms of its readability, but, more importantly. It's easier to test! You can put a unit test on each function and make sure everything's working correctly.&lt;/p&gt;
-&lt;p&gt;Overall, I really enjoyed the talk and think that it's another good example of how people sometimes forget to think Pythonically when coming from other languages.&lt;/p&gt;</content><category term="python"></category><category term="youtube"></category><category term="videos"></category></entry><entry><title>How to make a sequence of days in R</title><link href="https://szuckerman.github.io/make_date_range_r.html" rel="alternate"></link><published>2018-10-10T17:30:00-04:00</published><updated>2018-10-10T17:30:00-04:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2018-10-10:/make_date_range_r.html</id><summary type="html">&lt;p&gt;Sometimes I need to make a sequence of dates to help with analysis. Here's a quick 1-liner in R.&lt;/p&gt;</summary><content type="html">&lt;p&gt;I usually use the &lt;a href="https://lubridate.tidyverse.org/"&gt;lubridate&lt;/a&gt; package for date manipulation, however, there's one item in that package that I haven't really gotten the hold of, which is making an array of dates. &lt;/p&gt;
+&lt;p&gt;Overall, I really enjoyed the talk and think that it's another good example of how people sometimes forget to think Pythonically when coming from other languages.&lt;/p&gt;</content><category term="python"></category><category term="videos"></category><category term="pycon"></category></entry><entry><title>How to make a sequence of days in R</title><link href="https://szuckerman.github.io/make_date_range_r.html" rel="alternate"></link><published>2018-10-10T17:30:00-04:00</published><updated>2018-10-10T17:30:00-04:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2018-10-10:/make_date_range_r.html</id><summary type="html">&lt;p&gt;Sometimes I need to make a sequence of dates to help with analysis. Here's a quick 1-liner in R.&lt;/p&gt;</summary><content type="html">&lt;p&gt;I usually use the &lt;a href="https://lubridate.tidyverse.org/"&gt;lubridate&lt;/a&gt; package for date manipulation, however, there's one item in that package that I haven't really gotten the hold of, which is making an array of dates. &lt;/p&gt;
 &lt;p&gt;I usually have a situation where I'm missing data, such as with sales data. If a sale didn't take place on a certain day, then that date value won't show up. I want that date to have a value of zero.&lt;/p&gt;
 &lt;p&gt;I can make a sequence of dates with the following (base-R) command:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;date_sequence &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kp"&gt;seq&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kp"&gt;as.Date&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;2018/01/01&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="kp"&gt;as.Date&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;2018/12/31&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;days&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
@@ -52,7 +165,7 @@ full_dataset &lt;span class="o"&gt;=&lt;/span&gt; all_dates &lt;span class="o"&g
     left_join&lt;span class="p"&gt;(&lt;/span&gt;sales_data&lt;span class="p"&gt;)&lt;/span&gt;
 
 full_dataset&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="kp"&gt;is.na&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;full_dataset&lt;span class="o"&gt;$&lt;/span&gt;product_sales&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="s"&gt;&amp;#39;product_sales&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;</content><category term="r"></category><category term="dates"></category></entry><entry><title>Finding Local Python Packages</title><link href="https://szuckerman.github.io/finding-local-python-packages.html" rel="alternate"></link><published>2017-12-21T12:45:00-05:00</published><updated>2017-12-21T12:45:00-05:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2017-12-21:/finding-local-python-packages.html</id><summary type="html">&lt;p&gt;Finding Local Python Packages&lt;/p&gt;</summary><content type="html">&lt;h2&gt;Problem&lt;/h2&gt;
+&lt;/pre&gt;&lt;/div&gt;</content><category term="r"></category><category term="dates"></category></entry><entry><title>Finding local python packages</title><link href="https://szuckerman.github.io/finding-local-python-packages.html" rel="alternate"></link><published>2017-12-21T12:45:00-05:00</published><updated>2017-12-21T12:45:00-05:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2017-12-21:/finding-local-python-packages.html</id><summary type="html">&lt;p&gt;Finding Local Python Packages&lt;/p&gt;</summary><content type="html">&lt;h2&gt;Problem&lt;/h2&gt;
 &lt;p&gt;I had a problem where I couldn't get Python to notice a package I just made.&lt;/p&gt;
 &lt;p&gt;What's great about Python is that you can work on a module, say &lt;code&gt;my_file.py&lt;/code&gt;, and in another script write 'import my_file' to include that script in the current one. To include this module in a package, you merely add a blank &lt;code&gt;__init__.py&lt;/code&gt; file to the folder the script is in. If the script is in a folder called 'my_folder', adding a &lt;code&gt;__init__.py&lt;/code&gt; file to that folder will allow you to run:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;my_folder&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;my_script&lt;/span&gt;
@@ -71,7 +184,7 @@ full_dataset&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="kp"&gt;is.na&lt;
 &lt;p&gt;&lt;code&gt;/Users/my_username/Documents/my_folder/my_folder/&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;I would take this line and put it in a file called &lt;code&gt;my_folder.pth&lt;/code&gt; (it can be named anything, though) and put that pth file in the site-packages/ directory. It might seem odd to just have a text file with that one line of a directory, but it works.&lt;/p&gt;
 &lt;p&gt;The file's location would be &lt;code&gt;/Users/my_username/.virtualenvs/virtualenv_name/lib/python3.6/site-packages/my_folder.pth&lt;/code&gt;.&lt;/p&gt;
-&lt;p&gt;Now you can run &lt;code&gt;from my_folder import my_script&lt;/code&gt; without any errors!&lt;/p&gt;</content><category term="python"></category><category term="packages"></category></entry><entry><title>Using Slice Objects in Python</title><link href="https://szuckerman.github.io/slice-objects.html" rel="alternate"></link><published>2017-10-03T15:30:00-04:00</published><updated>2017-10-03T15:30:00-04:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2017-10-03:/slice-objects.html</id><summary type="html">&lt;p&gt;Slice objects in Python&lt;/p&gt;</summary><content type="html">&lt;h1&gt;Using Slice Objects in Python&lt;/h1&gt;
+&lt;p&gt;Now you can run &lt;code&gt;from my_folder import my_script&lt;/code&gt; without any errors!&lt;/p&gt;</content><category term="python"></category><category term="packages"></category></entry><entry><title>Using slice objects in Python</title><link href="https://szuckerman.github.io/slice-objects.html" rel="alternate"></link><published>2017-10-03T15:30:00-04:00</published><updated>2017-10-03T15:30:00-04:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2017-10-03:/slice-objects.html</id><summary type="html">&lt;p&gt;Slice objects in Python&lt;/p&gt;</summary><content type="html">&lt;h1&gt;Using Slice Objects in Python&lt;/h1&gt;
 &lt;p&gt;Here's a cool little helpful piece of code I found for Python, it's called a slice object.&lt;/p&gt;
 &lt;p&gt;You know when you write &lt;code&gt;my_list[:2]&lt;/code&gt; and you get the first two values? Well, the ":2" section is actually a slice object which you can input directly.&lt;/p&gt;
 &lt;p&gt;The notation for the object is &lt;code&gt;slice(None, 2)&lt;/code&gt; or &lt;code&gt;slice(None, 2, None)&lt;/code&gt;, similar to when you subset a list using one or two colons.&lt;/p&gt;

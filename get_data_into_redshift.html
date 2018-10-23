@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="Sam Zuckerman" />
+        <meta name="copyright" content="Sam Zuckerman" />
+
+<meta name="keywords" content="python, s3, redshift, aws, data transfer, Redshift, " />
+        <title>The easiest way to get data into Redshift  · programming notes
+</title>
+        <link href="http://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css">
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="https://szuckerman.github.io/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://szuckerman.github.io/theme/css/solarizedlight.css" media="screen">
+        <link rel="shortcut icon" href="https://szuckerman.github.io/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="https://szuckerman.github.io/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="https://szuckerman.github.io/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="https://szuckerman.github.io/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="https://szuckerman.github.io/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="https://szuckerman.github.io/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="https://szuckerman.github.io/theme/images/apple-touch-icon-144x144.png" />
+        <link href="https://szuckerman.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="programming notes - Full Atom Feed" />
+        <link href="https://szuckerman.github.io/feeds/Python.atom.xml" type="application/atom+xml" rel="alternate" title="programming notes - Python Category Atom Feed" />
+        <link href="https://szuckerman.github.io/feeds/R.atom.xml" type="application/atom+xml" rel="alternate" title="programming notes - R Category Atom Feed" />
+        <link href="https://szuckerman.github.io/feeds/Redshift.atom.xml" type="application/atom+xml" rel="alternate" title="programming notes - Redshift Category Atom Feed" />
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="https://szuckerman.github.io/"><span class=site-name>programming notes</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <!--<li ><a href="https://szuckerman.github.io">Home</a></li>-->
+                            <li ><a href="https://szuckerman.github.io/categories.html">Categories</a></li>
+                            <li ><a href="https://szuckerman.github.io/tags.html">Tags</a></li>
+                            <li ><a href="https://szuckerman.github.io/archives.html">Archives</a></li>
+                            <li><form class="navbar-search" action="https://szuckerman.github.io/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article>
+<div class="row-fluid">
+    <header class="page_header span10 offset2">
+    <h1><a href="https://szuckerman.github.io/get_data_into_redshift.html"> The easiest way to get data into Redshift  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+
+            <p>When using AWS and working in an analytical environment, you most likely have encountered Redshift at some point. Now, Redshift is awesome since it can contain a lot of data and query that data quickly. Due to its columnar storage, it's more effiecient to run a query such as:</p>
+<div class="highlight"><pre><span></span><span class="k">select</span> 
+  <span class="n">customer_id</span><span class="p">,</span>
+  <span class="k">sum</span><span class="p">(</span><span class="n">amount</span><span class="p">)</span> <span class="n">total_amount</span>
+
+<span class="k">from</span> <span class="n">customer_table</span>
+
+<span class="k">group</span> <span class="k">by</span> 
+  <span class="n">customer_id</span>
+</pre></div>
+
+
+<p>since it only needs to look at those two columns, versus a system like Oracle that needs to read the entire row up to the necessary column, basically wasting time reading unnecessary data.</p>
+<h1>Problem - How do we get the data to Redshift?</h1>
+<p>However, this presents us with a bit of a problem. We like a lot of data being stored in Redshift, but how can we 'get' it there? If I'm performing a transform and load from another table, the answer is trivial, but let's say I have a lot of data sitting on my computer I want in Redshift.</p>
+<p>For example, I could have:
+- Created a model in Python or R and want to add a table of the predictions to Redshift. This is especially true if you're manually tagging millions of customers. 
+- Data not created from a standard format, such as disparate Excel files or even an Access DB (yes, I've had to do that...)</p>
+<p>If the data is in the "few Gbs" of size, it won't take very long to upload, but for data integrity it's not the best idea to be loading row by row across a network for a huge table, but for Redshift row-by-row inserts aren't the best idea anyway, since, as mentioned above with the columnar storage, the columns are optimized based on the data types and Redshift doesn't like these individual row inserts as much as other relational databases do.</p>
+<p>That's assuming you even have proper database credentials and connections. If you can't even connect directly, this is pretty much impossible.  </p>
+<h1>Solution - S3 to the rescue!</h1>
+<p>Since Redshift and S3 are both part of AWS, they have baked in functionality together.</p>
+<p>Here's the workflow:</p>
+<ol>
+<li>Do your work in Python/R and save to a CSV or TXT file</li>
+<li>Upload that file to S3</li>
+<li>Create the table in Redshift (or truncate a previous one, depending on your use-case)</li>
+<li>Use the Redshift COPY command to move the file from S3 to Redshift</li>
+</ol>
+<p>Let's look at these in turn:</p>
+<h2>Saving a CSV file</h2>
+<p>First, you need to make sure that your data is in a friendly format to save to a Redshift table. That means: try to stay UTF-8 and also try to avoid any quoting characters if possible. One single quote without another to close the quote will give you a lot of headaches later. Similarly, make sure that you have all the columns that you need for this insert.</p>
+<h2>Uploading that file to S3</h2>
+<h3>Using boto3</h3>
+<p>There's various ways to upload a file to S3. The first, using <a href="https://boto3.readthedocs.io/">AWS's Boto3 library</a> goes a bit like this:</p>
+<p><em>The first example from the <a href="https://boto3.amazonaws.com/v1/documentation/api/latest/guide/s3.html">S3 section</a> on boto3</em></p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">boto3</span>
+
+<span class="c1"># Get the service client</span>
+<span class="n">s3</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">client</span><span class="p">(</span><span class="s1">&#39;s3&#39;</span><span class="p">)</span>
+
+<span class="c1"># Upload tmp.txt to bucket-name at key-name</span>
+<span class="n">s3</span><span class="o">.</span><span class="n">upload_file</span><span class="p">(</span><span class="s2">&quot;tmp.txt&quot;</span><span class="p">,</span> <span class="s2">&quot;bucket-name&quot;</span><span class="p">,</span> <span class="s2">&quot;key-name&quot;</span><span class="p">)</span>
+</pre></div>
+
+
+<p>There are also other upload methods depending on what you're doing; see the S3 section for more examples.</p>
+<p>This obviously assumes you already have a bucket to upload to. That's easy enough to do from the S3 UI console or the other methods in the boto3 library.</p>
+<h3>Using AWS CLI</h3>
+<p>I personally prefer to use the AWS CLI to upload to S3 since I like the separation between 'modeling work' in Python/R and I/O to S3.</p>
+<p>The S3 command works very much like the <code>cp</code> and <code>mv</code> commands in Unix systems, so it's easy to get get used to and also easy to use if you're used to moving files around your system anyway.</p>
+<p>You can see all the commands available at their <a href="https://docs.aws.amazon.com/cli/latest/reference/s3/index.html">S3 documentation for the CLI</a>.</p>
+<p>This is as easy as:</p>
+<div class="highlight"><pre><span></span>aws s3 cp filename s3://bucket-name/
+</pre></div>
+
+
+<p>You can do <code>cp</code> or <code>mv</code> to get the file to S3, but I usually prefer <code>cp</code> since I'll have a backup of the file in case something goes wrong with the flow to Redshift. I can then delete the file later after I'm done with the whole process.</p>
+<h2>Create the table in Redshift</h2>
+<p>I'm not going to go into the specifics on creating a table in this section, as table creation is an entirely different beast by itself, but there are two important ideas to keep in mind:</p>
+<ol>
+<li>
+<p>Make sure that you have your sort keys set up properly when making the table, or else you'll need to <code>drop</code> the table and start again. According to the <a href="https://docs.aws.amazon.com/redshift/latest/dg/r_ALTER_TABLE.html">AWS Redshift documentation</a>: </p>
+<blockquote>
+<p>You can't add a column that is the distribution key (DISTKEY) or a sort key (SORTKEY) of the table.</p>
+</blockquote>
+</li>
+<li>
+<p>The columns don't have to be in the same order as the CSV, but we'll discuss that more in the next section.</p>
+</li>
+</ol>
+<h2>Using the Redshift COPY command</h2>
+<h3>Access Rights</h3>
+<p>Before being able to move the file from S3 to Redshift, you need a role with the correct permissions. The role should (at least) have S3 read access and Redshift insert/write access. In the IAM console, you can create a new Redshift role and attach the <code>RedshiftAdminAccess</code> policy and <code>S3</code> policy. You use the ARN reference in the command. In this example, I'm using <code>'arn:aws:iam::&lt;account_number&gt;:role/&lt;your_redshift_role&gt;'</code> as the ARN.</p>
+<h3>Syntax</h3>
+<p>The basic syntax to move a file from S3 to Redshift is the following:</p>
+<div class="highlight"><pre><span></span><span class="k">copy</span> <span class="k">schema</span><span class="p">.</span><span class="n">tablename</span><span class="p">(</span><span class="n">column1</span><span class="p">,</span> <span class="n">column2</span><span class="p">)</span> <span class="k">from</span> <span class="s1">&#39;s3://bucket-name/filename.txt&#39;</span> <span class="n">iam_role</span> <span class="s1">&#39;arn:aws:iam::&lt;account_number&gt;:role/&lt;your_redshift_role&gt;&#39;</span><span class="p">;</span>
+</pre></div>
+
+
+<p>If the columns in the file in S3 are in the exact order you need them for the table, you can just do:</p>
+<div class="highlight"><pre><span></span><span class="k">copy</span> <span class="k">schema</span><span class="p">.</span><span class="n">tablename</span> <span class="k">from</span> <span class="s1">&#39;s3://bucket-name/filename.txt&#39;</span> <span class="n">iam_role</span> <span class="s1">&#39;arn:aws:iam::&lt;account_number&gt;:role/&lt;your_redshift_role&gt;&#39;</span><span class="p">;</span>
+</pre></div>
+
+
+<p>But I think it's more clear when the columns are explicit. Also, you can change the order of the columns, or even skip some columns like so:</p>
+<div class="highlight"><pre><span></span><span class="k">copy</span> <span class="k">schema</span><span class="p">.</span><span class="n">tablename</span><span class="p">(</span><span class="n">column3</span><span class="p">,</span> <span class="n">column1</span><span class="p">)</span> <span class="k">from</span> <span class="s1">&#39;s3://bucket-name/filename.txt&#39;</span> <span class="n">iam_role</span> <span class="s1">&#39;arn:aws:iam::&lt;account_number&gt;:role/&lt;your_redshift_role&gt;&#39;</span><span class="p">;</span>
+</pre></div>
+
+
+<p>I also like to have a <code>default</code> value on the table of <code>DATE_CREATED TIMESTAMP DEFAULT SYSDATE</code>, therefore if you're explicit with the column names when loading from Redshift, and don't include a column name of <code>DATE_CREATED</code>, that column will automatically populate to the load date.</p>
+<h3>Other Useful COPY Commands</h3>
+<p>There's additional commands to add (full list <a href="https://docs.aws.amazon.com/redshift/latest/dg/r_COPY.html">can be found here</a>).</p>
+<p>I find that I use the following most often:</p>
+<ul>
+<li><a href="https://docs.aws.amazon.com/redshift/latest/dg/copy-parameters-data-format.html#copy-csv">CSV</a></li>
+<li>This takes care of the fact that the file is a CSV and has defaults for the format.</li>
+<li><a href="https://docs.aws.amazon.com/redshift/latest/dg/copy-parameters-data-format.html#copy-csv">QUOTE [AS] 'quote_character'</a></li>
+<li>This can only be used with the <code>CSV</code> command and is useful if there's user input where there might be hanging apostrophes or something like that. If you change the quote character to something random it will ignore the single apostrophes. </li>
+<li><a href="https://docs.aws.amazon.com/redshift/latest/dg/copy-parameters-data-format.html#copy-delimiter">DELIMITER</a></li>
+<li>You can change <code>DELIMITER</code> to <code>\t</code> if you have a txt file. You don't need the <code>CSV</code> command in this case.</li>
+<li><a href="https://docs.aws.amazon.com/redshift/latest/dg/copy-parameters-data-conversion.html#copy-ignoreheader">IGNOREHEADER</a> </li>
+<li>If your file has column headers you'll get an error when loading. Use <code>IGNOREHEADER 1</code> to skip the first line.</li>
+</ul>
+<p>With some of these commands added, your <code>COPY</code> command might look more like this:</p>
+<div class="highlight"><pre><span></span><span class="k">copy</span> <span class="k">schema</span><span class="p">.</span><span class="n">tablename</span><span class="p">(</span><span class="n">column3</span><span class="p">,</span> <span class="n">column1</span><span class="p">)</span> <span class="k">from</span> <span class="s1">&#39;s3://bucket-name/filename.txt&#39;</span> <span class="n">iam_role</span> <span class="s1">&#39;arn:aws:iam::&lt;account_number&gt;:role/&lt;your_redshift_role&gt;&#39;</span> <span class="k">DELIMITER</span> <span class="s1">&#39;\t&#39;</span> <span class="n">QUOTE</span> <span class="s1">&#39;^&#39;</span> <span class="n">IGNOREHEADER</span> <span class="mi">1</span><span class="p">;</span>
+</pre></div>
+
+
+<p>There you have it! Your data is now safely, and securely, in Redshift to be able to be joined with other tables for efficient data processing.</p>
+<p>After this is all done, you might want to go back and delete the local file from your computer and the file from S3 (if it's not needed anymore).</p>
+<h1>Summary</h1>
+<p>In this post we looked at how to save data as a <code>CSV</code> or <code>TXT</code> file, upload to S3 and then use the <code>COPY</code> command in Redshift to quickly and efficiently move said data to the Redshift cluster, streamlining an often painful process of moving large amounts of data through various systems. </p>
+<section>
+<div class="accordion" id="accordion2">
+    <div class="accordion-group">
+        <div class="accordion-heading">
+            <a class="accordion-toggle disqus-comment-count" data-toggle="collapse" data-parent="#accordion2"
+                href="https://szuckerman.github.io/get_data_into_redshift.html#disqus_thread">
+                Comments
+            </a>
+        </div>
+        <div id="disqus_thread" class="accordion-body collapse">
+            <div class="accordion-inner">
+                <div class="comments">
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'szuckerman-github-io-1';
+        var disqus_identifier = 'https://szuckerman.github.io/get_data_into_redshift.html';
+    var disqus_url = 'https://szuckerman.github.io/get_data_into_redshift.html';
+
+    (function() {
+         var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+         dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+         (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+     })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</section>
+            <aside>
+            <hr/>
+            <nav>
+            <ul class="articles_timeline">
+ 
+                <li class="previous_article">« <a href="https://szuckerman.github.io/stop_writing_classes.html" title="Previous: Thoughts on "Stop Writing Classes" PyCon 2012 talk">Thoughts on "Stop Writing Classes" PyCon 2012 talk</a></li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+ 
+            <h4>Published</h4>
+            <time pubdate="pubdate" datetime="2018-10-23T11:30:00-04:00">Oct 23, 2018</time>
+ 
+            <h4>Last Updated</h4>
+            <div class="last_updated">2018-10-23 11:30:00-04:00</div>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#Redshift-ref">Redshift</a> 
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article"> 
+                <li><a href="/tags.html#aws-ref">aws
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#data-transfer-ref">data transfer
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#python-ref">python
+                    <span>4</span>
+</a></li>
+                <li><a href="/tags.html#redshift-ref">redshift
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#s3-ref">s3
+                    <span>1</span>
+</a></li>
+            </ul>
+
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="http://oncrashreboot.com/pelican-elegant" title="Theme Elegant Home Page">Elegant</a> by <a href="http://oncrashreboot.com" title="Talha Mansoor Home Page">Talha Mansoor</a></li>
+    </ul>
+</div>
+</footer>            <script src="http://code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+<script type="text/javascript">
+    var disqus_shortname = 'szuckerman-github-io-1';
+
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+    </script>
+        <script  language="javascript" type="text/javascript">
+            function uncollapse() {
+                var hash_str = window.location.hash;
+                if (window.location.hash.match(/^#comment-\d+$/))
+                {
+                    var hash_str = '#disqus_thread';
+                }
+                $(hash_str).collapse({
+                    toggle: true
+                    })
+            }
+        </script>
+
+        <script type="text/javascript" language="JavaScript">
+            uncollapse(); 
+        </script>
+    </body>
+</html>
