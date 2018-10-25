@@ -1,5 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>programming notes</title><link href="https://szuckerman.github.io/" rel="alternate"></link><link href="https://szuckerman.github.io/feeds/all.atom.xml" rel="self"></link><id>https://szuckerman.github.io/</id><updated>2018-10-23T11:30:00-04:00</updated><entry><title>The easiest way to get data into Redshift</title><link href="https://szuckerman.github.io/get_data_into_redshift.html" rel="alternate"></link><published>2018-10-23T11:30:00-04:00</published><updated>2018-10-23T11:30:00-04:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2018-10-23:/get_data_into_redshift.html</id><summary type="html">&lt;p&gt;There are many ways to load data into Redshift, this method, using the &lt;code&gt;COPY&lt;/code&gt; command, should be the most efficient and reliable.&lt;/p&gt;</summary><content type="html">&lt;p&gt;When using AWS and working in an analytical environment, you most likely have encountered Redshift at some point. Now, Redshift is awesome since it can contain a lot of data and query that data quickly. Due to its columnar storage, it's more effiecient to run a query such as:&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>programming notes</title><link href="https://szuckerman.github.io/" rel="alternate"></link><link href="https://szuckerman.github.io/feeds/all.atom.xml" rel="self"></link><id>https://szuckerman.github.io/</id><updated>2018-10-25T15:30:00-04:00</updated><entry><title>Conditional decorators in Python</title><link href="https://szuckerman.github.io/conditional_decorators.html" rel="alternate"></link><published>2018-10-25T15:30:00-04:00</published><updated>2018-10-25T15:30:00-04:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2018-10-25:/conditional_decorators.html</id><summary type="html">&lt;p&gt;The issue of conditional decorators came up recently.  Here's a code snippet.&lt;/p&gt;</summary><content type="html">&lt;p&gt;The issue of conditional decorators came up recently.  It was brought up in &lt;a href="https://twitter.com/samzuckerman/status/1055246076297560065"&gt;reference to pytest on Twitter&lt;/a&gt;. The following's a quick snippet to make the point.&lt;/p&gt;
+&lt;h1&gt;Basic Code&lt;/h1&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;do_nothing_decorator&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;func&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;func&lt;/span&gt;
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;print_hi_decorator&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;func&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;wrapper&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;**&lt;/span&gt;&lt;span class="n"&gt;kwargs&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Hi!&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;func&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;**&lt;/span&gt;&lt;span class="n"&gt;kwargs&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;wrapper&lt;/span&gt;
+
+&lt;span class="n"&gt;num_check&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;5&lt;/span&gt;
+
+&lt;span class="n"&gt;conditional_decorator&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;print_hi_decorator&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;num_check&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="n"&gt;do_nothing_decorator&lt;/span&gt;
+
+&lt;span class="nd"&gt;@conditional_decorator&lt;/span&gt;
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;my_function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Now this example doesn't do much, it merely prints "Hi!" when the function is called.&lt;/p&gt;
+&lt;p&gt;The main idea is that there's some sort of check, in this case &lt;code&gt;num_check&lt;/code&gt; that either applies the decorator and, if not, applies a &lt;code&gt;do_nothing_decorator&lt;/code&gt;.&lt;/p&gt;
+&lt;h3&gt;Output&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;my_function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;Hi&lt;/span&gt;&lt;span class="err"&gt;!&lt;/span&gt;
+&lt;span class="mi"&gt;5&lt;/span&gt;
+&lt;span class="o"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;my_function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;Hi&lt;/span&gt;&lt;span class="err"&gt;!&lt;/span&gt;
+&lt;span class="mi"&gt;6&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h1&gt;Changing the Parameters&lt;/h1&gt;
+&lt;p&gt;If we run the following to fail the &lt;code&gt;if&lt;/code&gt; portion, we can see the expected output below. Don't forget that the &lt;code&gt;conditional_decorator&lt;/code&gt; needs to be run with &lt;code&gt;my_function&lt;/code&gt; again to 'reinitialize'.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;num_check&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;
+
+&lt;span class="n"&gt;conditional_decorator&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;print_hi_decorator&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;num_check&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="n"&gt;do_nothing_decorator&lt;/span&gt;
+
+&lt;span class="nd"&gt;@conditional_decorator&lt;/span&gt;
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;my_function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;Output&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;my_function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="mi"&gt;5&lt;/span&gt;
+&lt;span class="o"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;my_function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="mi"&gt;6&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;</content><category term="python"></category><category term="decorators"></category><category term="functions"></category><category term="code snippet"></category></entry><entry><title>The easiest way to get data into Redshift</title><link href="https://szuckerman.github.io/get_data_into_redshift.html" rel="alternate"></link><published>2018-10-23T11:30:00-04:00</published><updated>2018-10-23T11:30:00-04:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2018-10-23:/get_data_into_redshift.html</id><summary type="html">&lt;p&gt;There are many ways to load data into Redshift, this method, using the &lt;code&gt;COPY&lt;/code&gt; command, should be the most efficient and reliable.&lt;/p&gt;</summary><content type="html">&lt;p&gt;When using AWS and working in an analytical environment, you most likely have encountered Redshift at some point. Now, Redshift is awesome since it can contain a lot of data and query that data quickly. Due to its columnar storage, it's more effiecient to run a query such as:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;select&lt;/span&gt; 
   &lt;span class="n"&gt;customer_id&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
   &lt;span class="k"&gt;sum&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;amount&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;total_amount&lt;/span&gt;
