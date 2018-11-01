@@ -6,8 +6,8 @@
         <meta name="author" content="Sam Zuckerman" />
         <meta name="copyright" content="Sam Zuckerman" />
 
-<meta name="keywords" content="python, Python, " />
-        <title>Using slice objects in Python  · programming notes
+<meta name="keywords" content="python, redshift, code snippet, Python, " />
+        <title>Creating a Python UDF in Redshift  · programming notes
 </title>
         <link href="http://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css">
         <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
@@ -56,55 +56,73 @@
 <article>
 <div class="row-fluid">
     <header class="page_header span10 offset2">
-    <h1><a href="https://szuckerman.github.io/slice-objects.html"> Using slice objects in Python  </a></h1>
+    <h1><a href="https://szuckerman.github.io/python_udf_in_redshift.html"> Creating a Python UDF in Redshift  </a></h1>
     </header>
 </div>
 
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
 
-            <h1>Using Slice Objects in Python</h1>
-<p>Here's a cool little helpful piece of code I found for Python, it's called a slice object.</p>
-<p>You know when you write <code>my_list[:2]</code> and you get the first two values? Well, the ":2" section is actually a slice object which you can input directly.</p>
-<p>The notation for the object is <code>slice(None, 2)</code> or <code>slice(None, 2, None)</code>, similar to when you subset a list using one or two colons.</p>
-<p>Therefore, if we want to get the first two values of the list we can write:</p>
-<div class="highlight"><pre><span></span><span class="n">my_list</span><span class="p">[</span><span class="nb">slice</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="mi">2</span><span class="p">)]</span>
+            <h1>What's a UDF?</h1>
+<p>Databases are central to effective programming and there are more and more offerings to handle people's workloads.  </p>
+<p>One that should greatly increase ones' productivity is in the database arena is moving beyond basic SQL and using additional programming structures such as stored procedures or UDFs.</p>
+<p>This post will focus on UDFs in Redshift and how we can leverage Python to write them.</p>
+<p>So, it sounds interesting, but at this point you might be wondering, <em>what exactly is a UDF</em>?</p>
+<blockquote>
+<p>A UDF is a User-Defined Function that gets stored in the database. Instead of using standard functions like <code>sum()</code> one can make a custom one like <code>my_crazy_function()</code>.</p>
+</blockquote>
+<p>I feel that this isn't 100% necessary if you're only writing SQL anyway (you can put your logic in a subquery and join to your new table), but if you like to write Python (like me), this can make some of the logic easier depending on the use case.</p>
+<h1>How does Python interact with Redshift?</h1>
+<p>There's much more information contained in <a href="https://docs.aws.amazon.com/redshift/latest/dg/udf-python-language-support.html">the official Redshift documentation on Python UDFs</a>, but the main points I took from it are:</p>
+<ul>
+<li>It runs Python 2.7</li>
+<li>It contains the following packages by default:<ul>
+<li>numpy: 1.8.2</li>
+<li>pandas: 0.14.1</li>
+<li>python-dateutil: 2.2</li>
+<li>pytz: 2014.7</li>
+<li>scipy: 0.12.1</li>
+<li>six: 1.3.0</li>
+<li>wsgiref: 0.1.2</li>
+</ul>
+</li>
+<li><a href="https://docs.aws.amazon.com/redshift/latest/dg/udf-python-language-support.html#udf-importing-custom-python-library-modules">You can add your own custom packages</a></li>
+</ul>
+<p>Basically, Python 2.7 is already "there" with the packages I listed above.</p>
+<h1>How do permissions work?</h1>
+<p>In Redshift, Python is referred to as <code>plpythonu</code>. To allow users (besides the superuser) to use the language, the following command must be run:</p>
+<div class="highlight"><pre><span></span><span class="k">GRANT</span> <span class="k">USAGE</span> <span class="k">ON</span> <span class="k">LANGUAGE</span> <span class="n">plpythonu</span> <span class="k">TO</span> <span class="n">USERNAME</span><span class="p">;</span>
 </pre></div>
 
 
-<p>Now, this doesn't actually save us anything from the usual syntax, but we can now save the slice object as its own variable:</p>
-<div class="highlight"><pre><span></span><span class="n">first_two</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
-
-<span class="n">my_list</span><span class="p">[</span><span class="n">first_two</span><span class="p">]</span>
+<h1>Making the Function</h1>
+<p>After the permissions are added, you can add a function like so:</p>
+<div class="highlight"><pre><span></span><span class="k">create</span> <span class="k">function</span> <span class="n">add_three_numbers</span><span class="p">(</span><span class="n">num1</span> <span class="nb">float</span><span class="p">,</span> <span class="n">num2</span> <span class="nb">float</span><span class="p">,</span> <span class="n">num3</span> <span class="nb">float</span><span class="p">)</span>
+<span class="k">RETURNS</span> <span class="nb">float</span>
+<span class="k">STABLE</span> 
+<span class="k">AS</span> <span class="err">$$</span>
+<span class="k">return</span> <span class="n">num1</span> <span class="o">+</span> <span class="n">num2</span> <span class="o">+</span> <span class="n">num3</span>
+<span class="err">$$</span> <span class="k">LANGUAGE</span> <span class="n">plpythonu</span><span class="p">;</span>
 </pre></div>
 
 
-<p>My most common use case for slice objects is with pandas dataframes.</p>
-<p>In one case I was generating a report with many different subsets of a few tables. Sometimes I needed the last column, which was a 'total' column, and othertimes not.</p>
-<p>Therefore, it was much easier to write:</p>
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">subset_my_df</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">include_total</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-    <span class="sd">&#39;&#39;&#39;This function takes a pandas dataframe and includes the &#39;total&#39; column at the end, or not.&#39;&#39;&#39;</span>
-    <span class="k">if</span> <span class="n">include_total</span><span class="p">:</span>
-        <span class="n">df_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">df_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
-
-    <span class="n">cols</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">df_slice</span><span class="p">]</span>
-
-    <span class="n">subset_df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">cols</span><span class="p">]</span>
-
-    <span class="k">return</span> <span class="n">subset_df</span>
+<p>This function adds three numbers and returns their result. In the definition, all the data types (parameters and return value) must be specified. Remember, these are Redshift datatypes, but it just so happens that <code>float</code> exists in both languages.</p>
+<p>Everything between the <code>$$</code>'s is the Python code. If you wanted to use <code>pandas</code> at this point you would <code>import pandas as pd</code> at the beginning of the function definition.</p>
+<p><code>STABLE</code> in this case deals with the query optimizer and how it should evaluate the function. <a href="https://docs.aws.amazon.com/redshift/latest/dg/r_CREATE_FUNCTION.html">The Redshift documentation goes into more detail on this for its different values</a>, but for the time being you should be OK keeping it with <code>STABLE</code>.</p>
+<p><strong>Note:</strong> This doesn't currently work for aggregation. I.e. you can't use <code>group by</code> and your Python function like you would <code>sum</code> or <code>avg</code>. We're going to discuss a workaround in a later post.</p>
+<h1>Output</h1>
+<div class="highlight"><pre><span></span><span class="k">SELECT</span> <span class="n">add_three_numbers</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
 </pre></div>
 
 
-<p>Than to try to hardcode the columns without the total, especially if you have dataframes with different column names.</p>
-<p>You need the <code>cols=df.columns[df_slice]</code> line to subset the columns.  If you don't include that line you'll be subsetting by rows instead.</p>
+<p>Would output 6. Remember, Redshift doesn't require a <code>FROM</code> clause.</p>
+<p>Now you should have a basic understanding of how to add a Python function to your Redshift database.</p>
 <section>
 <div class="accordion" id="accordion2">
     <div class="accordion-group">
         <div class="accordion-heading">
             <a class="accordion-toggle disqus-comment-count" data-toggle="collapse" data-parent="#accordion2"
-                href="https://szuckerman.github.io/slice-objects.html#disqus_thread">
+                href="https://szuckerman.github.io/python_udf_in_redshift.html#disqus_thread">
                 Comments
             </a>
         </div>
@@ -114,8 +132,8 @@
 <div id="disqus_thread"></div>
 <script type="text/javascript">
     var disqus_shortname = 'szuckerman-github-io-1';
-        var disqus_identifier = 'https://szuckerman.github.io/slice-objects.html';
-    var disqus_url = 'https://szuckerman.github.io/slice-objects.html';
+        var disqus_identifier = 'https://szuckerman.github.io/python_udf_in_redshift.html';
+    var disqus_url = 'https://szuckerman.github.io/python_udf_in_redshift.html';
 
     (function() {
          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
@@ -135,7 +153,7 @@
             <nav>
             <ul class="articles_timeline">
  
-                <li class="next_article"><a href="https://szuckerman.github.io/finding-local-python-packages.html" title="Next: Finding local python packages">Finding local python packages</a> »</li>
+                <li class="previous_article">« <a href="https://szuckerman.github.io/direct_upload_to_s3.html" title="Previous: Directly uploading a Pandas DataFrame to S3">Directly uploading a Pandas DataFrame to S3</a></li>
             </ul>
             </nav>
             </aside>
@@ -144,16 +162,22 @@
         <div class="span2" style="float:right;font-size:0.9em;">
  
             <h4>Published</h4>
-            <time pubdate="pubdate" datetime="2017-10-03T15:30:00-04:00">Oct 3, 2017</time>
+            <time pubdate="pubdate" datetime="2018-11-01T15:30:00-04:00">Nov 1, 2018</time>
  
             <h4>Last Updated</h4>
-            <div class="last_updated">2017-10-03 15:30:00-04:00</div>
+            <div class="last_updated">2018-11-01 15:30:00-04:00</div>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#Python-ref">Python</a> 
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
+                <li><a href="/tags.html#code-snippet-ref">code snippet
+                    <span>3</span>
+</a></li>
                 <li><a href="/tags.html#python-ref">python
                     <span>7</span>
+</a></li>
+                <li><a href="/tags.html#redshift-ref">redshift
+                    <span>2</span>
 </a></li>
             </ul>
 

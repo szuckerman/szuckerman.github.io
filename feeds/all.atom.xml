@@ -1,5 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>programming notes</title><link href="https://szuckerman.github.io/" rel="alternate"></link><link href="https://szuckerman.github.io/feeds/all.atom.xml" rel="self"></link><id>https://szuckerman.github.io/</id><updated>2018-10-30T15:30:00-04:00</updated><entry><title>Directly uploading a Pandas DataFrame to S3</title><link href="https://szuckerman.github.io/direct_upload_to_s3.html" rel="alternate"></link><published>2018-10-30T15:30:00-04:00</published><updated>2018-10-30T15:30:00-04:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2018-10-30:/direct_upload_to_s3.html</id><summary type="html">&lt;p&gt;Here's some basic code on how to upload to S3 directly from a Pandas object.&lt;/p&gt;</summary><content type="html">&lt;p&gt;Recently I published a post on &lt;a href="https://szuckerman.github.io/get_data_into_redshift.html"&gt;easily uploading data to S3 and loading into Redshift&lt;/a&gt;. That post was mainly focused on saving the data as a local file and uploading to S3 using either boto3 or the AWS CLI to move the file to S3.&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>programming notes</title><link href="https://szuckerman.github.io/" rel="alternate"></link><link href="https://szuckerman.github.io/feeds/all.atom.xml" rel="self"></link><id>https://szuckerman.github.io/</id><updated>2018-11-01T15:30:00-04:00</updated><entry><title>Creating a Python UDF in Redshift</title><link href="https://szuckerman.github.io/python_udf_in_redshift.html" rel="alternate"></link><published>2018-11-01T15:30:00-04:00</published><updated>2018-11-01T15:30:00-04:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2018-11-01:/python_udf_in_redshift.html</id><summary type="html">&lt;p&gt;Here's some basic code on how to directly insert a Python function into your Redshift instance.&lt;/p&gt;</summary><content type="html">&lt;h1&gt;What's a UDF?&lt;/h1&gt;
+&lt;p&gt;Databases are central to effective programming and there are more and more offerings to handle people's workloads.  &lt;/p&gt;
+&lt;p&gt;One that should greatly increase ones' productivity is in the database arena is moving beyond basic SQL and using additional programming structures such as stored procedures or UDFs.&lt;/p&gt;
+&lt;p&gt;This post will focus on UDFs in Redshift and how we can leverage Python to write them.&lt;/p&gt;
+&lt;p&gt;So, it sounds interesting, but at this point you might be wondering, &lt;em&gt;what exactly is a UDF&lt;/em&gt;?&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;A UDF is a User-Defined Function that gets stored in the database. Instead of using standard functions like &lt;code&gt;sum()&lt;/code&gt; one can make a custom one like &lt;code&gt;my_crazy_function()&lt;/code&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;I feel that this isn't 100% necessary if you're only writing SQL anyway (you can put your logic in a subquery and join to your new table), but if you like to write Python (like me), this can make some of the logic easier depending on the use case.&lt;/p&gt;
+&lt;h1&gt;How does Python interact with Redshift?&lt;/h1&gt;
+&lt;p&gt;There's much more information contained in &lt;a href="https://docs.aws.amazon.com/redshift/latest/dg/udf-python-language-support.html"&gt;the official Redshift documentation on Python UDFs&lt;/a&gt;, but the main points I took from it are:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;It runs Python 2.7&lt;/li&gt;
+&lt;li&gt;It contains the following packages by default:&lt;ul&gt;
+&lt;li&gt;numpy: 1.8.2&lt;/li&gt;
+&lt;li&gt;pandas: 0.14.1&lt;/li&gt;
+&lt;li&gt;python-dateutil: 2.2&lt;/li&gt;
+&lt;li&gt;pytz: 2014.7&lt;/li&gt;
+&lt;li&gt;scipy: 0.12.1&lt;/li&gt;
+&lt;li&gt;six: 1.3.0&lt;/li&gt;
+&lt;li&gt;wsgiref: 0.1.2&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.aws.amazon.com/redshift/latest/dg/udf-python-language-support.html#udf-importing-custom-python-library-modules"&gt;You can add your own custom packages&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Basically, Python 2.7 is already "there" with the packages I listed above.&lt;/p&gt;
+&lt;h1&gt;How do permissions work?&lt;/h1&gt;
+&lt;p&gt;In Redshift, Python is referred to as &lt;code&gt;plpythonu&lt;/code&gt;. To allow users (besides the superuser) to use the language, the following command must be run:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;GRANT&lt;/span&gt; &lt;span class="k"&gt;USAGE&lt;/span&gt; &lt;span class="k"&gt;ON&lt;/span&gt; &lt;span class="k"&gt;LANGUAGE&lt;/span&gt; &lt;span class="n"&gt;plpythonu&lt;/span&gt; &lt;span class="k"&gt;TO&lt;/span&gt; &lt;span class="n"&gt;USERNAME&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h1&gt;Making the Function&lt;/h1&gt;
+&lt;p&gt;After the permissions are added, you can add a function like so:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;create&lt;/span&gt; &lt;span class="k"&gt;function&lt;/span&gt; &lt;span class="n"&gt;add_three_numbers&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;num1&lt;/span&gt; &lt;span class="nb"&gt;float&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;num2&lt;/span&gt; &lt;span class="nb"&gt;float&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;num3&lt;/span&gt; &lt;span class="nb"&gt;float&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="k"&gt;RETURNS&lt;/span&gt; &lt;span class="nb"&gt;float&lt;/span&gt;
+&lt;span class="k"&gt;STABLE&lt;/span&gt; 
+&lt;span class="k"&gt;AS&lt;/span&gt; &lt;span class="err"&gt;$$&lt;/span&gt;
+&lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;num1&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;num2&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;num3&lt;/span&gt;
+&lt;span class="err"&gt;$$&lt;/span&gt; &lt;span class="k"&gt;LANGUAGE&lt;/span&gt; &lt;span class="n"&gt;plpythonu&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;This function adds three numbers and returns their result. In the definition, all the data types (parameters and return value) must be specified. Remember, these are Redshift datatypes, but it just so happens that &lt;code&gt;float&lt;/code&gt; exists in both languages.&lt;/p&gt;
+&lt;p&gt;Everything between the &lt;code&gt;$$&lt;/code&gt;'s is the Python code. If you wanted to use &lt;code&gt;pandas&lt;/code&gt; at this point you would &lt;code&gt;import pandas as pd&lt;/code&gt; at the beginning of the function definition.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;STABLE&lt;/code&gt; in this case deals with the query optimizer and how it should evaluate the function. &lt;a href="https://docs.aws.amazon.com/redshift/latest/dg/r_CREATE_FUNCTION.html"&gt;The Redshift documentation goes into more detail on this for its different values&lt;/a&gt;, but for the time being you should be OK keeping it with &lt;code&gt;STABLE&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Note:&lt;/strong&gt; This doesn't currently work for aggregation. I.e. you can't use &lt;code&gt;group by&lt;/code&gt; and your Python function like you would &lt;code&gt;sum&lt;/code&gt; or &lt;code&gt;avg&lt;/code&gt;. We're going to discuss a workaround in a later post.&lt;/p&gt;
+&lt;h1&gt;Output&lt;/h1&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;SELECT&lt;/span&gt; &lt;span class="n"&gt;add_three_numbers&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Would output 6. Remember, Redshift doesn't require a &lt;code&gt;FROM&lt;/code&gt; clause.&lt;/p&gt;
+&lt;p&gt;Now you should have a basic understanding of how to add a Python function to your Redshift database.&lt;/p&gt;</content><category term="python"></category><category term="redshift"></category><category term="code snippet"></category></entry><entry><title>Directly uploading a Pandas DataFrame to S3</title><link href="https://szuckerman.github.io/direct_upload_to_s3.html" rel="alternate"></link><published>2018-10-30T15:30:00-04:00</published><updated>2018-10-30T15:30:00-04:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2018-10-30:/direct_upload_to_s3.html</id><summary type="html">&lt;p&gt;Here's some basic code on how to upload to S3 directly from a Pandas object.&lt;/p&gt;</summary><content type="html">&lt;p&gt;Recently I published a post on &lt;a href="https://szuckerman.github.io/get_data_into_redshift.html"&gt;easily uploading data to S3 and loading into Redshift&lt;/a&gt;. That post was mainly focused on saving the data as a local file and uploading to S3 using either boto3 or the AWS CLI to move the file to S3.&lt;/p&gt;
 &lt;p&gt;However, even though the above works, I had a situation recently where I wanted to upload the files to S3 without storing any temporary files locally.&lt;/p&gt;
 &lt;p&gt;I saw a &lt;a href="https://stackoverflow.com/a/40615630"&gt;great stackoverflow answer&lt;/a&gt; that discusses how to use boto3 to upload the bytes from a DataFrame to S3.&lt;/p&gt;
 &lt;p&gt;Here's the answer from the post:&lt;/p&gt;
