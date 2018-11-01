@@ -11,15 +11,31 @@
 </title>
         <link href="http://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css">
         <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
-        <link rel="stylesheet" type="text/css" href="/theme/css/style.css" media="screen">
-        <link rel="stylesheet" type="text/css" href="/theme/css/solarizedlight.css" media="screen">
-        <link rel="shortcut icon" href="/theme/images/favicon.ico" type="image/x-icon" />
-        <link rel="apple-touch-icon" href="/theme/images/apple-touch-icon.png" />
-        <link rel="apple-touch-icon" sizes="57x57" href="/theme/images/apple-touch-icon-57x57.png" />
-        <link rel="apple-touch-icon" sizes="72x72" href="/theme/images/apple-touch-icon-72x72.png" />
-        <link rel="apple-touch-icon" sizes="114x114" href="/theme/images/apple-touch-icon-114x114.png" />
-        <link rel="apple-touch-icon" sizes="144x144" href="/theme/images/apple-touch-icon-144x144.png" />
-        <link rel="icon" href="/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="stylesheet" type="text/css" href="https://szuckerman.github.io/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://szuckerman.github.io/theme/css/solarizedlight.css" media="screen">
+        <link rel="shortcut icon" href="https://szuckerman.github.io/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="https://szuckerman.github.io/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="https://szuckerman.github.io/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="https://szuckerman.github.io/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="https://szuckerman.github.io/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="https://szuckerman.github.io/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="https://szuckerman.github.io/theme/images/apple-touch-icon-144x144.png" />
+        <link href="https://szuckerman.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="programming notes - Full Atom Feed" />
+        <link href="https://szuckerman.github.io/feeds/Keras.atom.xml" type="application/atom+xml" rel="alternate" title="programming notes - Keras Category Atom Feed" />
+        <link href="https://szuckerman.github.io/feeds/Python.atom.xml" type="application/atom+xml" rel="alternate" title="programming notes - Python Category Atom Feed" />
+        <link href="https://szuckerman.github.io/feeds/R.atom.xml" type="application/atom+xml" rel="alternate" title="programming notes - R Category Atom Feed" />
+        <link href="https://szuckerman.github.io/feeds/Redshift.atom.xml" type="application/atom+xml" rel="alternate" title="programming notes - Redshift Category Atom Feed" />
+        <link href="https://szuckerman.github.io/feeds/S3.atom.xml" type="application/atom+xml" rel="alternate" title="programming notes - S3 Category Atom Feed" />
+    <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-128575468-1']);
+    _gaq.push(['_trackPageview']);
+    (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+    </script>
     </head>
     <body>
         <div id="content-sans-footer">
@@ -31,14 +47,14 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </a>
-                    <a class="brand" href="/"><span class=site-name>programming notes</span></a>
+                    <a class="brand" href="https://szuckerman.github.io/"><span class=site-name>programming notes</span></a>
                     <div class="nav-collapse collapse">
                         <ul class="nav pull-right top-menu">
-                            <!--<li ><a href="">Home</a></li>-->
-                            <li ><a href="/categories.html">Categories</a></li>
-                            <li ><a href="/tags.html">Tags</a></li>
-                            <li ><a href="/archives.html">Archives</a></li>
-                            <li><form class="navbar-search" action="/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                            <!--<li ><a href="https://szuckerman.github.io">Home</a></li>-->
+                            <li ><a href="https://szuckerman.github.io/categories.html">Categories</a></li>
+                            <li ><a href="https://szuckerman.github.io/tags.html">Tags</a></li>
+                            <li ><a href="https://szuckerman.github.io/archives.html">Archives</a></li>
+                            <li><form class="navbar-search" action="https://szuckerman.github.io/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
                         </ul>
                     </div>
                 </div>
@@ -51,7 +67,7 @@
 <article>
 <div class="row-fluid">
     <header class="page_header span10 offset2">
-    <h1><a href="/keras_hello_world_boston_housing_dataset.html"> Keras "Hello World" Example for Regression  </a></h1>
+    <h1><a href="https://szuckerman.github.io/keras_hello_world_boston_housing_dataset.html"> Keras "Hello World" Example for Regression  </a></h1>
     </header>
 </div>
 
@@ -75,7 +91,7 @@
 <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">keras.datasets</span> <span class="kn">import</span> <span class="n">boston_housing</span>
 <span class="kn">from</span> <span class="nn">keras.models</span> <span class="kn">import</span> <span class="n">Sequential</span>
 <span class="kn">from</span> <span class="nn">keras.layers</span> <span class="kn">import</span> <span class="n">Dense</span>
-<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">MinMaxScaler</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 
 <span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">),</span> <span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span> <span class="o">=</span> <span class="n">boston_housing</span><span class="o">.</span><span class="n">load_data</span><span class="p">()</span>
@@ -83,8 +99,8 @@
 
 
 <p>Neural networks work best when the data is normalized. The network would get confused with our data when comparing small and big numbers of different units (like tax rates and non-business acres). </p>
-<div class="highlight"><pre><span></span><span class="n">scalerX</span> <span class="o">=</span> <span class="n">MinMaxScaler</span><span class="p">(</span><span class="n">feature_range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
-<span class="n">scalerY</span> <span class="o">=</span> <span class="n">MinMaxScaler</span><span class="p">(</span><span class="n">feature_range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+<div class="highlight"><pre><span></span><span class="n">scalerX</span> <span class="o">=</span> <span class="n">MinMaxScaler</span><span class="p">(</span><span class="n">feature_range</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">scalerY</span> <span class="o">=</span> <span class="n">MinMaxScaler</span><span class="p">(</span><span class="n">feature_range</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
 
 <span class="n">scaled_training_X</span> <span class="o">=</span> <span class="n">scalerX</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X_train</span><span class="p">)</span>
 <span class="n">scaled_testing_X</span> <span class="o">=</span> <span class="n">scalerX</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
@@ -176,32 +192,71 @@ Epoch 100/100
 </pre></div>
 
 
-<p>Since used mse as a loss function above, when we use the <code>evaluate</code> method, we'll get mse returned.</p>
+<p>Since we used mse as a loss function above, when we use the <code>evaluate</code> method, we'll get mse returned.</p>
 <blockquote>
 <p>Note: We are evaluating with the test data and will also be predicting with the test data as well. Usually when preparing a model for production one has a breakdown of training, testing and validation data sets for model evaluation. We are merely using the testing data to show how the model performs on unseen data.  </p>
 </blockquote>
 <p>Output:</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span><span class="mf">0.16640686755086861</span> 
-</pre></div>
-
-
-<h1>So What Does This Mean?</h1>
-<p>Since we have the mse, we want to know how "off" our predictions are. The units are currently (scaled_dollars)^2 which isn't so useful. Therefore we have to 'untransform' it.</p>
-<div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mse</span><span class="p">)</span>
-<span class="n">true_result</span> <span class="o">=</span> <span class="n">scalerY</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">([</span><span class="n">result</span><span class="p">])</span>
-</pre></div>
-
-
-<p>Output:</p>
-<div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([[</span> <span class="mf">26.80030564</span><span class="p">]])</span>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="mf">0.017321763085383995</span>
 </pre></div>
 
 
 <p><strong>Note:</strong> you might get different slightly results based on rounding issues .</p>
-<p>This shows that across all the </p>
-<p>def get_results(x):
-    pred = model.predict(scaled_testing_X[x:x+1])
-    return  y_test[x], scalerY.inverse_transform(pred)[0][0]</p>
+<h1>So What Does This Mean?</h1>
+<p>Since we have the MSE, we want to know how "off" our predictions are. A quick explanation to MSE is that you take all your predictions, subtract the real values, square each result, and add those all together.</p>
+<h2>Why do we square the values?</h2>
+<p>The following shows why we square the values:</p>
+<p>Let's say we have three data points: [1, 2, 3]
+Let's say we have three predicted points: [3, 2, 1]</p>
+<p>We would have the following total (without squaring):</p>
+<div class="highlight"><pre><span></span><span class="mi">1</span><span class="o">-</span><span class="mi">4</span> <span class="o">=</span> <span class="o">-</span><span class="mi">3</span>
+<span class="mi">2</span><span class="o">-</span><span class="mi">2</span> <span class="o">=</span>  <span class="mi">0</span>
+<span class="mi">5</span><span class="o">-</span><span class="mi">1</span> <span class="o">=</span>  <span class="mi">4</span>
+
+
+<span class="o">-</span><span class="mi">3</span> <span class="o">+</span> <span class="mi">0</span> <span class="o">+</span> <span class="mi">4</span> <span class="o">=</span> <span class="mi">1</span>
+</pre></div>
+
+
+<p>This would, incorrectly, imply a near-perfect model.</p>
+<p>Now, with squaring:</p>
+<div class="highlight"><pre><span></span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="mi">4</span><span class="p">)</span><span class="o">^</span><span class="mi">2</span> <span class="o">=</span> <span class="mi">9</span>
+<span class="p">(</span><span class="mi">2</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span><span class="o">^</span><span class="mi">2</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="p">(</span><span class="mi">5</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">^</span><span class="mi">2</span> <span class="o">=</span> <span class="mi">16</span>
+
+<span class="mi">9</span> <span class="o">+</span> <span class="mi">0</span> <span class="o">+</span> <span class="mi">16</span> <span class="o">=</span> <span class="mi">25</span>
+</pre></div>
+
+
+<p>Basically, by squaring we take care of the positive/negative number issue.</p>
+<p>Sometimes it's useful to take the square-root of the Mean Square Error so we'll get the same units that we're predicting (in this case dollars). In the above example we would see that our predictions were 'off' by 5 over the testing data.</p>
+<p>In Python we could calculate this by:</p>
+<div class="highlight"><pre><span></span><span class="n">rmse</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mse</span><span class="p">)</span>
+</pre></div>
+
+
+<p>It's not so necessary in this case to take the Root Mean Square Error, though, since we scaled the data (i.e. an RMSE of 2345 wouldn't relate to $2345) and a main reason for these loss models is to compare models to eachother; the number by itself isn't very useful.</p>
+<h1>Comparing Keras Regression model to Linear Model</h1>
+<p>First we need to import the proper libraries:</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LinearRegression</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">mean_squared_error</span>
+ <span class="sb">``</span><span class="err">`</span>
+
+ <span class="sb">``</span><span class="err">`</span><span class="n">python</span>
+<span class="n">boston_linear_model</span> <span class="o">=</span> <span class="n">LinearRegression</span><span class="p">()</span>
+
+<span class="n">boston_linear_model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">scaled_training_X</span><span class="p">,</span> <span class="n">scaled_training_y</span><span class="p">)</span>
+
+<span class="n">y_pred</span> <span class="o">=</span> <span class="n">boston_linear_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">scaled_testing_X</span><span class="p">)</span>
+
+<span class="n">mean_squared_error</span><span class="p">(</span><span class="n">scaled_testing_y</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="mf">0.018737306901733503</span>
+</pre></div>
+
+
 <div class="highlight"><pre><span></span>scalerX = MinMaxScaler(feature_range=(0,1))
 scalerY = MinMaxScaler(feature_range=(0,1))
 
@@ -213,14 +268,45 @@ scaled_testing_X = scalerX.fit_transform(X_test)
 scaled_training_y = scalerY.fit_transform(y_train.reshape(-1, 1))
 scaled_testing_y = scalerY.fit_transform(y_test.reshape(-1, 1))
 </pre></div>
+<section>
+<div class="accordion" id="accordion2">
+    <div class="accordion-group">
+        <div class="accordion-heading">
+            <a class="accordion-toggle disqus-comment-count" data-toggle="collapse" data-parent="#accordion2"
+                href="https://szuckerman.github.io/keras_hello_world_boston_housing_dataset.html#disqus_thread">
+                Comments
+            </a>
+        </div>
+        <div id="disqus_thread" class="accordion-body collapse">
+            <div class="accordion-inner">
+                <div class="comments">
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'szuckerman-github-io-1';
+        var disqus_identifier = 'https://szuckerman.github.io/keras_hello_world_boston_housing_dataset.html';
+    var disqus_url = 'https://szuckerman.github.io/keras_hello_world_boston_housing_dataset.html';
+
+    (function() {
+         var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+         dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+         (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+     })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</section>
             <aside>
             <hr/>
             <nav>
             <ul class="articles_timeline">
  
-                <li class="previous_article">« <a href="/stop_writing_classes.html" title="Previous: Thoughts on "Stop Writing Classes" PyCon 2012 talk">Thoughts on "Stop Writing Classes" PyCon 2012 talk</a></li>
+                <li class="previous_article">« <a href="https://szuckerman.github.io/stop_writing_classes.html" title="Previous: Thoughts on "Stop Writing Classes" PyCon 2012 talk">Thoughts on "Stop Writing Classes" PyCon 2012 talk</a></li>
  
-                <li class="next_article"><a href="/get_data_into_redshift.html" title="Next: The easiest way to get data into Redshift">The easiest way to get data into Redshift</a> »</li>
+                <li class="next_article"><a href="https://szuckerman.github.io/get_data_into_redshift.html" title="Next: The easiest way to get data into Redshift">The easiest way to get data into Redshift</a> »</li>
             </ul>
             </nav>
             </aside>
@@ -247,7 +333,7 @@ scaled_testing_y = scalerY.fit_transform(y_test.reshape(-1, 1))
                     <span>1</span>
 </a></li>
                 <li><a href="/tags.html#python-ref">python
-                    <span>5</span>
+                    <span>8</span>
 </a></li>
             </ul>
 
@@ -275,5 +361,31 @@ scaled_testing_y = scalerY.fit_transform(y_test.reshape(-1, 1))
             }
         </script>
 
+<script type="text/javascript">
+    var disqus_shortname = 'szuckerman-github-io-1';
+
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+    </script>
+        <script  language="javascript" type="text/javascript">
+            function uncollapse() {
+                var hash_str = window.location.hash;
+                if (window.location.hash.match(/^#comment-\d+$/))
+                {
+                    var hash_str = '#disqus_thread';
+                }
+                $(hash_str).collapse({
+                    toggle: true
+                    })
+            }
+        </script>
+
+        <script type="text/javascript" language="JavaScript">
+            uncollapse(); 
+        </script>
     </body>
 </html>
