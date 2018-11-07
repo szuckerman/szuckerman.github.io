@@ -1,5 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>programming notes - Python</title><link href="https://szuckerman.github.io/" rel="alternate"></link><link href="https://szuckerman.github.io/feeds/python.atom.xml" rel="self"></link><id>https://szuckerman.github.io/</id><updated>2018-11-01T15:30:00-04:00</updated><entry><title>Creating a Python UDF in Redshift</title><link href="https://szuckerman.github.io/python_udf_in_redshift.html" rel="alternate"></link><published>2018-11-01T15:30:00-04:00</published><updated>2018-11-01T15:30:00-04:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2018-11-01:/python_udf_in_redshift.html</id><summary type="html">&lt;p&gt;Here's some basic code on how to directly insert a Python function into your Redshift instance.&lt;/p&gt;</summary><content type="html">&lt;h1&gt;What's a UDF?&lt;/h1&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>programming notes - Python</title><link href="https://szuckerman.github.io/" rel="alternate"></link><link href="https://szuckerman.github.io/feeds/python.atom.xml" rel="self"></link><id>https://szuckerman.github.io/</id><updated>2018-11-07T15:30:00-05:00</updated><entry><title>Getting started with plotting in Python (using Pandas)</title><link href="https://szuckerman.github.io/getting_started_with_plotting_in_python_using_pandas.html" rel="alternate"></link><published>2018-11-07T15:30:00-05:00</published><updated>2018-11-07T15:30:00-05:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2018-11-07:/getting_started_with_plotting_in_python_using_pandas.html</id><summary type="html">&lt;p&gt;Here's some code to get you started with plotting in Python.&lt;/p&gt;</summary><content type="html">&lt;p&gt;I don't really need to give reasons as to "why" data visualization is necessary, everyone knows that a graph is easier to look at and understand than a large table.&lt;/p&gt;
+&lt;p&gt;People most likely get their first introduction to plotting in Excel, when they highlight a table or column, press the chart button and out pops a chart. Easy, right?&lt;/p&gt;
+&lt;p&gt;Well, once people get introduced to a programming language such as Python that doesn't have the 'clicky buttons' to make the charts, the task can seem somewhat daunting.&lt;/p&gt;
+&lt;p&gt;It's actually not as bad as one would initially think; below are some code snippets to get started.&lt;/p&gt;
+&lt;h1&gt;Plotting using Pandas&lt;/h1&gt;
+&lt;p&gt;This post will focus on plotting using Pandas DataFrames, since that's the easiest way to generate results.&lt;/p&gt;
+&lt;p&gt;Let's say you have the following DataFrame (which I just made up right now):&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;pandas&lt;/span&gt; &lt;span class="kn"&gt;as&lt;/span&gt; &lt;span class="nn"&gt;pd&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;matplotlib.pyplot&lt;/span&gt; &lt;span class="kn"&gt;as&lt;/span&gt; &lt;span class="nn"&gt;plt&lt;/span&gt;  
+
+&lt;span class="n"&gt;school_dat&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pd&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;DataFrame&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+    &lt;span class="p"&gt;[[&lt;/span&gt;&lt;span class="mi"&gt;11&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;25&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;6&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;12&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;7&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;13&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;40&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;7&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;7&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;]],&lt;/span&gt; 
+    &lt;span class="n"&gt;index&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;Alice&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;Bob&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;Claire&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;Daniel&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt; 
+    &lt;span class="n"&gt;columns&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;age&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;minutes_to_school&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;distance_to_school&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;class&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;        age  minutes_to_school  distance_to_school  class
+Alice    11                 25                   3      6
+Bob      12                  5                   1      7
+Claire   13                 40                   7      7
+Daniel   10                 10                   3      5
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;What's great about pandas is that it contains plotting methods within the DataFrame object. You just need to include &lt;code&gt;import matplotlib.pyplot as plt&lt;/code&gt; so if you're running this in console, you run &lt;code&gt;plt.show()&lt;/code&gt; to actually show the plot.&lt;/p&gt;
+&lt;p&gt;The following code:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;school_dat&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;plot&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;span class="n"&gt;plt&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;show&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Will result in a line chart plot, like so:&lt;/p&gt;
+&lt;p&gt;&lt;img alt="School Line Chart" src="https://szuckerman.github.io/images/getting_started_with_plotting_Figure_1.png"&gt;&lt;/p&gt;
+&lt;h2&gt;Using within a Jupyter notebook&lt;/h2&gt;
+&lt;p&gt;If you're instead running the code in a Jupyter notebook, you want to add the following line at the top with your imports:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="o"&gt;%&lt;/span&gt;&lt;span class="n"&gt;matplotlib&lt;/span&gt; &lt;span class="n"&gt;inline&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;This ensures that the plots will be shown as output from the cells.&lt;/p&gt;
+&lt;p&gt;Similarly, when running in Jupyter you'll see something similar to &lt;code&gt;&amp;lt;matplotlib.axes._subplots.AxesSubplot object at 0x1130e59e8&amp;gt;&lt;/code&gt; above the chart. That just shows the memory location of the plot object. It's a bit ugly, so the easy workaround to get rid of it is to assign the plot method call to a variable like so:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;my_plot&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;school_dat&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;plot&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h2&gt;Changing the Plot Around&lt;/h2&gt;
+&lt;p&gt;Now, it's nice how quickly we generated the plot, but there may be other options we want to use. For one, let's say we wanted to view the lines on different plots?&lt;/p&gt;
+&lt;p&gt;For that we would run:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;my_plot&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;school_dat&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;plot&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;subplots&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="bp"&gt;True&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Don't forget to run &lt;code&gt;plt.show()&lt;/code&gt; if necessary!&lt;/p&gt;
+&lt;p&gt;We would get a figure like so:&lt;/p&gt;
+&lt;p&gt;&lt;img alt="School Line Chart Subplots" src="https://szuckerman.github.io/images/getting_started_with_plotting_Figure_2.png"&gt;&lt;/p&gt;
+&lt;p&gt;Still, however, this data is better suited as bar charts, since the lines imply that the data is connected somehow, while it's really not. If the x-axis implied some order, such as time, then a line chart might be a good choice, but now counts of numbers is more useful for what we might be interested in. A bar chart is a good choice for this type of data.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;my_plot&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;school_dat&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;plot&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;bar&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;&lt;img alt="School Bar Chart" src="https://szuckerman.github.io/images/getting_started_with_plotting_Figure_3.png"&gt;&lt;/p&gt;
+&lt;p&gt;There are many options for different charts, they can be found in the &lt;em&gt;kind&lt;/em&gt; parameter in the &lt;a href="https://pandas.pydata.org/pandas-docs/version/0.23/generated/pandas.DataFrame.plot.html"&gt;DataFrame.plot documentation&lt;/a&gt;. I could have also called the above barchart as &lt;code&gt;school_dat.plot(kind='bar')&lt;/code&gt;, but I feel using it as a method call above  looks cleaner. &lt;/p&gt;
+&lt;p&gt;This is a good use case to break out the subplots, since I think it's more interesting to compare individual attributes across students than grouping all the attributes for each student.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;my_plot&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;school_dat&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;plot&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;bar&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;subplots&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="bp"&gt;True&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;&lt;img alt="School Bar Chart Subplots" src="https://szuckerman.github.io/images/getting_started_with_plotting_Figure_4.png"&gt;&lt;/p&gt;
+&lt;p&gt;Unfortunately the subplot titles get in the way, to remove them we can pass a list of empty strings. The list needs to be the same size as the number of columns in the DataFrame, since each column is getting its own subplot.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;num_cols&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;school_dat&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;shape&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;span class="n"&gt;my_plot&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;school_dat&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;plot&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;bar&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;subplots&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="bp"&gt;True&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;title&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;num_cols&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;&lt;img alt="School Bar Chart Subplots No Titles" src="https://szuckerman.github.io/images/getting_started_with_plotting_Figure_5.png"&gt;&lt;/p&gt;
+&lt;p&gt;I think this is a good start to an insightful visualization for this type of data.&lt;/p&gt;
+&lt;p&gt;The examples here are obviously only the tip of the iceberg as to what can be done with these plot methods; be sure to check out &lt;a href="https://pandas.pydata.org/pandas-docs/version/0.23/generated/pandas.DataFrame.plot.html"&gt;the official documentation for DataFrame.plot&lt;/a&gt; to see what other options are available.&lt;/p&gt;</content><category term="python"></category><category term="pandas"></category><category term="visualization"></category><category term="code snippet"></category></entry><entry><title>Creating a Python UDF in Redshift</title><link href="https://szuckerman.github.io/python_udf_in_redshift.html" rel="alternate"></link><published>2018-11-01T15:30:00-04:00</published><updated>2018-11-01T15:30:00-04:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2018-11-01:/python_udf_in_redshift.html</id><summary type="html">&lt;p&gt;Here's some basic code on how to directly insert a Python function into your Redshift instance.&lt;/p&gt;</summary><content type="html">&lt;h1&gt;What's a UDF?&lt;/h1&gt;
 &lt;p&gt;Databases are central to effective programming and there are more and more offerings to handle people's workloads.  &lt;/p&gt;
 &lt;p&gt;One that should greatly increase ones' productivity is in the database arena is moving beyond basic SQL and using additional programming structures such as stored procedures or UDFs.&lt;/p&gt;
 &lt;p&gt;This post will focus on UDFs in Redshift and how we can leverage Python to write them.&lt;/p&gt;
