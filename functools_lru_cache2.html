@@ -6,8 +6,8 @@
         <meta name="author" content="Sam Zuckerman" />
         <meta name="copyright" content="Sam Zuckerman" />
 
-<meta name="keywords" content="python, packages, Python, " />
-        <title>Finding local python packages  · programming notes
+<meta name="keywords" content="python, functools, functions, code snippet, Python, " />
+        <title>Additional points on lru_cache  · programming notes
 </title>
         <link href="http://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css">
         <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
@@ -61,41 +61,42 @@
 <article>
 <div class="row-fluid">
     <header class="page_header span10 offset2">
-    <h1><a href="/finding-local-python-packages.html"> Finding local python packages  </a></h1>
+    <h1><a href="/functools_lru_cache2.html"> Additional points on lru_cache  </a></h1>
     </header>
 </div>
 
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
 
-            <h2>Problem</h2>
-<p>I had a problem where I couldn't get Python to notice a package I just made.</p>
-<p>What's great about Python is that you can work on a module, say <code>my_file.py</code>, and in another script write 'import my_file' to include that script in the current one. To include this module in a package, you merely add a blank <code>__init__.py</code> file to the folder the script is in. If the script is in a folder called 'my_folder', adding a <code>__init__.py</code> file to that folder will allow you to run:</p>
-<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">my_folder</span> <span class="kn">import</span> <span class="n">my_script</span>
+            <p>In our previous post <em><a href="/functools_lru_cache.html">What's this in functools? lru_cache</a></em>, we saw how we can use <code>lru_cache</code> effectively to speed up execution time of a function that grows exponentially.</p>
+<p>Here's three more points to be aware of when using <code>lru_cache</code>.</p>
+<h1>The function arguments must be hashable</h1>
+<p>Since the results are cached using a dictionary, the function arguments must be hashable. This is because the keys of a dictionary must be hashable.</p>
+<p>Basically, hashable means that there is a lookup value (i.e. "hash") associated with the object. If something is immutable, and thus can't change, the item can be hashed.</p>
+<p>Lists and other mutable objects that can be changed don't have a hash value. More specifically, they don't implement the __hash__ method, but one could be added in a custom class <a href="https://stackoverflow.com/a/42203997">as in this stackoverflow answer</a>.</p>
+<p>Therefore, <strong>the arguments to the functions you're decorating with <code>lru_cache</code> should only accept hashable objects</strong>.</p>
+<p>I.e: <strong>Don't use lists or dictionaries as function arguments for functions you decorate with <code>lru_cache</code></strong>.</p>
+<h1>Watch out for differing argument patterns</h1>
+<p>Different argument patterns might get cached differently. For example: <code>f(a=1, b=2)</code> might get cached differently from <code>f(b=2, a=1)</code>.</p>
+<p>Ok, so, that's easy enough. Just always use the correct order, right?</p>
+<p>Well, I sometimes like to do argument unpacking with my parameters using a <code>dict</code>.</p>
+<p>So, instead of <code>f(a=1, b=2)</code>, I might run:</p>
+<div class="highlight"><pre><span></span><span class="n">my_params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}</span>
+
+<span class="n">f</span><span class="p">(</span><span class="o">**</span><span class="n">my_params</span><span class="p">)</span>
 </pre></div>
 
 
-<p>However, Python only knows about this package if it's in the same directory. I was trying to run some tests recently by having a separate 'tests' folder and I kept on getting an error of <code>ModuleNotFoundError: No module named my_folder</code>.</p>
-<p>The reason it can't find the package is because Python only knows about packages loaded into the site-packages section of your Python installation.</p>
-<p>For example, I use a virtual environment on my mac which loads all my packages (such as pandas, scipy, etc) here:</p>
-<p><code>/Users/my_username/.virtualenvs/virtualenv_name/lib/python3.6/site-packages</code></p>
-<p>When you install with pip, the packages get loaded there.</p>
-<p>If I decided to build the package, then it would go there too, but I don't really want to do that while I'm just doing some brief testing.</p>
-<h2>Solution</h2>
-<p>Add a .pth file to the site-packages/ directory.</p>
-<p>It's fairly simple. Let's say my <code>my_folder</code> package is in the following <code>my_folder</code> directory (it's a common design to have a package in a folder of the same name).</p>
-<p><code>/Users/my_username/Documents/my_folder/my_folder/</code></p>
-<p>I would take this line and put it in a file called <code>my_folder.pth</code> (it can be named anything, though) and put that pth file in the site-packages/ directory. It might seem odd to just have a text file with that one line of a directory, but it works.</p>
-<p>The file's location would be <code>/Users/my_username/.virtualenvs/virtualenv_name/lib/python3.6/site-packages/my_folder.pth</code>.</p>
-<p>Now you can run <code>from my_folder import my_script</code> without any errors!</p>
+<p>The problem here is that, depending on what version of Python3 you're using, dictionaries aren't necessarily ordered. If you're using Python 3.7, though, <a href="https://stackoverflow.com/a/39980744">you should be fine</a>.</p>
+<p>If you're using a version that doesn't order they keys, then the function could be called sometimes as <code>f(a=1, b=2)</code> and sometimes <code>f(b=2, a=1)</code> depending on what gets unpacked first. In these cases you should look into using an <code>OrderedDict</code> found in the <code>collections</code> module.  </p>
+<h1>Clearing the cache</h1>
+<p>You can clear out the cache with the <code>cache_clear()</code> method. </p>
             <aside>
             <hr/>
             <nav>
             <ul class="articles_timeline">
  
-                <li class="previous_article">« <a href="/slice-objects.html" title="Previous: Using slice objects in Python">Using slice objects in Python</a></li>
- 
-                <li class="next_article"><a href="/make_date_range_r.html" title="Next: How to make a sequence of days in R">How to make a sequence of days in R</a> »</li>
+                <li class="previous_article">« <a href="/functools_lru_cache.html" title="Previous: What's this in functools? lru_cache">What's this in functools? lru_cache</a></li>
             </ul>
             </nav>
             </aside>
@@ -104,16 +105,22 @@
         <div class="span2" style="float:right;font-size:0.9em;">
  
             <h4>Published</h4>
-            <time pubdate="pubdate" datetime="2017-12-21T12:45:00-05:00">Dec 21, 2017</time>
+            <time pubdate="pubdate" datetime="2018-11-09T15:30:00-05:00">Nov 9, 2018</time>
  
             <h4>Last Updated</h4>
-            <div class="last_updated">2017-12-21 12:45:00-05:00</div>
+            <div class="last_updated">2018-11-09 15:30:00-05:00</div>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#Python-ref">Python</a> 
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
-                <li><a href="/tags.html#packages-ref">packages
-                    <span>1</span>
+                <li><a href="/tags.html#code-snippet-ref">code snippet
+                    <span>6</span>
+</a></li>
+                <li><a href="/tags.html#functions-ref">functions
+                    <span>3</span>
+</a></li>
+                <li><a href="/tags.html#functools-ref">functools
+                    <span>2</span>
 </a></li>
                 <li><a href="/tags.html#python-ref">python
                     <span>10</span>
