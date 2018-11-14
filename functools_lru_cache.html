@@ -11,15 +11,20 @@
 </title>
         <link href="http://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css">
         <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
-        <link rel="stylesheet" type="text/css" href="/theme/css/style.css" media="screen">
-        <link rel="stylesheet" type="text/css" href="/theme/css/solarizedlight.css" media="screen">
-        <link rel="shortcut icon" href="/theme/images/favicon.ico" type="image/x-icon" />
-        <link rel="apple-touch-icon" href="/theme/images/apple-touch-icon.png" />
-        <link rel="apple-touch-icon" sizes="57x57" href="/theme/images/apple-touch-icon-57x57.png" />
-        <link rel="apple-touch-icon" sizes="72x72" href="/theme/images/apple-touch-icon-72x72.png" />
-        <link rel="apple-touch-icon" sizes="114x114" href="/theme/images/apple-touch-icon-114x114.png" />
-        <link rel="apple-touch-icon" sizes="144x144" href="/theme/images/apple-touch-icon-144x144.png" />
-        <link rel="icon" href="/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="stylesheet" type="text/css" href="https://szuckerman.github.io/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://szuckerman.github.io/theme/css/solarizedlight.css" media="screen">
+        <link rel="shortcut icon" href="https://szuckerman.github.io/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="https://szuckerman.github.io/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="https://szuckerman.github.io/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="https://szuckerman.github.io/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="https://szuckerman.github.io/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="https://szuckerman.github.io/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="https://szuckerman.github.io/theme/images/apple-touch-icon-144x144.png" />
+        <link href="https://szuckerman.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="programming notes - Full Atom Feed" />
+        <link href="https://szuckerman.github.io/feeds/Python.atom.xml" type="application/atom+xml" rel="alternate" title="programming notes - Python Category Atom Feed" />
+        <link href="https://szuckerman.github.io/feeds/R.atom.xml" type="application/atom+xml" rel="alternate" title="programming notes - R Category Atom Feed" />
+        <link href="https://szuckerman.github.io/feeds/Redshift.atom.xml" type="application/atom+xml" rel="alternate" title="programming notes - Redshift Category Atom Feed" />
+        <link href="https://szuckerman.github.io/feeds/S3.atom.xml" type="application/atom+xml" rel="alternate" title="programming notes - S3 Category Atom Feed" />
     <script type="text/javascript">
     var _gaq = _gaq || [];
     _gaq.push(['_setAccount', 'UA-128575468-1']);
@@ -41,14 +46,14 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </a>
-                    <a class="brand" href="/"><span class=site-name>programming notes</span></a>
+                    <a class="brand" href="https://szuckerman.github.io/"><span class=site-name>programming notes</span></a>
                     <div class="nav-collapse collapse">
                         <ul class="nav pull-right top-menu">
-                            <!--<li ><a href="">Home</a></li>-->
-                            <li ><a href="/categories.html">Categories</a></li>
-                            <li ><a href="/tags.html">Tags</a></li>
-                            <li ><a href="/archives.html">Archives</a></li>
-                            <li><form class="navbar-search" action="/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                            <!--<li ><a href="https://szuckerman.github.io">Home</a></li>-->
+                            <li ><a href="https://szuckerman.github.io/categories.html">Categories</a></li>
+                            <li ><a href="https://szuckerman.github.io/tags.html">Tags</a></li>
+                            <li ><a href="https://szuckerman.github.io/archives.html">Archives</a></li>
+                            <li><form class="navbar-search" action="https://szuckerman.github.io/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
                         </ul>
                     </div>
                 </div>
@@ -61,7 +66,7 @@
 <article>
 <div class="row-fluid">
     <header class="page_header span10 offset2">
-    <h1><a href="/functools_lru_cache.html"> What's this in functools? lru_cache  </a></h1>
+    <h1><a href="https://szuckerman.github.io/functools_lru_cache.html"> What's this in functools? lru_cache  </a></h1>
     </header>
 </div>
 
@@ -104,7 +109,7 @@
 
 
 <p>This graph is growing on the order of O(2<sup>n</sup>). That means that for every additional call, it's going to take about double the amount before it. When the function calls are taking less than a second to run, it's hardly noticeable, but there's a big difference between waiting a few minutes and a few hours.</p>
-<p><img alt="Fibonacci Chart 1" src="/images/functools_lru_cache_Figure_1.png"></p>
+<p><img alt="Fibonacci Chart 1" src="https://szuckerman.github.io/images/functools_lru_cache_Figure_1.png"></p>
 <h1>How can lru_cache fit in?</h1>
 <p><code>lru_cache</code> is a decorator, so once the function is decorated, you're done! There's a parameter for how many values to store in the cache, so for our case of going through 37 values using <code>range</code> we want at least that amount in the cache.</p>
 <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">lru_cache</span>
@@ -119,10 +124,10 @@
 
 
 <p>If we run the timeit section above, again, we get a graph that looks like this.</p>
-<p><img alt="Fibonacci Chart 2" src="/images/functools_lru_cache_Figure_2.png"></p>
+<p><img alt="Fibonacci Chart 2" src="https://szuckerman.github.io/images/functools_lru_cache_Figure_2.png"></p>
 <p>Besides the fact that it almost ran instantly, it's almost running in O(1) time, too.</p>
 <p>We can even bump up the number to look for the 1000th fibonacci and it also runs just as quick. That timed graph looks like this.</p>
-<p><img alt="Fibonacci Chart 3" src="/images/functools_lru_cache_Figure_3.png"></p>
+<p><img alt="Fibonacci Chart 3" src="https://szuckerman.github.io/images/functools_lru_cache_Figure_3.png"></p>
 <h1>Why did this go so much faster?</h1>
 <p>The fibonnaci function runs in O(2<sup>n</sup>) time since every call has to make two calls to the previous fibonacci functions. That makes the number of calls double over time. If you're calling <code>fib(10)</code> you're going to be calling <code>fib(1)</code> 2<sup>10</sup> times. When we cache the results using <code>lru_cache</code> we save the value of the intermediate calls, such as <code>fib(3)</code> and <code>fib(4)</code>. Once we have those values, the value is returned and we don't need to continue making repeated recursive function calls.</p>
 <h1>Other uses</h1>
@@ -158,14 +163,45 @@
 <p>What happens when the cache is full? The lru in <code>lru_cache</code> stands for "least recently used". Therefore, once the cache is full, the oldest values start to get thrown out.</p>
 <h1>Conclusion</h1>
 <p>The <code>lru_cache</code> decorator from the <code>functools</code> module is a very easy way to add caching to expensive functions. In this post you've seen how easy it is to cut down a function from O(2<sup>n</sup>) time to O(1) time using <code>lru_cache</code> and should be able to tell when a function might necessitate its use.</p>
+<section>
+<div class="accordion" id="accordion2">
+    <div class="accordion-group">
+        <div class="accordion-heading">
+            <a class="accordion-toggle disqus-comment-count" data-toggle="collapse" data-parent="#accordion2"
+                href="https://szuckerman.github.io/functools_lru_cache.html#disqus_thread">
+                Comments
+            </a>
+        </div>
+        <div id="disqus_thread" class="accordion-body collapse">
+            <div class="accordion-inner">
+                <div class="comments">
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'szuckerman-github-io-1';
+        var disqus_identifier = 'https://szuckerman.github.io/functools_lru_cache.html';
+    var disqus_url = 'https://szuckerman.github.io/functools_lru_cache.html';
+
+    (function() {
+         var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+         dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+         (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+     })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</section>
             <aside>
             <hr/>
             <nav>
             <ul class="articles_timeline">
  
-                <li class="previous_article">« <a href="/getting_started_with_plotting_in_python_using_pandas.html" title="Previous: Getting started with plotting in Python (using Pandas)">Getting started with plotting in Python (using Pandas)</a></li>
+                <li class="previous_article">« <a href="https://szuckerman.github.io/getting_started_with_plotting_in_python_using_pandas.html" title="Previous: Getting started with plotting in Python (using Pandas)">Getting started with plotting in Python (using Pandas)</a></li>
  
-                <li class="next_article"><a href="/functools_lru_cache2.html" title="Next: Additional points on lru_cache">Additional points on lru_cache</a> »</li>
+                <li class="next_article"><a href="https://szuckerman.github.io/functools_lru_cache2.html" title="Next: Additional points on lru_cache">Additional points on lru_cache</a> »</li>
             </ul>
             </nav>
             </aside>
@@ -183,16 +219,16 @@
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#code-snippet-ref">code snippet
-                    <span>6</span>
+                    <span>7</span>
 </a></li>
                 <li><a href="/tags.html#functions-ref">functions
-                    <span>3</span>
+                    <span>4</span>
 </a></li>
                 <li><a href="/tags.html#functools-ref">functools
-                    <span>2</span>
+                    <span>3</span>
 </a></li>
                 <li><a href="/tags.html#python-ref">python
-                    <span>10</span>
+                    <span>11</span>
 </a></li>
             </ul>
 
@@ -220,5 +256,31 @@
             }
         </script>
 
+<script type="text/javascript">
+    var disqus_shortname = 'szuckerman-github-io-1';
+
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+    </script>
+        <script  language="javascript" type="text/javascript">
+            function uncollapse() {
+                var hash_str = window.location.hash;
+                if (window.location.hash.match(/^#comment-\d+$/))
+                {
+                    var hash_str = '#disqus_thread';
+                }
+                $(hash_str).collapse({
+                    toggle: true
+                    })
+            }
+        </script>
+
+        <script type="text/javascript" language="JavaScript">
+            uncollapse(); 
+        </script>
     </body>
 </html>
