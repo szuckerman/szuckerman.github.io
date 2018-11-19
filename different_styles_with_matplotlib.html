@@ -6,8 +6,8 @@
         <meta name="author" content="Sam Zuckerman" />
         <meta name="copyright" content="Sam Zuckerman" />
 
-<meta name="keywords" content="python, pandas, s3, code snippet, S3, " />
-        <title>Directly uploading a Pandas DataFrame to S3  · programming notes
+<meta name="keywords" content="python, pandas, matplotlib, visualization, Python, " />
+        <title>Using different styles with matplotlib  · programming notes
 </title>
         <link href="http://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css">
         <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
@@ -66,38 +66,64 @@
 <article>
 <div class="row-fluid">
     <header class="page_header span10 offset2">
-    <h1><a href="https://szuckerman.github.io/direct_upload_to_s3.html"> Directly uploading a Pandas DataFrame to S3  </a></h1>
+    <h1><a href="https://szuckerman.github.io/different_styles_with_matplotlib.html"> Using different styles with matplotlib  </a></h1>
     </header>
 </div>
 
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
 
-            <p>Recently I published a post on <a href="https://szuckerman.github.io/get_data_into_redshift.html">easily uploading data to S3 and loading into Redshift</a>. That post was mainly focused on saving the data as a local file and uploading to S3 using either boto3 or the AWS CLI to move the file to S3.</p>
-<p>However, even though the above works, I had a situation recently where I wanted to upload the files to S3 without storing any temporary files locally.</p>
-<p>I saw a <a href="https://stackoverflow.com/a/40615630">great stackoverflow answer</a> that discusses how to use boto3 to upload the bytes from a DataFrame to S3.</p>
-<p>Here's the answer from the post:</p>
-<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">StringIO</span>
-<span class="kn">import</span> <span class="nn">boto3</span>
-
-<span class="n">csv_buffer</span> <span class="o">=</span> <span class="n">StringIO</span><span class="p">()</span>
-<span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">csv_buffer</span><span class="p">)</span>
-<span class="n">s3_resource</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">resource</span><span class="p">(</span><span class="s1">&#39;s3&#39;</span><span class="p">)</span>
-<span class="n">s3_resource</span><span class="o">.</span><span class="n">Object</span><span class="p">(</span><span class="n">bucket</span><span class="p">,</span> <span class="s1">&#39;df.csv&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">Body</span><span class="o">=</span><span class="n">csv_buffer</span><span class="o">.</span><span class="n">getvalue</span><span class="p">())</span>
+            <h1>Getting the styles</h1>
+<p>To see what alternate styles are available for matplotlib charts, you would first run <code>plt.style.available</code> to get the list of available styles.</p>
+<p>This is assuming you've already run the following:</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
 </pre></div>
 
 
-<p>The main point to realize here is that instead of the file being sent as a 'file' it's getting sent as bytes directly over the internet.</p>
-<p>This is a good, quick solution, however, if you have a super-gigantic file, it might still be better to go the 'temporary file' route, since this has to store the object in memory to send it.</p>
-<p>The main idea that's important about this method, though, is that once you're familiar with using the methods from the <a href="https://docs.python.org/3/library/io.html"><code>io</code> package</a> (i.e. <code>StringIO()</code> and <code>BytesIO()</code>), there's a ton you can do online.</p>
-<p>For example, using <code>BytesIO()</code> you can download and work with images using <code>PIL</code>, using <code>StreamIO()</code> you can work with huge text files that won't fit in memory; there's many cool uses that will take your Python programming to the next level. </p>
-<p>But those are the topics for other posts :). This is merely an introduction to one example using the <code>io</code> module.</p>
+<div class="highlight"><pre><span></span>&gt;&gt;&gt; [u&#39;seaborn-darkgrid&#39;,
+     u&#39;Solarize_Light2&#39;,
+     u&#39;seaborn-notebook&#39;,
+     u&#39;classic&#39;,
+     u&#39;seaborn-ticks&#39;,
+     u&#39;grayscale&#39;,
+     u&#39;bmh&#39;,
+     u&#39;seaborn-talk&#39;,
+     u&#39;dark_background&#39;,
+     u&#39;ggplot&#39;,
+     u&#39;fivethirtyeight&#39;,
+     u&#39;_classic_test&#39;,
+     u&#39;seaborn-colorblind&#39;,
+     u&#39;seaborn-deep&#39;,
+     u&#39;seaborn-whitegrid&#39;,
+     u&#39;seaborn-bright&#39;,
+     u&#39;seaborn-poster&#39;,
+     u&#39;seaborn-muted&#39;,
+     u&#39;seaborn-paper&#39;,
+     u&#39;seaborn-white&#39;,
+     u&#39;fast&#39;,
+     u&#39;seaborn-pastel&#39;,
+     u&#39;seaborn-dark&#39;,
+     u&#39;seaborn&#39;,
+     u&#39;seaborn-dark-palette&#39;]
+</pre></div>
+
+
+<p>There's various reasons why you might want a different theme; maybe depending on the content of your report you want a darker or lighter theme. If you're planning on printing the graphs and only have access to a B&amp;W printer, grayscale charts might be preferred. Being mindful of users who may be colorblind is also a thoughtful consideration.</p>
+<h1>Applying the style</h1>
+<p>The style must be applied before the charts are made, therefore it's a good idea to run the command right after importing the <code>matplotlab</code> module like so:</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;ggplot&#39;</span><span class="p">)</span>
+</pre></div>
+
+
+<p><strong>Note:</strong> If you change styles in the middle, you might get a mix of styles which is not consistent behavior and most likely not what you want. You should always restart your Jupyter kernal or Python instance when changing to a new style.</p>
+<p>With this one line, you can easily customize your graphs and charts to your content making for a more polished reporting template.</p>
 <section>
 <div class="accordion" id="accordion2">
     <div class="accordion-group">
         <div class="accordion-heading">
             <a class="accordion-toggle disqus-comment-count" data-toggle="collapse" data-parent="#accordion2"
-                href="https://szuckerman.github.io/direct_upload_to_s3.html#disqus_thread">
+                href="https://szuckerman.github.io/different_styles_with_matplotlib.html#disqus_thread">
                 Comments
             </a>
         </div>
@@ -107,8 +133,8 @@
 <div id="disqus_thread"></div>
 <script type="text/javascript">
     var disqus_shortname = 'szuckerman-github-io-1';
-        var disqus_identifier = 'https://szuckerman.github.io/direct_upload_to_s3.html';
-    var disqus_url = 'https://szuckerman.github.io/direct_upload_to_s3.html';
+        var disqus_identifier = 'https://szuckerman.github.io/different_styles_with_matplotlib.html';
+    var disqus_url = 'https://szuckerman.github.io/different_styles_with_matplotlib.html';
 
     (function() {
          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
@@ -128,9 +154,7 @@
             <nav>
             <ul class="articles_timeline">
  
-                <li class="previous_article">« <a href="https://szuckerman.github.io/conditional_decorators.html" title="Previous: Conditional decorators in Python">Conditional decorators in Python</a></li>
- 
-                <li class="next_article"><a href="https://szuckerman.github.io/python_udf_in_redshift.html" title="Next: Creating a Python UDF in Redshift">Creating a Python UDF in Redshift</a> »</li>
+                <li class="previous_article">« <a href="https://szuckerman.github.io/functools_total_ordering.html" title="Previous: What's this in functools? total_ordering">What's this in functools? total_ordering</a></li>
             </ul>
             </nav>
             </aside>
@@ -139,16 +163,16 @@
         <div class="span2" style="float:right;font-size:0.9em;">
  
             <h4>Published</h4>
-            <time pubdate="pubdate" datetime="2018-10-30T15:30:00-04:00">Oct 30, 2018</time>
+            <time pubdate="pubdate" datetime="2018-11-19T15:30:00-05:00">Nov 19, 2018</time>
  
             <h4>Last Updated</h4>
-            <div class="last_updated">2018-10-30 15:30:00-04:00</div>
+            <div class="last_updated">2018-11-19 15:30:00-05:00</div>
             <h4>Category</h4>
-            <a class="category-link" href="/categories.html#S3-ref">S3</a> 
+            <a class="category-link" href="/categories.html#Python-ref">Python</a> 
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
-                <li><a href="/tags.html#code-snippet-ref">code snippet
-                    <span>8</span>
+                <li><a href="/tags.html#matplotlib-ref">matplotlib
+                    <span>1</span>
 </a></li>
                 <li><a href="/tags.html#pandas-ref">pandas
                     <span>3</span>
@@ -156,7 +180,7 @@
                 <li><a href="/tags.html#python-ref">python
                     <span>13</span>
 </a></li>
-                <li><a href="/tags.html#s3-ref">s3
+                <li><a href="/tags.html#visualization-ref">visualization
                     <span>2</span>
 </a></li>
             </ul>
