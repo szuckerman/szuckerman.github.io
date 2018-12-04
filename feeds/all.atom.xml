@@ -1,5 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>programming notes</title><link href="https://szuckerman.github.io/" rel="alternate"></link><link href="https://szuckerman.github.io/feeds/all.atom.xml" rel="self"></link><id>https://szuckerman.github.io/</id><updated>2018-11-20T15:30:00-05:00</updated><entry><title>Finding duplicate rows to not break a primary key</title><link href="https://szuckerman.github.io/finding_duplicate_rows_in_sql.html" rel="alternate"></link><published>2018-11-20T15:30:00-05:00</published><updated>2018-11-20T15:30:00-05:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2018-11-20:/finding_duplicate_rows_in_sql.html</id><summary type="html">&lt;p&gt;Primary keys are essential to relational databases. They ensure that rows in a database conform to a unique identifier. The following code snippet shows how to identify problematic rows.&lt;/p&gt;</summary><content type="html">&lt;p&gt;Primary keys are essential to relational databases. They ensure that rows in a database conform to a unique identifier. The following code snippet shows how to identify problematic rows.&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>programming notes</title><link href="https://szuckerman.github.io/" rel="alternate"></link><link href="https://szuckerman.github.io/feeds/all.atom.xml" rel="self"></link><id>https://szuckerman.github.io/</id><updated>2018-12-04T15:30:00-05:00</updated><entry><title>Number of days between dates in Postgres</title><link href="https://szuckerman.github.io/number_of_days_between_dates_in_postgres.html" rel="alternate"></link><published>2018-12-04T15:30:00-05:00</published><updated>2018-12-04T15:30:00-05:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2018-12-04:/number_of_days_between_dates_in_postgres.html</id><summary type="html">&lt;p&gt;Different database systems handle math for dates differently. Here's how you find the number of dates between dates in Postgres.&lt;/p&gt;</summary><content type="html">&lt;h1&gt;Date math with dates and timestamps&lt;/h1&gt;
+&lt;p&gt;In most relational databases getting the number of days between two dates is fairly straightforward. You merely subtract two date objects from eachother. This also works in PostgreSQL.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;select&lt;/span&gt; &lt;span class="n"&gt;TO_DATE&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;20180501&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;YYYYMMDD&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;TO_DATE&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;20170101&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;YYYYMMDD&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;num_days&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;num_days&lt;/span&gt;
+&lt;span class="mi"&gt;485&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;However, if even one of the objects is a &lt;code&gt;timestamp&lt;/code&gt; and not a &lt;code&gt;date&lt;/code&gt;, then the output is a bit messy:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;select&lt;/span&gt; &lt;span class="n"&gt;TO_DATE&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;20180501&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;YYYYMMDD&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;TO_TIMESTAMP&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;20170101&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;YYYYMMDD&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;num_days&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;num_days&lt;/span&gt;
+&lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="n"&gt;years&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="n"&gt;mons&lt;/span&gt; &lt;span class="mi"&gt;485&lt;/span&gt; &lt;span class="n"&gt;days&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="n"&gt;hours&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="n"&gt;mins&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="mi"&gt;00&lt;/span&gt; &lt;span class="n"&gt;secs&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;This situation happens often if you use one of the built-in date functions, such as &lt;code&gt;CURRENT_DATE&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;select&lt;/span&gt; &lt;span class="k"&gt;CURRENT_DATE&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;TO_TIMESTAMP&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;20170101&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;YYYYMMDD&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;num_days&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;num_days&lt;/span&gt;
+&lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="n"&gt;years&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="n"&gt;mons&lt;/span&gt; &lt;span class="mi"&gt;702&lt;/span&gt; &lt;span class="n"&gt;days&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="n"&gt;hours&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="n"&gt;mins&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="mi"&gt;00&lt;/span&gt; &lt;span class="n"&gt;secs&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h1&gt;Making the output cleaner&lt;/h1&gt;
+&lt;p&gt;Here's how you make the output numeric, like the first example, instead of long and ugly like the others: You use the &lt;code&gt;DATE_PART&lt;/code&gt; function.&lt;/p&gt;
+&lt;p&gt;Basically you just wrap &lt;code&gt;DATE_PART&lt;/code&gt; around your output to grab the (wait for it...) date part.&lt;/p&gt;
+&lt;p&gt;You need to do this since, if you notice the above output, only days are returned. Even though one example is 485 days, it's not split into "1 year 125 days".&lt;/p&gt;
+&lt;p&gt;Here's the above example using &lt;code&gt;DATE_PART&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;select&lt;/span&gt; &lt;span class="n"&gt;DATE_PART&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;day&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="k"&gt;CURRENT_DATE&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;TO_TIMESTAMP&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;20170101&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;YYYYMMDD&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="n"&gt;num_days&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;num_days&lt;/span&gt;
+&lt;span class="mi"&gt;702&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h1&gt;Further reading&lt;/h1&gt;
+&lt;p&gt;I found &lt;a href="http://www.sqlines.com/postgresql/how-to/datediff"&gt;this page on Sqlines useful&lt;/a&gt; if you need to perform a &lt;code&gt;DATE_DIFF&lt;/code&gt; using units other than dates. &lt;/p&gt;</content><category term="sql"></category><category term="postgres"></category></entry><entry><title>Finding duplicate rows to not break a primary key</title><link href="https://szuckerman.github.io/finding_duplicate_rows_in_sql.html" rel="alternate"></link><published>2018-11-20T15:30:00-05:00</published><updated>2018-11-20T15:30:00-05:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2018-11-20:/finding_duplicate_rows_in_sql.html</id><summary type="html">&lt;p&gt;Primary keys are essential to relational databases. They ensure that rows in a database conform to a unique identifier. The following code snippet shows how to identify problematic rows.&lt;/p&gt;</summary><content type="html">&lt;p&gt;Primary keys are essential to relational databases. They ensure that rows in a database conform to a unique identifier. The following code snippet shows how to identify problematic rows.&lt;/p&gt;
 &lt;p&gt;Sometimes when loading into a different table there can be issues with duplicates on distinct columns when you thought there should be none.&lt;/p&gt;
 &lt;h1&gt;Finding duplicates in a table&lt;/h1&gt;
 &lt;p&gt;You might have a table in your database that doesn't contain any unique constraints. Let's assume the table is called &lt;code&gt;TABLE1&lt;/code&gt; and we want to check duplicates on &lt;code&gt;COL1&lt;/code&gt; and &lt;code&gt;COL2&lt;/code&gt;. The following code will check to see what rows are duplicated, based on certain columns.&lt;/p&gt;
