@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="Sam Zuckerman" />
+        <meta name="copyright" content="Sam Zuckerman" />
+
+<meta name="keywords" content="python, pandas, Python, " />
+        <title>Easy dates with Pandas  · programming notes
+</title>
+        <link href="http://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css">
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="/theme/css/solarizedlight.css" media="screen">
+        <link rel="shortcut icon" href="/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="/theme/images/apple-touch-icon-144x144.png" />
+    <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-128575468-1']);
+    _gaq.push(['_trackPageview']);
+    (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+    </script>
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="/"><span class=site-name>programming notes</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <!--<li ><a href="">Home</a></li>-->
+                            <li ><a href="/categories.html">Categories</a></li>
+                            <li ><a href="/tags.html">Tags</a></li>
+                            <li ><a href="/archives.html">Archives</a></li>
+                            <li><form class="navbar-search" action="/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article>
+<div class="row-fluid">
+    <header class="page_header span10 offset2">
+    <h1><a href="/number_of_dates_between_dates_in_postgres.html"> Easy dates with Pandas  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+
+            <h1>Date math with dates and timestamps</h1>
+<p>In most relational databases getting the number of days between two dates is fairly straightforward. You merely subtract two date objects from eachother. This also works in PostgreSQL.</p>
+<div class="highlight"><pre><span></span><span class="k">select</span> <span class="n">TO_DATE</span><span class="p">(</span><span class="s1">&#39;20180501&#39;</span><span class="p">,</span> <span class="s1">&#39;YYYYMMDD&#39;</span><span class="p">)</span> <span class="o">-</span> <span class="n">TO_DATE</span><span class="p">(</span><span class="s1">&#39;20170101&#39;</span><span class="p">,</span> <span class="s1">&#39;YYYYMMDD&#39;</span><span class="p">)</span> <span class="n">num_days</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">num_days</span>
+<span class="mi">485</span>
+</pre></div>
+
+
+<p>However, if even one of the objects is a <code>timestamp</code> and not a <code>date</code>, then the output is a bit messy:</p>
+<div class="highlight"><pre><span></span><span class="k">select</span> <span class="n">TO_DATE</span><span class="p">(</span><span class="s1">&#39;20180501&#39;</span><span class="p">,</span> <span class="s1">&#39;YYYYMMDD&#39;</span><span class="p">)</span> <span class="o">-</span> <span class="n">TO_TIMESTAMP</span><span class="p">(</span><span class="s1">&#39;20170101&#39;</span><span class="p">,</span> <span class="s1">&#39;YYYYMMDD&#39;</span><span class="p">)</span> <span class="n">num_days</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">num_days</span>
+<span class="mi">0</span> <span class="n">years</span> <span class="mi">0</span> <span class="n">mons</span> <span class="mi">485</span> <span class="n">days</span> <span class="mi">0</span> <span class="n">hours</span> <span class="mi">0</span> <span class="n">mins</span> <span class="mi">0</span><span class="p">.</span><span class="mi">00</span> <span class="n">secs</span>
+</pre></div>
+
+
+<p>This situation happens often if you use one of the built-in date functions, such as <code>CURRENT_DATE</code>:</p>
+<div class="highlight"><pre><span></span><span class="k">select</span> <span class="k">CURRENT_DATE</span> <span class="o">-</span> <span class="n">TO_TIMESTAMP</span><span class="p">(</span><span class="s1">&#39;20170101&#39;</span><span class="p">,</span> <span class="s1">&#39;YYYYMMDD&#39;</span><span class="p">)</span> <span class="n">num_days</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">num_days</span>
+<span class="mi">0</span> <span class="n">years</span> <span class="mi">0</span> <span class="n">mons</span> <span class="mi">702</span> <span class="n">days</span> <span class="mi">0</span> <span class="n">hours</span> <span class="mi">0</span> <span class="n">mins</span> <span class="mi">0</span><span class="p">.</span><span class="mi">00</span> <span class="n">secs</span>
+</pre></div>
+
+
+<h1>Making the output cleaner</h1>
+<p>Here's how you make the output numeric, like the first example, instead of long and ugly like the others: You use the <code>DATE_PART</code> function.</p>
+<p>Basically you just wrap <code>DATE_PART</code> around your output to grab the (wait for it...) date part.</p>
+<p>You need to do this since, if you notice the above output, only days are returned. Even though one example is 485 days, it's not split into "1 year 125 days".</p>
+<p>Here's the above example using <code>DATE_PART</code>:</p>
+<div class="highlight"><pre><span></span><span class="k">select</span> <span class="n">DATE_PART</span><span class="p">(</span><span class="s1">&#39;day&#39;</span><span class="p">,</span> <span class="k">CURRENT_DATE</span> <span class="o">-</span> <span class="n">TO_TIMESTAMP</span><span class="p">(</span><span class="s1">&#39;20170101&#39;</span><span class="p">,</span> <span class="s1">&#39;YYYYMMDD&#39;</span><span class="p">))</span> <span class="n">num_days</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">num_days</span>
+<span class="mi">702</span>
+</pre></div>
+
+
+<h1>Further reading</h1>
+<p>I found <a href="http://www.sqlines.com/postgresql/how-to/datediff">this page on Sqlines useful</a> if you need to perform a <code>DATE_DIFF</code> using units other than dates. </p>
+            <aside>
+            <hr/>
+            <nav>
+            <ul class="articles_timeline">
+ 
+                <li class="previous_article">« <a href="/functools_lru_cache2.html" title="Previous: Additional points on lru_cache">Additional points on lru_cache</a></li>
+ 
+                <li class="next_article"><a href="/functools_cmp_to_key.html" title="Next: What's this in functools? cmp_to_key">What's this in functools? cmp_to_key</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+ 
+            <h4>Published</h4>
+            <time pubdate="pubdate" datetime="2018-11-12T15:30:00-05:00">Nov 12, 2018</time>
+ 
+            <h4>Last Updated</h4>
+            <div class="last_updated">2018-11-12 15:30:00-05:00</div>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#Python-ref">Python</a> 
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article"> 
+                <li><a href="/tags.html#pandas-ref">pandas
+                    <span>4</span>
+</a></li>
+                <li><a href="/tags.html#python-ref">python
+                    <span>14</span>
+</a></li>
+            </ul>
+
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="http://oncrashreboot.com/pelican-elegant" title="Theme Elegant Home Page">Elegant</a> by <a href="http://oncrashreboot.com" title="Talha Mansoor Home Page">Talha Mansoor</a></li>
+    </ul>
+</div>
+</footer>            <script src="http://code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    </body>
+</html>
