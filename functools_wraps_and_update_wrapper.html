@@ -7,7 +7,7 @@
         <meta name="copyright" content="Sam Zuckerman" />
 
 <meta name="keywords" content="python, functools, functions, code snippet, Python, " />
-        <title>Additional points on lru_cache  · programming notes
+        <title>What's this in functools? wraps and update_wrapper  · programming notes
 </title>
         <link href="http://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css">
         <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
@@ -68,42 +68,96 @@
 <article>
 <div class="row-fluid">
     <header class="page_header span10 offset2">
-    <h1><a href="https://szuckerman.github.io/functools_lru_cache2.html"> Additional points on lru_cache  </a></h1>
+    <h1><a href="https://szuckerman.github.io/functools_wraps_and_update_wrapper.html"> What's this in functools? wraps and update_wrapper  </a></h1>
     </header>
 </div>
 
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
 
-            <p>In our previous post <em><a href="https://szuckerman.github.io/functools_lru_cache.html">What's this in functools? lru_cache</a></em>, we saw how we can use <code>lru_cache</code> effectively to speed up execution time of a function that grows exponentially.</p>
-<p>Here's three more points to be aware of when using <code>lru_cache</code>.</p>
-<h1>The function arguments must be hashable</h1>
-<p>Since the results are cached using a dictionary, the function arguments must be hashable. This is because the keys of a dictionary must be hashable.</p>
-<p>Basically, hashable means that there is a lookup value (i.e. "hash") associated with the object. If something is immutable, and thus can't change, the item can be hashed.</p>
-<p>Lists and other mutable objects that can be changed don't have a hash value. More specifically, they don't implement the __hash__ method, but one could be added in a custom class <a href="https://stackoverflow.com/a/42203997">as in this stackoverflow answer</a>.</p>
-<p>Therefore, <strong>the arguments to the functions you're decorating with <code>lru_cache</code> should only accept hashable objects</strong>.</p>
-<p>I.e: <strong>Don't use lists or dictionaries as function arguments for functions you decorate with <code>lru_cache</code></strong>.</p>
-<h1>Watch out for differing argument patterns</h1>
-<p>Different argument patterns might get cached differently. For example: <code>f(a=1, b=2)</code> might get cached differently from <code>f(b=2, a=1)</code>.</p>
-<p>Ok, so, that's easy enough. Just always use the correct order, right?</p>
-<p>Well, I sometimes like to do argument unpacking with my parameters using a <code>dict</code>.</p>
-<p>So, instead of <code>f(a=1, b=2)</code>, I might run:</p>
-<div class="highlight"><pre><span></span><span class="n">my_params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}</span>
+            <h1>Why do I need functools.wraps?</h1>
+<p>Decorators are a useful part of Python. They allow one to adjust functions in a similar, predictable manner and can be especially powerful due to their concise expressiveness when utilized by certain frameworks, especially web frameworks like Flask.</p>
+<p>That being said, one issue with decorators is that they copy the attributes of the functions they wrap. An example will make this more clear.</p>
+<h1>Example without functools.wraps</h1>
+<p>The following is <a href="https://docs.python.org/3/library/functools.html#functools.wraps">taken from the Python3 <code>functools</code> documentation</a>, but has the <code>@wraps(f)</code> section removed.</p>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">my_decorator</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Calling decorated function&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">wrapper</span>
 
-<span class="n">f</span><span class="p">(</span><span class="o">**</span><span class="n">my_params</span><span class="p">)</span>
+<span class="nd">@my_decorator</span>
+<span class="k">def</span> <span class="nf">example</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Docstring&quot;&quot;&quot;</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Called example function&#39;</span><span class="p">)</span>
+
+<span class="n">example</span><span class="p">()</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">Calling</span> <span class="n">decorated</span> <span class="n">function</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">Called</span> <span class="n">example</span> <span class="n">function</span>
 </pre></div>
 
 
-<p>The problem here is that, depending on what version of Python3 you're using, dictionaries aren't necessarily ordered. If you're using Python 3.7, though, <a href="https://stackoverflow.com/a/39980744">you should be fine</a>.</p>
-<p>If you're using a version that doesn't order they keys, then the function could be called sometimes as <code>f(a=1, b=2)</code> and sometimes <code>f(b=2, a=1)</code> depending on what gets unpacked first. In these cases you should look into using an <code>OrderedDict</code> found in the <code>collections</code> module.  </p>
-<h1>Clearing the cache</h1>
-<p>You can clear out the cache with the <code>cache_clear()</code> method. </p>
+<p>As you can see, the above works as expected. However, if we inspect some of the attributes from the function, we see that some attributes have been overwritten.</p>
+<div class="highlight"><pre><span></span><span class="n">example</span><span class="o">.</span><span class="vm">__name__</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="s1">&#39;wrapper&#39;</span>
+
+<span class="n">example</span><span class="o">.</span><span class="vm">__doc__</span>
+<span class="o">&gt;&gt;&gt;</span> 
+</pre></div>
+
+
+<p>The function has lost its name of 'example' and has been replaced by <code>wrapper</code>. Similarly, the non-existent docstring from <code>wrapper</code> has overwritten the docstring in <code>example</code>.</p>
+<h1>Example with functools.wraps</h1>
+<p>Now let's run the same code above, use the <code>wraps</code> decorator:</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
+
+<span class="k">def</span> <span class="nf">my_decorator</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+    <span class="nd">@wraps</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Calling decorated function&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">wrapper</span>
+
+<span class="nd">@my_decorator</span>
+<span class="k">def</span> <span class="nf">example</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Docstring&quot;&quot;&quot;</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Called example function&#39;</span><span class="p">)</span>
+
+<span class="n">example</span><span class="p">()</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">Calling</span> <span class="n">decorated</span> <span class="n">function</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">Called</span> <span class="n">example</span> <span class="n">function</span>
+</pre></div>
+
+
+<p>The attributes we inspected above now return what would be expected for the <code>example</code> function.</p>
+<div class="highlight"><pre><span></span><span class="n">example</span><span class="o">.</span><span class="vm">__name__</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="s1">&#39;example&#39;</span>
+
+<span class="n">example</span><span class="o">.</span><span class="vm">__doc__</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="s1">&#39;Docstring&#39;</span>
+</pre></div>
+
+
+<p>The following are the attributes that are 'retained' (more correctly, 'copied over' to <code>wrapper</code>, but this makes more sense colloquially):</p>
+<div class="highlight"><pre><span></span><span class="n">functools</span><span class="o">.</span><span class="n">WRAPPER_ASSIGNMENTS</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="p">(</span><span class="s1">&#39;__module__&#39;</span><span class="p">,</span> <span class="s1">&#39;__name__&#39;</span><span class="p">,</span> <span class="s1">&#39;__qualname__&#39;</span><span class="p">,</span> <span class="s1">&#39;__doc__&#39;</span><span class="p">,</span> <span class="s1">&#39;__annotations__&#39;</span><span class="p">)</span>
+</pre></div>
+
+
+<h1>Why does this matter?</h1>
+<p>The above situation might not seem like a big deal, and in most cases it probably isn't. However, I'm sure people can think of situations where a program's logic could depend on what's available in the <code>__name__</code> attribute. If various functions are wrapped with the same decorator, they would all get the name of the internal wrapper function, which would definitely not be desired if logic is based on <code>__name__</code>.</p>
+<h1>Access to the original function</h1>
+<p>Another nice aspect of <code>wraps</code> is that it adds a <code>__wrapped__()</code> attribute to the wrapped function that allows access to the original function if introspection is necessary. The <code>example</code> function that is called is technically calling <code>wrapper</code> (which also happens to call <code>example</code> in its definition). If we wanted to work with <code>example</code> like it was never wrapped, we would work with <code>example.__wrapped__()</code>.</p>
+<h1>Now what about functools.update_wrapper?</h1>
+<p><code>update_wrapper</code> is what actually performs the work, but <code>wraps</code> is cleaner to invoke as a wrapper. They're equivalent in that <code>wraps</code> is merely a <code>partial</code> function of <code>update_wrapper</code> that has its parameters frozen. Long story short, you should be fine just using <code>wraps</code>, but should be aware of <code>update_wrapper</code> in case you need more control over the wrapped function.</p>
+<h1>Summary</h1>
+<p>The <code>wraps</code> decorator is an easy way to retain attributes for a wrapped function instead of inheriting from the wrapper function definition. By using this decorator you can ensure reliability and consistency of your function attributes. </p>
 <section>
 <div class="accordion" id="accordion2">
     <div class="accordion-group">
         <div class="accordion-heading">
             <a class="accordion-toggle disqus-comment-count" data-toggle="collapse" data-parent="#accordion2"
-                href="https://szuckerman.github.io/functools_lru_cache2.html#disqus_thread">
+                href="https://szuckerman.github.io/functools_wraps_and_update_wrapper.html#disqus_thread">
                 Comments
             </a>
         </div>
@@ -113,8 +167,8 @@
 <div id="disqus_thread"></div>
 <script type="text/javascript">
     var disqus_shortname = 'szuckerman-github-io-1';
-        var disqus_identifier = 'https://szuckerman.github.io/functools_lru_cache2.html';
-    var disqus_url = 'https://szuckerman.github.io/functools_lru_cache2.html';
+        var disqus_identifier = 'https://szuckerman.github.io/functools_wraps_and_update_wrapper.html';
+    var disqus_url = 'https://szuckerman.github.io/functools_wraps_and_update_wrapper.html';
 
     (function() {
          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
@@ -134,9 +188,7 @@
             <nav>
             <ul class="articles_timeline">
  
-                <li class="previous_article">« <a href="https://szuckerman.github.io/functools_lru_cache.html" title="Previous: What's this in functools? lru_cache">What's this in functools? lru_cache</a></li>
- 
-                <li class="next_article"><a href="https://szuckerman.github.io/functools_cmp_to_key.html" title="Next: What's this in functools? cmp_to_key">What's this in functools? cmp_to_key</a> »</li>
+                <li class="previous_article">« <a href="https://szuckerman.github.io/number_of_days_between_dates_in_postgres.html" title="Previous: Number of days between dates in Postgres">Number of days between dates in Postgres</a></li>
             </ul>
             </nav>
             </aside>
@@ -145,10 +197,10 @@
         <div class="span2" style="float:right;font-size:0.9em;">
  
             <h4>Published</h4>
-            <time pubdate="pubdate" datetime="2018-11-09T15:30:00-05:00">Nov 9, 2018</time>
+            <time pubdate="pubdate" datetime="2018-12-06T15:30:00-05:00">Dec 6, 2018</time>
  
             <h4>Last Updated</h4>
-            <div class="last_updated">2018-11-09 15:30:00-05:00</div>
+            <div class="last_updated">2018-12-06 15:30:00-05:00</div>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#Python-ref">Python</a> 
             <h4>Tags</h4>

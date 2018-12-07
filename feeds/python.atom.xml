@@ -1,5 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>programming notes - Python</title><link href="https://szuckerman.github.io/" rel="alternate"></link><link href="https://szuckerman.github.io/feeds/python.atom.xml" rel="self"></link><id>https://szuckerman.github.io/</id><updated>2018-11-19T15:30:00-05:00</updated><entry><title>Using different styles with matplotlib</title><link href="https://szuckerman.github.io/different_styles_with_matplotlib.html" rel="alternate"></link><published>2018-11-19T15:30:00-05:00</published><updated>2018-11-19T15:30:00-05:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2018-11-19:/different_styles_with_matplotlib.html</id><summary type="html">&lt;p&gt;The default style for matplotlib charts looks nice, but sometimes you might want a change. It's not difficult to use a plethora of predefined alternate styles.&lt;/p&gt;</summary><content type="html">&lt;h1&gt;Getting the styles&lt;/h1&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>programming notes - Python</title><link href="https://szuckerman.github.io/" rel="alternate"></link><link href="https://szuckerman.github.io/feeds/python.atom.xml" rel="self"></link><id>https://szuckerman.github.io/</id><updated>2018-12-06T15:30:00-05:00</updated><entry><title>What's this in functools? wraps and update_wrapper</title><link href="https://szuckerman.github.io/functools_wraps_and_update_wrapper.html" rel="alternate"></link><published>2018-12-06T15:30:00-05:00</published><updated>2018-12-06T15:30:00-05:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2018-12-06:/functools_wraps_and_update_wrapper.html</id><summary type="html">&lt;p&gt;There's a lot of cool stuff in the functools module. Some small additions to your functions will greatly increase your productivity and your code quality. The &lt;code&gt;wraps&lt;/code&gt; decorator is an easy way to retain attributes for a wrapped function instead of inheriting from the wrapper function definition.&lt;/p&gt;</summary><content type="html">&lt;h1&gt;Why do I need functools.wraps?&lt;/h1&gt;
+&lt;p&gt;Decorators are a useful part of Python. They allow one to adjust functions in a similar, predictable manner and can be especially powerful due to their concise expressiveness when utilized by certain frameworks, especially web frameworks like Flask.&lt;/p&gt;
+&lt;p&gt;That being said, one issue with decorators is that they copy the attributes of the functions they wrap. An example will make this more clear.&lt;/p&gt;
+&lt;h1&gt;Example without functools.wraps&lt;/h1&gt;
+&lt;p&gt;The following is &lt;a href="https://docs.python.org/3/library/functools.html#functools.wraps"&gt;taken from the Python3 &lt;code&gt;functools&lt;/code&gt; documentation&lt;/a&gt;, but has the &lt;code&gt;@wraps(f)&lt;/code&gt; section removed.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;my_decorator&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;wrapper&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;**&lt;/span&gt;&lt;span class="n"&gt;kwds&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;Calling decorated function&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;**&lt;/span&gt;&lt;span class="n"&gt;kwds&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;wrapper&lt;/span&gt;
+
+&lt;span class="nd"&gt;@my_decorator&lt;/span&gt;
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;example&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;Docstring&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+    &lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;Called example function&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="n"&gt;example&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;span class="o"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;Calling&lt;/span&gt; &lt;span class="n"&gt;decorated&lt;/span&gt; &lt;span class="n"&gt;function&lt;/span&gt;
+&lt;span class="o"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;Called&lt;/span&gt; &lt;span class="n"&gt;example&lt;/span&gt; &lt;span class="n"&gt;function&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;As you can see, the above works as expected. However, if we inspect some of the attributes from the function, we see that some attributes have been overwritten.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;example&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="vm"&gt;__name__&lt;/span&gt;
+&lt;span class="o"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;wrapper&amp;#39;&lt;/span&gt;
+
+&lt;span class="n"&gt;example&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="vm"&gt;__doc__&lt;/span&gt;
+&lt;span class="o"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; 
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The function has lost its name of 'example' and has been replaced by &lt;code&gt;wrapper&lt;/code&gt;. Similarly, the non-existent docstring from &lt;code&gt;wrapper&lt;/code&gt; has overwritten the docstring in &lt;code&gt;example&lt;/code&gt;.&lt;/p&gt;
+&lt;h1&gt;Example with functools.wraps&lt;/h1&gt;
+&lt;p&gt;Now let's run the same code above, use the &lt;code&gt;wraps&lt;/code&gt; decorator:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;functools&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;wraps&lt;/span&gt;
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;my_decorator&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="nd"&gt;@wraps&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;wrapper&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;**&lt;/span&gt;&lt;span class="n"&gt;kwds&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;Calling decorated function&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;**&lt;/span&gt;&lt;span class="n"&gt;kwds&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;wrapper&lt;/span&gt;
+
+&lt;span class="nd"&gt;@my_decorator&lt;/span&gt;
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;example&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;Docstring&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+    &lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;Called example function&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="n"&gt;example&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;span class="o"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;Calling&lt;/span&gt; &lt;span class="n"&gt;decorated&lt;/span&gt; &lt;span class="n"&gt;function&lt;/span&gt;
+&lt;span class="o"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;Called&lt;/span&gt; &lt;span class="n"&gt;example&lt;/span&gt; &lt;span class="n"&gt;function&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The attributes we inspected above now return what would be expected for the &lt;code&gt;example&lt;/code&gt; function.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;example&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="vm"&gt;__name__&lt;/span&gt;
+&lt;span class="o"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;example&amp;#39;&lt;/span&gt;
+
+&lt;span class="n"&gt;example&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="vm"&gt;__doc__&lt;/span&gt;
+&lt;span class="o"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;Docstring&amp;#39;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The following are the attributes that are 'retained' (more correctly, 'copied over' to &lt;code&gt;wrapper&lt;/code&gt;, but this makes more sense colloquially):&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;functools&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;WRAPPER_ASSIGNMENTS&lt;/span&gt;
+&lt;span class="o"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;__module__&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;__name__&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;__qualname__&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;__doc__&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;__annotations__&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h1&gt;Why does this matter?&lt;/h1&gt;
+&lt;p&gt;The above situation might not seem like a big deal, and in most cases it probably isn't. However, I'm sure people can think of situations where a program's logic could depend on what's available in the &lt;code&gt;__name__&lt;/code&gt; attribute. If various functions are wrapped with the same decorator, they would all get the name of the internal wrapper function, which would definitely not be desired if logic is based on &lt;code&gt;__name__&lt;/code&gt;.&lt;/p&gt;
+&lt;h1&gt;Access to the original function&lt;/h1&gt;
+&lt;p&gt;Another nice aspect of &lt;code&gt;wraps&lt;/code&gt; is that it adds a &lt;code&gt;__wrapped__()&lt;/code&gt; attribute to the wrapped function that allows access to the original function if introspection is necessary. The &lt;code&gt;example&lt;/code&gt; function that is called is technically calling &lt;code&gt;wrapper&lt;/code&gt; (which also happens to call &lt;code&gt;example&lt;/code&gt; in its definition). If we wanted to work with &lt;code&gt;example&lt;/code&gt; like it was never wrapped, we would work with &lt;code&gt;example.__wrapped__()&lt;/code&gt;.&lt;/p&gt;
+&lt;h1&gt;Now what about functools.update_wrapper?&lt;/h1&gt;
+&lt;p&gt;&lt;code&gt;update_wrapper&lt;/code&gt; is what actually performs the work, but &lt;code&gt;wraps&lt;/code&gt; is cleaner to invoke as a wrapper. They're equivalent in that &lt;code&gt;wraps&lt;/code&gt; is merely a &lt;code&gt;partial&lt;/code&gt; function of &lt;code&gt;update_wrapper&lt;/code&gt; that has its parameters frozen. Long story short, you should be fine just using &lt;code&gt;wraps&lt;/code&gt;, but should be aware of &lt;code&gt;update_wrapper&lt;/code&gt; in case you need more control over the wrapped function.&lt;/p&gt;
+&lt;h1&gt;Summary&lt;/h1&gt;
+&lt;p&gt;The &lt;code&gt;wraps&lt;/code&gt; decorator is an easy way to retain attributes for a wrapped function instead of inheriting from the wrapper function definition. By using this decorator you can ensure reliability and consistency of your function attributes. &lt;/p&gt;</content><category term="python"></category><category term="functools"></category><category term="functions"></category><category term="code snippet"></category></entry><entry><title>Using different styles with matplotlib</title><link href="https://szuckerman.github.io/different_styles_with_matplotlib.html" rel="alternate"></link><published>2018-11-19T15:30:00-05:00</published><updated>2018-11-19T15:30:00-05:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2018-11-19:/different_styles_with_matplotlib.html</id><summary type="html">&lt;p&gt;The default style for matplotlib charts looks nice, but sometimes you might want a change. It's not difficult to use a plethora of predefined alternate styles.&lt;/p&gt;</summary><content type="html">&lt;h1&gt;Getting the styles&lt;/h1&gt;
 &lt;p&gt;To see what alternate styles are available for matplotlib charts, you would first run &lt;code&gt;plt.style.available&lt;/code&gt; to get the list of available styles.&lt;/p&gt;
 &lt;p&gt;This is assuming you've already run the following:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;matplotlib.pyplot&lt;/span&gt; &lt;span class="kn"&gt;as&lt;/span&gt; &lt;span class="nn"&gt;plt&lt;/span&gt;
