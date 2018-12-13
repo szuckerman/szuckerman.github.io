@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="Sam Zuckerman" />
+        <meta name="copyright" content="Sam Zuckerman" />
+
+<meta name="keywords" content="python, functools, functions, code snippet, Python, " />
+        <title>What's this in functools? partial and partialmethod  · programming notes
+</title>
+        <link href="http://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css">
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="https://szuckerman.github.io/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://szuckerman.github.io/theme/css/solarizedlight.css" media="screen">
+        <link rel="shortcut icon" href="https://szuckerman.github.io/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="https://szuckerman.github.io/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="https://szuckerman.github.io/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="https://szuckerman.github.io/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="https://szuckerman.github.io/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="https://szuckerman.github.io/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="https://szuckerman.github.io/theme/images/apple-touch-icon-144x144.png" />
+        <link href="https://szuckerman.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="programming notes - Full Atom Feed" />
+        <link href="https://szuckerman.github.io/feeds/Postgres.atom.xml" type="application/atom+xml" rel="alternate" title="programming notes - Postgres Category Atom Feed" />
+        <link href="https://szuckerman.github.io/feeds/Python.atom.xml" type="application/atom+xml" rel="alternate" title="programming notes - Python Category Atom Feed" />
+        <link href="https://szuckerman.github.io/feeds/R.atom.xml" type="application/atom+xml" rel="alternate" title="programming notes - R Category Atom Feed" />
+        <link href="https://szuckerman.github.io/feeds/Redshift.atom.xml" type="application/atom+xml" rel="alternate" title="programming notes - Redshift Category Atom Feed" />
+        <link href="https://szuckerman.github.io/feeds/S3.atom.xml" type="application/atom+xml" rel="alternate" title="programming notes - S3 Category Atom Feed" />
+        <link href="https://szuckerman.github.io/feeds/SQL.atom.xml" type="application/atom+xml" rel="alternate" title="programming notes - SQL Category Atom Feed" />
+    <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-128575468-1']);
+    _gaq.push(['_trackPageview']);
+    (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+    </script>
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="https://szuckerman.github.io/"><span class=site-name>programming notes</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <!--<li ><a href="https://szuckerman.github.io">Home</a></li>-->
+                            <li ><a href="https://szuckerman.github.io/categories.html">Categories</a></li>
+                            <li ><a href="https://szuckerman.github.io/tags.html">Tags</a></li>
+                            <li ><a href="https://szuckerman.github.io/archives.html">Archives</a></li>
+                            <li><form class="navbar-search" action="https://szuckerman.github.io/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article>
+<div class="row-fluid">
+    <header class="page_header span10 offset2">
+    <h1><a href="https://szuckerman.github.io/functools_partial_and_partialmethod.html"> What's this in functools? partial and partialmethod  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+
+            <h1>Why do I need functools.partial?</h1>
+<p>According to <a href="https://www.amazon.com/Clean-Code-Handbook-Software-Craftsmanship/dp/0132350882">Clean Code</a> by Bob Martin, functions should "do one thing", but sometimes we try to pack so many arguments in a function to generalize it, that the "one thing" aspect gets muddled or lost. </p>
+<p><code>functools.partial</code> helps by making functions from other functions but give default values for certain attributes. <code>functools.partialmethod</code> is the same idea, but within a <code>class</code>. Examples should make this idea more concrete.</p>
+<h1>Example 1</h1>
+<p>A simple example (<a href="https://twitter.com/raymondh/status/1072592988268834816">taken from Raymond Hettinger</a>) is to create a custom function for a certain base when using the <code>pow</code> function.</p>
+<p>The following are equivalent:</p>
+<div class="highlight"><pre><span></span><span class="mi">2</span><span class="o">**</span><span class="mi">3</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="mi">8</span>
+
+<span class="nb">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="mi">8</span>
+</pre></div>
+
+
+<p>If for some reason I would be using <code>pow(2, x)</code> a lot, it might make sense to make a new function:</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="n">power_of_2</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="nb">pow</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+<span class="n">power_of_2</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="mi">8</span>
+</pre></div>
+
+
+<p>The way this works is <code>partial</code> takes a function for the first argument then takes the values for the arguments you want to freeze, left to right. It also takes keyward arguments, but we'll discuss that in the next section whether that's a good idea.</p>
+<h1>Freezing other arguments</h1>
+<p>If you want to freeze other arguments rather than the left one first, you have a few options.</p>
+<h2>Using Keyword Arguments</h2>
+<p>Here's a toy function that gets an employee's job level based on their position and location.</p>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">get_employee_job_level</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="n">level</span> <span class="o">=</span> <span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">location</span> <span class="o">==</span> <span class="s1">&#39;CA&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">ord</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">ord</span><span class="p">(</span><span class="n">level</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span>
+
+<span class="n">get_employee_job_level</span><span class="p">(</span><span class="s1">&#39;CEO&#39;</span><span class="p">,</span> <span class="s1">&#39;CA&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="mi">67</span>
+</pre></div>
+
+
+<p>If we were only interested in employees from California, we could use <code>partial</code> to create a new function, like so:</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+
+<span class="n">get_CA_employee_job_level</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">get_employee_job_level</span><span class="p">,</span>  <span class="n">location</span><span class="o">=</span><span class="s1">&#39;CA&#39;</span><span class="p">)</span>
+
+<span class="n">get_CA_employee_job_level</span><span class="p">(</span><span class="s1">&#39;CEO&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="mi">67</span>
+</pre></div>
+
+
+<p>The above isn't recommended, however, as discussed in the aforementioned <a href="https://twitter.com/raymondh/status/1072592988268834816">tweet by Raymond Hettinger</a>.</p>
+<p>For example, this won't work if we want to use keyword arguments to make a <code>square</code> function:</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="n">square</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="nb">pow</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="n">square</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="ne">TypeError</span><span class="p">:</span> <span class="nb">pow</span><span class="p">()</span> <span class="n">takes</span> <span class="n">no</span> <span class="n">keyword</span> <span class="n">arguments</span>
+</pre></div>
+
+
+<h2>Using a lambda instead of keyword arguments</h2>
+<p>If one needs to freeze other arguments in a function, it's recommended to use a <code>lambda</code>:</p>
+<div class="highlight"><pre><span></span><span class="n">square</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">pow</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+<span class="n">square</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="mi">9</span>
+</pre></div>
+
+
+<h1>Most useful case for partial</h1>
+<p>The above examples for <code>partial</code> are nice, in terms of writing more clean and verbose code, but it just appears as something that's "nice" and not 100% necessary.</p>
+<p>I think the most important use case is using it as a key for other functions, since these keys only allow one-argument functions to be passed.</p>
+<p>For example:</p>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">sort_func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="s1">&#39;forward&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">ord</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="nb">ord</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+<span class="n">backward_sort</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">sort_func</span><span class="p">,</span> <span class="s1">&#39;backward&#39;</span><span class="p">)</span>
+
+<span class="n">letters</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">,</span> <span class="s1">&#39;E&#39;</span><span class="p">]</span>
+
+<span class="nb">sorted</span><span class="p">(</span><span class="n">letters</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">backward_sort</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="p">[</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;A&#39;</span><span class="p">]</span>
+</pre></div>
+
+
+<h2>Using in a Pandas DataFrame</h2>
+<p>This is especially useful in the Pandas <code>apply</code> function for columns. If you have a function with important business logic, but has more than one argument, you can cut it down using <code>partial</code> and pass it to the <code>apply</code> function. </p>
+<h1>Using partialmethod</h1>
+<p><code>partialmethod</code> works in a similar fashion to <code>partial</code>, but is used within a <code>class</code>.</p>
+<p>Take the following <code>class</code> for example, which implements similar functionality to the functions we've made above.</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partialmethod</span>
+
+<span class="k">class</span> <span class="nc">Compute</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">power</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">my_pow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">my_pow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">x</span> <span class="o">**</span> <span class="n">y</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;&lt;Compute {x},{y}&gt;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+
+    <span class="n">power_of_2</span> <span class="o">=</span> <span class="n">partialmethod</span><span class="p">(</span><span class="n">my_pow</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+
+<span class="n">num</span><span class="o">=</span><span class="n">Compute</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">num</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="o">&lt;</span><span class="n">Compute</span> <span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">&gt;</span>
+<span class="n">num</span><span class="o">.</span><span class="n">power</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="mi">8</span>
+<span class="n">num</span><span class="o">.</span><span class="n">power_of_2</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="mi">4</span>
+</pre></div>
+
+
+<p>Basically we want to add another method for the <code>class</code> that's based on a previous method.</p>
+<h1>Why not just use partial in the class?</h1>
+<p>If you run the above code, with <code>partial</code> instead of <code>partialmethod</code> you'll get an error. The reason is since, as we mentioned above, <code>partial</code> freezes arguments from left to right. The first argument of a method is <code>self</code> which, you can imagine, will make for many problems if you try to freeze that with something other than the object instance.</p>
+<h1>Summary</h1>
+<p>The <code>partial</code> and <code>partialmethod</code> functions are easy ways to create new functions when you need to "freeze" an argument from an existing one. The there are various applications, with the most useful being, in my experience, when you need to pass a one-argument function as an argument to another function, like Pandas' <code>apply</code> or a <code>key</code> parameter. </p>
+<section>
+<div class="accordion" id="accordion2">
+    <div class="accordion-group">
+        <div class="accordion-heading">
+            <a class="accordion-toggle disqus-comment-count" data-toggle="collapse" data-parent="#accordion2"
+                href="https://szuckerman.github.io/functools_partial_and_partialmethod.html#disqus_thread">
+                Comments
+            </a>
+        </div>
+        <div id="disqus_thread" class="accordion-body collapse">
+            <div class="accordion-inner">
+                <div class="comments">
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'szuckerman-github-io-1';
+        var disqus_identifier = 'https://szuckerman.github.io/functools_partial_and_partialmethod.html';
+    var disqus_url = 'https://szuckerman.github.io/functools_partial_and_partialmethod.html';
+
+    (function() {
+         var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+         dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+         (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+     })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</section>
+            <aside>
+            <hr/>
+            <nav>
+            <ul class="articles_timeline">
+ 
+                <li class="previous_article">« <a href="https://szuckerman.github.io/functools_wraps_and_update_wrapper.html" title="Previous: What's this in functools? wraps and update_wrapper">What's this in functools? wraps and update_wrapper</a></li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+ 
+            <h4>Published</h4>
+            <time pubdate="pubdate" datetime="2018-12-13T15:30:00-05:00">Dec 13, 2018</time>
+ 
+            <h4>Last Updated</h4>
+            <div class="last_updated">2018-12-13 15:30:00-05:00</div>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#Python-ref">Python</a> 
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article"> 
+                <li><a href="/tags.html#code-snippet-ref">code snippet
+                    <span>11</span>
+</a></li>
+                <li><a href="/tags.html#functions-ref">functions
+                    <span>7</span>
+</a></li>
+                <li><a href="/tags.html#functools-ref">functools
+                    <span>6</span>
+</a></li>
+                <li><a href="/tags.html#python-ref">python
+                    <span>15</span>
+</a></li>
+            </ul>
+
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="http://oncrashreboot.com/pelican-elegant" title="Theme Elegant Home Page">Elegant</a> by <a href="http://oncrashreboot.com" title="Talha Mansoor Home Page">Talha Mansoor</a></li>
+    </ul>
+</div>
+</footer>            <script src="http://code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+<script type="text/javascript">
+    var disqus_shortname = 'szuckerman-github-io-1';
+
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+    </script>
+        <script  language="javascript" type="text/javascript">
+            function uncollapse() {
+                var hash_str = window.location.hash;
+                if (window.location.hash.match(/^#comment-\d+$/))
+                {
+                    var hash_str = '#disqus_thread';
+                }
+                $(hash_str).collapse({
+                    toggle: true
+                    })
+            }
+        </script>
+
+        <script type="text/javascript" language="JavaScript">
+            uncollapse(); 
+        </script>
+    </body>
+</html>
