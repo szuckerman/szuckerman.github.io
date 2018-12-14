@@ -1,5 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>programming notes - Redshift</title><link href="https://szuckerman.github.io/" rel="alternate"></link><link href="https://szuckerman.github.io/feeds/redshift.atom.xml" rel="self"></link><id>https://szuckerman.github.io/</id><updated>2018-10-23T11:30:00-04:00</updated><entry><title>The easiest way to get data into Redshift</title><link href="https://szuckerman.github.io/get_data_into_redshift.html" rel="alternate"></link><published>2018-10-23T11:30:00-04:00</published><updated>2018-10-23T11:30:00-04:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2018-10-23:/get_data_into_redshift.html</id><summary type="html">&lt;p&gt;There are many ways to load data into Redshift, this method, using the &lt;code&gt;COPY&lt;/code&gt; command, should be the most efficient and reliable.&lt;/p&gt;</summary><content type="html">&lt;p&gt;When using AWS and working in an analytical environment, you most likely have encountered Redshift at some point. Now, Redshift is awesome since it can contain a lot of data and query that data quickly. Due to its columnar storage, it's more effiecient to run a query such as:&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>programming notes - Redshift</title><link href="https://szuckerman.github.io/" rel="alternate"></link><link href="https://szuckerman.github.io/feeds/redshift.atom.xml" rel="self"></link><id>https://szuckerman.github.io/</id><updated>2018-12-14T15:30:00-05:00</updated><entry><title>Getting tripped up with "MEDIAN" in Redshift and PostgreSQL</title><link href="https://szuckerman.github.io/getting-tripped-up-with-median-in-redshift-and-postgresql.html" rel="alternate"></link><published>2018-12-14T15:30:00-05:00</published><updated>2018-12-14T15:30:00-05:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2018-12-14:/getting-tripped-up-with-median-in-redshift-and-postgresql.html</id><summary type="html">&lt;p&gt;Analytical functions are essential to working effectively with relational databases. There's a quirk with MEDIAN, however.&lt;/p&gt;</summary><content type="html">&lt;h1&gt;MEDIAN in Redshift&lt;/h1&gt;
+&lt;p&gt;Redshift has an interesting quirk in that when a &lt;code&gt;MEDIAN&lt;/code&gt; function is called within a query, it implicitly give an &lt;code&gt;ORDER BY&lt;/code&gt; for that column. &lt;/p&gt;
+&lt;h2&gt;Window Functions in 5 seconds&lt;/h2&gt;
+&lt;p&gt;Taking a step back, when working with window functions there's usually  &lt;code&gt;OVER&lt;/code&gt; and  &lt;code&gt;ORDER BY&lt;/code&gt; arguments and optionally, but often, a &lt;code&gt;PARTITION BY&lt;/code&gt; argument as well.&lt;/p&gt;
+&lt;p&gt;If I wanted to order customer purchases by customer, I could do the following:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;SELECT&lt;/span&gt; 
+    &lt;span class="n"&gt;CUSTOMER_ID&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;PRODUCT_NAME&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;ORDER_DATE&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;ROW_NUMBER&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="n"&gt;OVER&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;PARTITION&lt;/span&gt; &lt;span class="k"&gt;BY&lt;/span&gt; &lt;span class="n"&gt;CUSTOMER_ID&lt;/span&gt; &lt;span class="k"&gt;ORDER&lt;/span&gt; &lt;span class="k"&gt;BY&lt;/span&gt; &lt;span class="n"&gt;ORDER_DATE&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;ORDER_NUMBER&lt;/span&gt;
+&lt;span class="k"&gt;FROM&lt;/span&gt; &lt;span class="n"&gt;CUSTOMER_ORDERS&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The &lt;code&gt;MEDIAN&lt;/code&gt; function also uses an &lt;code&gt;ORDER BY&lt;/code&gt; internally to determine the middle value, but doesn't use the same syntax as the above.&lt;/p&gt;
+&lt;h2&gt;Ok, fine... But why does this matter?&lt;/h2&gt;
+&lt;p&gt;The above is important to keep in mind since multiple &lt;code&gt;MEDIAN&lt;/code&gt; functions in a query will mess up. You'll get the following error:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;ERROR&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;within&lt;/span&gt; &lt;span class="k"&gt;group&lt;/span&gt; &lt;span class="k"&gt;ORDER&lt;/span&gt; &lt;span class="k"&gt;BY&lt;/span&gt; &lt;span class="n"&gt;clauses&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="k"&gt;aggregate&lt;/span&gt; &lt;span class="n"&gt;functions&lt;/span&gt; &lt;span class="n"&gt;must&lt;/span&gt; &lt;span class="n"&gt;be&lt;/span&gt; &lt;span class="n"&gt;the&lt;/span&gt; &lt;span class="n"&gt;same&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;You'll get this error if you have any combination of &lt;code&gt;LISTAGG&lt;/code&gt;, &lt;code&gt;PERCENTILE_CONT&lt;/code&gt;, or &lt;code&gt;MEDIAN&lt;/code&gt; in a query that do not share the same &lt;code&gt;ORDER BY&lt;/code&gt; column.&lt;/p&gt;
+&lt;p&gt;The &lt;a href="https://docs.aws.amazon.com/redshift/latest/dg/r_MEDIAN.html"&gt;AWS Redshift Documentation&lt;/a&gt; shows the following example that will execute correctly when mixing these various window functions in a query:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;select&lt;/span&gt; &lt;span class="n"&gt;top&lt;/span&gt; &lt;span class="mi"&gt;10&lt;/span&gt; &lt;span class="n"&gt;salesid&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="k"&gt;sum&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;pricepaid&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; 
+&lt;span class="n"&gt;percentile_cont&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="mi"&gt;6&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;within&lt;/span&gt; &lt;span class="k"&gt;group&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;order&lt;/span&gt; &lt;span class="k"&gt;by&lt;/span&gt; &lt;span class="n"&gt;salesid&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+&lt;span class="n"&gt;median&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;salesid&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="k"&gt;from&lt;/span&gt; &lt;span class="n"&gt;sales&lt;/span&gt; &lt;span class="k"&gt;group&lt;/span&gt; &lt;span class="k"&gt;by&lt;/span&gt; &lt;span class="n"&gt;salesid&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pricepaid&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h2&gt;Solutions if you need multiple MEDIANs&lt;/h2&gt;
+&lt;p&gt;If you absolutely need to have various medians in a result set, most likely the easiest option is to make multiple subqueries and then join them together at the end.&lt;/p&gt;
+&lt;p&gt;For example:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;WITH&lt;/span&gt; &lt;span class="n"&gt;MED_ITEMS_BOUGHT&lt;/span&gt; &lt;span class="k"&gt;AS&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;
+&lt;span class="k"&gt;SELECT&lt;/span&gt; 
+    &lt;span class="n"&gt;CUSTOMER_ID&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;MEDIAN&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ITEMS_BOUGHT&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;MED_ITEMS_BOUGHT&lt;/span&gt;
+&lt;span class="k"&gt;FROM&lt;/span&gt; 
+  &lt;span class="n"&gt;CUSTOMER_ORDERS&lt;/span&gt;
+&lt;span class="k"&gt;GROUP&lt;/span&gt; &lt;span class="k"&gt;BY&lt;/span&gt; 
+  &lt;span class="n"&gt;CUSTOMER_ID&lt;/span&gt;
+&lt;span class="p"&gt;),&lt;/span&gt;
+
+&lt;span class="n"&gt;MED_PAYMENT&lt;/span&gt; &lt;span class="k"&gt;AS&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;
+&lt;span class="k"&gt;SELECT&lt;/span&gt; 
+  &lt;span class="n"&gt;CUSTOMER_ID&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+  &lt;span class="n"&gt;MEDIAN&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;PAYMENT&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;MED_PAYMENT&lt;/span&gt;
+&lt;span class="k"&gt;FROM&lt;/span&gt; 
+  &lt;span class="n"&gt;CUSTOMER_ORDERS&lt;/span&gt;
+&lt;span class="k"&gt;GROUP&lt;/span&gt; &lt;span class="k"&gt;BY&lt;/span&gt; 
+  &lt;span class="n"&gt;CUSTOMER_ID&lt;/span&gt;
+&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="k"&gt;SELECT&lt;/span&gt; 
+    &lt;span class="n"&gt;MIB&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;CUSTOMER_ID&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;MIB&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;MED_ITEMS_BOUGHT&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;MP&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;MED_PAYMENT&lt;/span&gt;
+&lt;span class="k"&gt;FROM&lt;/span&gt; 
+    &lt;span class="n"&gt;MED_ITEMS_BOUGHT&lt;/span&gt; &lt;span class="n"&gt;MIB&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;MED_PAYMENT&lt;/span&gt; &lt;span class="n"&gt;MP&lt;/span&gt;
+&lt;span class="k"&gt;WHERE&lt;/span&gt; &lt;span class="n"&gt;MIB&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;CUSTOMER_ID&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;MP&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;CUSTOMER_ID&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h1&gt;MEDIAN in PostgreSQL&lt;/h1&gt;
+&lt;p&gt;Unfortunately PostgreSQL doesn't have a native median function, but this doesn't really matter so much, as there is a &lt;code&gt;percentile_cont&lt;/code&gt; function. &lt;code&gt;percentile_cont(0.5)&lt;/code&gt; is equivalent to &lt;code&gt;median&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;You can see the description of &lt;code&gt;percentile_cont&lt;/code&gt; in &lt;a href="https://www.postgresql.org/docs/9.6/functions-aggregate.html#FUNCTIONS-ORDEREDSET-TABLE"&gt;the official PostgreSQL documentation&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;However, if you &lt;em&gt;must&lt;/em&gt; have a &lt;code&gt;median&lt;/code&gt; function (i.e you're using SQLAlchemy and want to seamlessly switch backends) there's a user-defined &lt;code&gt;PL/pgSQL&lt;/code&gt; function that can mimic this functionality.&lt;/p&gt;
+&lt;p&gt;The code for &lt;code&gt;median&lt;/code&gt; is available &lt;a href="https://wiki.postgresql.org/wiki/Aggregate_Median"&gt;at this link&lt;/a&gt;.&lt;/p&gt;
+&lt;h1&gt;Summary&lt;/h1&gt;
+&lt;p&gt;When using &lt;code&gt;MEDIAN&lt;/code&gt; in Redshift, you cannot use more than one in a query at a time. A workaround is to make subqueries and join later. &lt;/p&gt;
+&lt;p&gt;PostgreSQL does not have a native &lt;code&gt;MEDIAN&lt;/code&gt; function, but this may be mimicked with the &lt;code&gt;percentile_cont(0.5)&lt;/code&gt; function or &lt;a href="https://wiki.postgresql.org/wiki/Aggregate_Median"&gt;an additional PL/pgSQL function&lt;/a&gt;.&lt;/p&gt;</content><category term="sql"></category><category term="redshift"></category><category term="postgres"></category></entry><entry><title>The easiest way to get data into Redshift</title><link href="https://szuckerman.github.io/get_data_into_redshift.html" rel="alternate"></link><published>2018-10-23T11:30:00-04:00</published><updated>2018-10-23T11:30:00-04:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2018-10-23:/get_data_into_redshift.html</id><summary type="html">&lt;p&gt;There are many ways to load data into Redshift, this method, using the &lt;code&gt;COPY&lt;/code&gt; command, should be the most efficient and reliable.&lt;/p&gt;</summary><content type="html">&lt;p&gt;When using AWS and working in an analytical environment, you most likely have encountered Redshift at some point. Now, Redshift is awesome since it can contain a lot of data and query that data quickly. Due to its columnar storage, it's more effiecient to run a query such as:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;select&lt;/span&gt; 
   &lt;span class="n"&gt;customer_id&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
   &lt;span class="k"&gt;sum&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;amount&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;total_amount&lt;/span&gt;
