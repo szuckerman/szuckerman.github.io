@@ -7,7 +7,7 @@
         <meta name="copyright" content="Sam Zuckerman" />
 
 <meta name="keywords" content="python, functools, functions, code snippet, Python, " />
-        <title>Additional points on lru_cache  · programming notes
+        <title>What's this in functools? reduce  · programming notes
 </title>
         <link href="http://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css">
         <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
@@ -68,42 +68,101 @@
 <article>
 <div class="row-fluid">
     <header class="page_header span10 offset2">
-    <h1><a href="https://szuckerman.github.io/functools_lru_cache2.html"> Additional points on lru_cache  </a></h1>
+    <h1><a href="https://szuckerman.github.io/functools_reduce.html"> What's this in functools? reduce  </a></h1>
     </header>
 </div>
 
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
 
-            <p>In our previous post <em><a href="https://szuckerman.github.io/functools_lru_cache.html">What's this in functools? lru_cache</a></em>, we saw how we can use <code>lru_cache</code> effectively to speed up execution time of a function that grows exponentially.</p>
-<p>Here's three more points to be aware of when using <code>lru_cache</code>.</p>
-<h1>The function arguments must be hashable</h1>
-<p>Since the results are cached using a dictionary, the function arguments must be hashable. This is because the keys of a dictionary must be hashable.</p>
-<p>Basically, hashable means that there is a lookup value (i.e. "hash") associated with the object. If something is immutable, and thus can't change, the item can be hashed.</p>
-<p>Lists and other mutable objects that can be changed don't have a hash value. More specifically, they don't implement the __hash__ method, but one could be added in a custom class <a href="https://stackoverflow.com/a/42203997">as in this stackoverflow answer</a>.</p>
-<p>Therefore, <strong>the arguments to the functions you're decorating with <code>lru_cache</code> should only accept hashable objects</strong>.</p>
-<p>I.e: <strong>Don't use lists or dictionaries as function arguments for functions you decorate with <code>lru_cache</code></strong>.</p>
-<h1>Watch out for differing argument patterns</h1>
-<p>Different argument patterns might get cached differently. For example: <code>f(a=1, b=2)</code> might get cached differently from <code>f(b=2, a=1)</code>.</p>
-<p>Ok, so, that's easy enough. Just always use the correct order, right?</p>
-<p>Well, I sometimes like to do argument unpacking with my parameters using a <code>dict</code>.</p>
-<p>So, instead of <code>f(a=1, b=2)</code>, I might run:</p>
-<div class="highlight"><pre><span></span><span class="n">my_params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}</span>
+            <h1>Why do I need reduce?</h1>
+<p>Honestly, you don't really. <code>reduce</code> was a built-in in Python 2 and was demoted to <code>functools</code> in Python 3. </p>
+<p>Most of the examples from <code>reduce</code> can be done in an easier fashion using other built-ins.</p>
+<h1>What does reduce do?</h1>
+<p><code>reduce</code> works the same way as most "reduce" functions in Computer Science. It "reduces" an array of numbers to one number, adding the first number to the second, and adding subsequent numbers to each intermittent total.</p>
+<h1>Example 1: Implementing a "sum" function using reduce</h1>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="nb">reduce</span>
+<span class="kn">import</span> <span class="nn">operator</span> <span class="kn">as</span> <span class="nn">o</span>
 
-<span class="n">f</span><span class="p">(</span><span class="o">**</span><span class="n">my_params</span><span class="p">)</span>
+<span class="n">my_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">]</span>
+
+<span class="nb">reduce</span><span class="p">(</span><span class="n">o</span><span class="o">.</span><span class="n">add</span><span class="p">,</span> <span class="n">my_list</span><span class="p">)</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="mi">15</span>
 </pre></div>
 
 
-<p>The problem here is that, depending on what version of Python3 you're using, dictionaries aren't necessarily ordered. If you're using Python 3.7, though, <a href="https://stackoverflow.com/a/39980744">you should be fine</a>.</p>
-<p>If you're using a version that doesn't order they keys, then the function could be called sometimes as <code>f(a=1, b=2)</code> and sometimes <code>f(b=2, a=1)</code> depending on what gets unpacked first. In these cases you should look into using an <code>OrderedDict</code> found in the <code>collections</code> module.  </p>
-<h1>Clearing the cache</h1>
-<p>You can clear out the cache with the <code>cache_clear()</code> method. </p>
+<p>The above example works the same way as running <code>sum(my_list)</code>. </p>
+<p>What the above example is doing:</p>
+<ol>
+<li><code>o.add</code> is a functional approach to algebra; <code>o.add(1,2)</code> is the same as <code>1 + 2</code>.</li>
+<li><code>o.add</code> takes two arguments, <code>reduce</code> adds the next value to the current subtotal.</li>
+</ol>
+<p>It works the same way as:</p>
+<div class="highlight"><pre><span></span><span class="n">total</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">next_numbers</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+
+<span class="k">for</span> <span class="n">next_number</span> <span class="ow">in</span> <span class="n">next_numbers</span><span class="p">:</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="n">total</span> <span class="o">+</span> <span class="n">next_number</span>
+</pre></div>
+
+
+<p>Basically, there's always a function with two parameters used, with one of the parameters being the next value and the other being the intermediate total value.</p>
+<h1>Example 2: Implementing a "factorial" function using reduce</h1>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="nb">reduce</span>
+<span class="kn">import</span> <span class="nn">operator</span> <span class="kn">as</span> <span class="nn">o</span>
+
+<span class="n">my_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">]</span>
+
+<span class="nb">reduce</span><span class="p">(</span><span class="n">o</span><span class="o">.</span><span class="n">mul</span><span class="p">,</span> <span class="n">my_list</span><span class="p">)</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="mi">120</span>
+</pre></div>
+
+
+<p>As you can see, it's similar to the loop we mentioned before, except that the addition operator is replaced with a multiplication operator:</p>
+<div class="highlight"><pre><span></span><span class="n">total</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">next_numbers</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+
+<span class="k">for</span> <span class="n">next_number</span> <span class="ow">in</span> <span class="n">next_numbers</span><span class="p">:</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="n">total</span> <span class="o">*</span> <span class="n">next_number</span>
+</pre></div>
+
+
+<h1>Which is faster? reduce or the loops?</h1>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">timeit</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="nb">reduce</span>
+<span class="kn">import</span> <span class="nn">operator</span> <span class="kn">as</span> <span class="nn">o</span>
+
+<span class="k">def</span> <span class="nf">factorial</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">next_numbers</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+    <span class="k">for</span> <span class="n">next_number</span> <span class="ow">in</span> <span class="n">next_numbers</span><span class="p">:</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="n">total</span> <span class="o">*</span> <span class="n">next_number</span>
+
+    <span class="k">return</span> <span class="n">total</span>
+
+
+<span class="n">timeit</span><span class="o">.</span><span class="n">timeit</span><span class="p">(</span><span class="s1">&#39;factorial([1,2,3,4,5])&#39;</span><span class="p">,</span> <span class="n">setup</span><span class="o">=</span><span class="s2">&quot;from __main__ import factorial&quot;</span><span class="p">,</span> <span class="n">number</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="mf">0.0005066430021543056</span>
+
+<span class="n">timeit</span><span class="o">.</span><span class="n">timeit</span><span class="p">(</span><span class="s1">&#39;reduce(o.mul, [1,2,3,4,5])&#39;</span><span class="p">,</span> <span class="n">setup</span><span class="o">=</span><span class="s2">&quot;from functools import reduce</span><span class="se">\n</span><span class="s2">import operator as o&quot;</span><span class="p">,</span> <span class="n">number</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="mf">0.000527281008544378</span>
+</pre></div>
+
+
+<p>From the above, it appears that our own <code>factorial</code> implementation has similar performance to using <code>reduce</code>.</p>
+<h1>Conclusion</h1>
+<p>There are many situations where it's useful to <code>reduce</code> numbers to a single value, however the implementation for those situations might be better suited for other functions than <code>reduce</code> from `functools.</p>
+<p>Understanding how <code>reduce</code> works, by using an intermittent sum, is useful since this topic comes up often in Computer Science, and is actually how Apache Spark aggregates data. </p>
+<p>As we saw above, the time difference for a user defined function or a similar version with <code>reduce</code> yield similar results. In this case one should obviously opt for whatever appears to be more clean/verbose/understandable code.  </p>
 <section>
 <div class="accordion" id="accordion2">
     <div class="accordion-group">
         <div class="accordion-heading">
             <a class="accordion-toggle disqus-comment-count" data-toggle="collapse" data-parent="#accordion2"
-                href="https://szuckerman.github.io/functools_lru_cache2.html#disqus_thread">
+                href="https://szuckerman.github.io/functools_reduce.html#disqus_thread">
                 Comments
             </a>
         </div>
@@ -113,8 +172,8 @@
 <div id="disqus_thread"></div>
 <script type="text/javascript">
     var disqus_shortname = 'szuckerman-github-io-1';
-        var disqus_identifier = 'https://szuckerman.github.io/functools_lru_cache2.html';
-    var disqus_url = 'https://szuckerman.github.io/functools_lru_cache2.html';
+        var disqus_identifier = 'https://szuckerman.github.io/functools_reduce.html';
+    var disqus_url = 'https://szuckerman.github.io/functools_reduce.html';
 
     (function() {
          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
@@ -134,9 +193,7 @@
             <nav>
             <ul class="articles_timeline">
  
-                <li class="previous_article">« <a href="https://szuckerman.github.io/functools_lru_cache.html" title="Previous: What's this in functools? lru_cache">What's this in functools? lru_cache</a></li>
- 
-                <li class="next_article"><a href="https://szuckerman.github.io/functools_cmp_to_key.html" title="Next: What's this in functools? cmp_to_key">What's this in functools? cmp_to_key</a> »</li>
+                <li class="previous_article">« <a href="https://szuckerman.github.io/getting-tripped-up-with-median-in-redshift-and-postgresql.html" title="Previous: Getting tripped up with "MEDIAN" in Redshift and PostgreSQL">Getting tripped up with "MEDIAN" in Redshift and PostgreSQL</a></li>
             </ul>
             </nav>
             </aside>
@@ -145,10 +202,10 @@
         <div class="span2" style="float:right;font-size:0.9em;">
  
             <h4>Published</h4>
-            <time pubdate="pubdate" datetime="2018-11-09T15:30:00-05:00">Nov 9, 2018</time>
+            <time pubdate="pubdate" datetime="2019-01-11T15:30:00-05:00">Jan 11, 2019</time>
  
             <h4>Last Updated</h4>
-            <div class="last_updated">2018-11-09 15:30:00-05:00</div>
+            <div class="last_updated">2019-01-11 15:30:00-05:00</div>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#Python-ref">Python</a> 
             <h4>Tags</h4>

@@ -1,5 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>programming notes</title><link href="https://szuckerman.github.io/" rel="alternate"></link><link href="https://szuckerman.github.io/feeds/all.atom.xml" rel="self"></link><id>https://szuckerman.github.io/</id><updated>2018-12-14T15:30:00-05:00</updated><entry><title>Getting tripped up with "MEDIAN" in Redshift and PostgreSQL</title><link href="https://szuckerman.github.io/getting-tripped-up-with-median-in-redshift-and-postgresql.html" rel="alternate"></link><published>2018-12-14T15:30:00-05:00</published><updated>2018-12-14T15:30:00-05:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2018-12-14:/getting-tripped-up-with-median-in-redshift-and-postgresql.html</id><summary type="html">&lt;p&gt;Analytical functions are essential to working effectively with relational databases. There's a quirk with MEDIAN, however.&lt;/p&gt;</summary><content type="html">&lt;h1&gt;MEDIAN in Redshift&lt;/h1&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>programming notes</title><link href="https://szuckerman.github.io/" rel="alternate"></link><link href="https://szuckerman.github.io/feeds/all.atom.xml" rel="self"></link><id>https://szuckerman.github.io/</id><updated>2019-01-11T15:30:00-05:00</updated><entry><title>What's this in functools? reduce</title><link href="https://szuckerman.github.io/functools_reduce.html" rel="alternate"></link><published>2019-01-11T15:30:00-05:00</published><updated>2019-01-11T15:30:00-05:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2019-01-11:/functools_reduce.html</id><summary type="html">&lt;p&gt;There's a lot of cool stuff in the functools module. Some small additions to your functions will greatly increase your productivity and your code quality. &lt;code&gt;reduce&lt;/code&gt; is an easy way "reduce" an array of elements to a single value.&lt;/p&gt;</summary><content type="html">&lt;h1&gt;Why do I need reduce?&lt;/h1&gt;
+&lt;p&gt;Honestly, you don't really. &lt;code&gt;reduce&lt;/code&gt; was a built-in in Python 2 and was demoted to &lt;code&gt;functools&lt;/code&gt; in Python 3. &lt;/p&gt;
+&lt;p&gt;Most of the examples from &lt;code&gt;reduce&lt;/code&gt; can be done in an easier fashion using other built-ins.&lt;/p&gt;
+&lt;h1&gt;What does reduce do?&lt;/h1&gt;
+&lt;p&gt;&lt;code&gt;reduce&lt;/code&gt; works the same way as most "reduce" functions in Computer Science. It "reduces" an array of numbers to one number, adding the first number to the second, and adding subsequent numbers to each intermittent total.&lt;/p&gt;
+&lt;h1&gt;Example 1: Implementing a "sum" function using reduce&lt;/h1&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;functools&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nb"&gt;reduce&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;operator&lt;/span&gt; &lt;span class="kn"&gt;as&lt;/span&gt; &lt;span class="nn"&gt;o&lt;/span&gt;
+
+&lt;span class="n"&gt;my_list&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+
+&lt;span class="nb"&gt;reduce&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;o&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;add&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;my_list&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="o"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="mi"&gt;15&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The above example works the same way as running &lt;code&gt;sum(my_list)&lt;/code&gt;. &lt;/p&gt;
+&lt;p&gt;What the above example is doing:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;code&gt;o.add&lt;/code&gt; is a functional approach to algebra; &lt;code&gt;o.add(1,2)&lt;/code&gt; is the same as &lt;code&gt;1 + 2&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;o.add&lt;/code&gt; takes two arguments, &lt;code&gt;reduce&lt;/code&gt; adds the next value to the current subtotal.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;It works the same way as:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;total&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+&lt;span class="n"&gt;next_numbers&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+
+&lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;next_number&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;next_numbers&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;total&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;total&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;next_number&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Basically, there's always a function with two parameters used, with one of the parameters being the next value and the other being the intermediate total value.&lt;/p&gt;
+&lt;h1&gt;Example 2: Implementing a "factorial" function using reduce&lt;/h1&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;functools&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nb"&gt;reduce&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;operator&lt;/span&gt; &lt;span class="kn"&gt;as&lt;/span&gt; &lt;span class="nn"&gt;o&lt;/span&gt;
+
+&lt;span class="n"&gt;my_list&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+
+&lt;span class="nb"&gt;reduce&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;o&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;mul&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;my_list&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="o"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="mi"&gt;120&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;As you can see, it's similar to the loop we mentioned before, except that the addition operator is replaced with a multiplication operator:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;total&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+&lt;span class="n"&gt;next_numbers&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+
+&lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;next_number&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;next_numbers&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;total&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;total&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;next_number&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h1&gt;Which is faster? reduce or the loops?&lt;/h1&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;timeit&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;functools&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nb"&gt;reduce&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;operator&lt;/span&gt; &lt;span class="kn"&gt;as&lt;/span&gt; &lt;span class="nn"&gt;o&lt;/span&gt;
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;factorial&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;values&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="n"&gt;total&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;values&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+    &lt;span class="n"&gt;next_numbers&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;values&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;:]&lt;/span&gt;
+
+    &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;next_number&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;next_numbers&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;total&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;total&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;next_number&lt;/span&gt;
+
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;total&lt;/span&gt;
+
+
+&lt;span class="n"&gt;timeit&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;timeit&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;factorial([1,2,3,4,5])&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;setup&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;from __main__ import factorial&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;number&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;1000&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="o"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="mf"&gt;0.0005066430021543056&lt;/span&gt;
+
+&lt;span class="n"&gt;timeit&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;timeit&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;reduce(o.mul, [1,2,3,4,5])&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;setup&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;from functools import reduce&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s2"&gt;import operator as o&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;number&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;1000&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="o"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="mf"&gt;0.000527281008544378&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;From the above, it appears that our own &lt;code&gt;factorial&lt;/code&gt; implementation has similar performance to using &lt;code&gt;reduce&lt;/code&gt;.&lt;/p&gt;
+&lt;h1&gt;Conclusion&lt;/h1&gt;
+&lt;p&gt;There are many situations where it's useful to &lt;code&gt;reduce&lt;/code&gt; numbers to a single value, however the implementation for those situations might be better suited for other functions than &lt;code&gt;reduce&lt;/code&gt; from `functools.&lt;/p&gt;
+&lt;p&gt;Understanding how &lt;code&gt;reduce&lt;/code&gt; works, by using an intermittent sum, is useful since this topic comes up often in Computer Science, and is actually how Apache Spark aggregates data. &lt;/p&gt;
+&lt;p&gt;As we saw above, the time difference for a user defined function or a similar version with &lt;code&gt;reduce&lt;/code&gt; yield similar results. In this case one should obviously opt for whatever appears to be more clean/verbose/understandable code.  &lt;/p&gt;</content><category term="python"></category><category term="functools"></category><category term="functions"></category><category term="code snippet"></category></entry><entry><title>Getting tripped up with "MEDIAN" in Redshift and PostgreSQL</title><link href="https://szuckerman.github.io/getting-tripped-up-with-median-in-redshift-and-postgresql.html" rel="alternate"></link><published>2018-12-14T15:30:00-05:00</published><updated>2018-12-14T15:30:00-05:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2018-12-14:/getting-tripped-up-with-median-in-redshift-and-postgresql.html</id><summary type="html">&lt;p&gt;Analytical functions are essential to working effectively with relational databases. There's a quirk with MEDIAN, however.&lt;/p&gt;</summary><content type="html">&lt;h1&gt;MEDIAN in Redshift&lt;/h1&gt;
 &lt;p&gt;Redshift has an interesting quirk in that when a &lt;code&gt;MEDIAN&lt;/code&gt; function is called within a query, it implicitly give an &lt;code&gt;ORDER BY&lt;/code&gt; for that column. &lt;/p&gt;
 &lt;h2&gt;Window Functions in 5 seconds&lt;/h2&gt;
 &lt;p&gt;Taking a step back, when working with window functions there's usually  &lt;code&gt;OVER&lt;/code&gt; and  &lt;code&gt;ORDER BY&lt;/code&gt; arguments and optionally, but often, a &lt;code&gt;PARTITION BY&lt;/code&gt; argument as well.&lt;/p&gt;
