@@ -1,5 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>programming notes - Redshift</title><link href="https://szuckerman.github.io/" rel="alternate"></link><link href="https://szuckerman.github.io/feeds/redshift.atom.xml" rel="self"></link><id>https://szuckerman.github.io/</id><updated>2018-12-14T15:30:00-05:00</updated><entry><title>Getting tripped up with "MEDIAN" in Redshift and PostgreSQL</title><link href="https://szuckerman.github.io/getting-tripped-up-with-median-in-redshift-and-postgresql.html" rel="alternate"></link><published>2018-12-14T15:30:00-05:00</published><updated>2018-12-14T15:30:00-05:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2018-12-14:/getting-tripped-up-with-median-in-redshift-and-postgresql.html</id><summary type="html">&lt;p&gt;Analytical functions are essential to working effectively with relational databases. There's a quirk with MEDIAN, however.&lt;/p&gt;</summary><content type="html">&lt;h1&gt;MEDIAN in Redshift&lt;/h1&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>programming notes - Redshift</title><link href="https://szuckerman.github.io/" rel="alternate"></link><link href="https://szuckerman.github.io/feeds/redshift.atom.xml" rel="self"></link><id>https://szuckerman.github.io/</id><updated>2019-01-17T15:30:00-05:00</updated><entry><title>Integer Division in Redshift: Gotcha!</title><link href="https://szuckerman.github.io/integer_division_in_redshift.html" rel="alternate"></link><published>2019-01-17T15:30:00-05:00</published><updated>2019-01-17T15:30:00-05:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2019-01-17:/integer_division_in_redshift.html</id><summary type="html">&lt;p&gt;Data types can always be tricky in SQL. Here's an interesting quirk I noticed with regard to integer division in Redshift.&lt;/p&gt;</summary><content type="html">&lt;h1&gt;What's the problem?&lt;/h1&gt;
+&lt;h2&gt;Background to Integer Division&lt;/h2&gt;
+&lt;p&gt;Usually when someone divides two numbers, which don't divide evenly, with a calculator or another software program, he expects there to be a decimal. &lt;/p&gt;
+&lt;p&gt;For example, if I divide 3 by 2, I would expect to see 1.5.&lt;/p&gt;
+&lt;p&gt;It's well known with some programming situations (like Python 2) that the answer to the above would be "1" since nothing after the decimal is preserved.&lt;/p&gt;
+&lt;p&gt;The following Redshift code would also return 1.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;SELECT&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h2&gt;What's the solution to get a decimal then?&lt;/h2&gt;
+&lt;p&gt;If you cast the values to a &lt;code&gt;float&lt;/code&gt;, then everything works nicely.&lt;/p&gt;
+&lt;p&gt;For example, in Python 2 the following would both return 1.5:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="mf"&gt;3.0&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mf"&gt;2.0&lt;/span&gt;
+&lt;span class="o"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="mf"&gt;1.5&lt;/span&gt;
+
+&lt;span class="nb"&gt;float&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nb"&gt;float&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="o"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="mf"&gt;1.5&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h1&gt;How to solve this in Redshift:&lt;/h1&gt;
+&lt;p&gt;In Redshift, the answer is basically the same, you merely cast to a &lt;code&gt;float&lt;/code&gt;, or &lt;code&gt;decimal&lt;/code&gt;, but there's a big caveat.&lt;/p&gt;
+&lt;p&gt;Let's say you try the following:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;SELECT&lt;/span&gt; &lt;span class="n"&gt;NUMERATOR&lt;/span&gt;&lt;span class="p"&gt;::&lt;/span&gt;&lt;span class="nb"&gt;DECIMAL&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;DENOMINATOR&lt;/span&gt;&lt;span class="p"&gt;::&lt;/span&gt;&lt;span class="nb"&gt;DECIMAL&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;You might still have integer division! Why? Because toward the bottom of &lt;a href="https://docs.aws.amazon.com/redshift/latest/dg/r_numeric_computations201.html"&gt;this AWS documentation on numeric computations in Redshift&lt;/a&gt; it mentions that:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;When one of the operands in a calculation has an INTEGER data type and the other operand is DECIMAL, the INTEGER operand is implicitly cast as a DECIMAL:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;INT2 (SMALLINT) is cast as DECIMAL(5,0)&lt;/li&gt;
+&lt;li&gt;INT4 (INTEGER) is cast as DECIMAL(10,0)&lt;/li&gt;
+&lt;li&gt;INT8 (BIGINT) is cast as DECIMAL(19,0)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Basically, instead of the above, you might want to cast as:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;SELECT&lt;/span&gt; &lt;span class="n"&gt;NUMERATOR&lt;/span&gt;&lt;span class="p"&gt;::&lt;/span&gt;&lt;span class="nb"&gt;DECIMAL&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;DENOMINATOR&lt;/span&gt;&lt;span class="p"&gt;::&lt;/span&gt;&lt;span class="nb"&gt;DECIMAL&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Or, rather, something that keeps the precision in the number. The first number after the word &lt;code&gt;DECIMAL&lt;/code&gt; is the &lt;code&gt;precision&lt;/code&gt;, loosely meaning, "how many numbers total in the number (including after the decimal point)" and &lt;code&gt;scale&lt;/code&gt; is "how many numbers after the decimal point".&lt;/p&gt;
+&lt;p&gt;The above have a &lt;code&gt;scale&lt;/code&gt; of 0, which essentially makes them look like an &lt;code&gt;INTEGER&lt;/code&gt;; just add &lt;code&gt;scale&lt;/code&gt; to the mix and you should be good to go!&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Note:&lt;/strong&gt; I've seen inconsistent results with this truncation behavior, especially when I have queries containing aggregations upon aggregations. For example, even &lt;code&gt;SELECT NUMERATOR::DECIMAL/DENOMINATOR::DECIMAL&lt;/code&gt; returns as a &lt;code&gt;DECIMAL&lt;/code&gt;. The main point of this post is to be able to troubleshoot what the issue might be if you think you've casted data types properly and don't want to spend too much time pulling your hair out.&lt;/p&gt;
+&lt;/blockquote&gt;</content><category term="redshift"></category><category term="sql"></category></entry><entry><title>Getting tripped up with "MEDIAN" in Redshift and PostgreSQL</title><link href="https://szuckerman.github.io/getting-tripped-up-with-median-in-redshift-and-postgresql.html" rel="alternate"></link><published>2018-12-14T15:30:00-05:00</published><updated>2018-12-14T15:30:00-05:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2018-12-14:/getting-tripped-up-with-median-in-redshift-and-postgresql.html</id><summary type="html">&lt;p&gt;Analytical functions are essential to working effectively with relational databases. There's a quirk with MEDIAN, however.&lt;/p&gt;</summary><content type="html">&lt;h1&gt;MEDIAN in Redshift&lt;/h1&gt;
 &lt;p&gt;Redshift has an interesting quirk in that when a &lt;code&gt;MEDIAN&lt;/code&gt; function is called within a query, it implicitly give an &lt;code&gt;ORDER BY&lt;/code&gt; for that column. &lt;/p&gt;
 &lt;h2&gt;Window Functions in 5 seconds&lt;/h2&gt;
 &lt;p&gt;Taking a step back, when working with window functions there's usually  &lt;code&gt;OVER&lt;/code&gt; and  &lt;code&gt;ORDER BY&lt;/code&gt; arguments and optionally, but often, a &lt;code&gt;PARTITION BY&lt;/code&gt; argument as well.&lt;/p&gt;

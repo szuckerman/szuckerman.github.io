@@ -1,5 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>programming notes</title><link href="https://szuckerman.github.io/" rel="alternate"></link><link href="https://szuckerman.github.io/feeds/all.atom.xml" rel="self"></link><id>https://szuckerman.github.io/</id><updated>2019-01-11T15:30:00-05:00</updated><entry><title>What's this in functools? reduce</title><link href="https://szuckerman.github.io/functools_reduce.html" rel="alternate"></link><published>2019-01-11T15:30:00-05:00</published><updated>2019-01-11T15:30:00-05:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2019-01-11:/functools_reduce.html</id><summary type="html">&lt;p&gt;There's a lot of cool stuff in the functools module. Some small additions to your functions will greatly increase your productivity and your code quality. &lt;code&gt;reduce&lt;/code&gt; is an easy way "reduce" an array of elements to a single value.&lt;/p&gt;</summary><content type="html">&lt;h1&gt;Why do I need reduce?&lt;/h1&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>programming notes</title><link href="https://szuckerman.github.io/" rel="alternate"></link><link href="https://szuckerman.github.io/feeds/all.atom.xml" rel="self"></link><id>https://szuckerman.github.io/</id><updated>2019-01-17T15:30:00-05:00</updated><entry><title>Integer Division in Redshift: Gotcha!</title><link href="https://szuckerman.github.io/integer_division_in_redshift.html" rel="alternate"></link><published>2019-01-17T15:30:00-05:00</published><updated>2019-01-17T15:30:00-05:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2019-01-17:/integer_division_in_redshift.html</id><summary type="html">&lt;p&gt;Data types can always be tricky in SQL. Here's an interesting quirk I noticed with regard to integer division in Redshift.&lt;/p&gt;</summary><content type="html">&lt;h1&gt;What's the problem?&lt;/h1&gt;
+&lt;h2&gt;Background to Integer Division&lt;/h2&gt;
+&lt;p&gt;Usually when someone divides two numbers, which don't divide evenly, with a calculator or another software program, he expects there to be a decimal. &lt;/p&gt;
+&lt;p&gt;For example, if I divide 3 by 2, I would expect to see 1.5.&lt;/p&gt;
+&lt;p&gt;It's well known with some programming situations (like Python 2) that the answer to the above would be "1" since nothing after the decimal is preserved.&lt;/p&gt;
+&lt;p&gt;The following Redshift code would also return 1.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;SELECT&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h2&gt;What's the solution to get a decimal then?&lt;/h2&gt;
+&lt;p&gt;If you cast the values to a &lt;code&gt;float&lt;/code&gt;, then everything works nicely.&lt;/p&gt;
+&lt;p&gt;For example, in Python 2 the following would both return 1.5:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="mf"&gt;3.0&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mf"&gt;2.0&lt;/span&gt;
+&lt;span class="o"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="mf"&gt;1.5&lt;/span&gt;
+
+&lt;span class="nb"&gt;float&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nb"&gt;float&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="o"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="mf"&gt;1.5&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h1&gt;How to solve this in Redshift:&lt;/h1&gt;
+&lt;p&gt;In Redshift, the answer is basically the same, you merely cast to a &lt;code&gt;float&lt;/code&gt;, or &lt;code&gt;decimal&lt;/code&gt;, but there's a big caveat.&lt;/p&gt;
+&lt;p&gt;Let's say you try the following:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;SELECT&lt;/span&gt; &lt;span class="n"&gt;NUMERATOR&lt;/span&gt;&lt;span class="p"&gt;::&lt;/span&gt;&lt;span class="nb"&gt;DECIMAL&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;DENOMINATOR&lt;/span&gt;&lt;span class="p"&gt;::&lt;/span&gt;&lt;span class="nb"&gt;DECIMAL&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;You might still have integer division! Why? Because toward the bottom of &lt;a href="https://docs.aws.amazon.com/redshift/latest/dg/r_numeric_computations201.html"&gt;this AWS documentation on numeric computations in Redshift&lt;/a&gt; it mentions that:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;When one of the operands in a calculation has an INTEGER data type and the other operand is DECIMAL, the INTEGER operand is implicitly cast as a DECIMAL:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;INT2 (SMALLINT) is cast as DECIMAL(5,0)&lt;/li&gt;
+&lt;li&gt;INT4 (INTEGER) is cast as DECIMAL(10,0)&lt;/li&gt;
+&lt;li&gt;INT8 (BIGINT) is cast as DECIMAL(19,0)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Basically, instead of the above, you might want to cast as:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;SELECT&lt;/span&gt; &lt;span class="n"&gt;NUMERATOR&lt;/span&gt;&lt;span class="p"&gt;::&lt;/span&gt;&lt;span class="nb"&gt;DECIMAL&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;DENOMINATOR&lt;/span&gt;&lt;span class="p"&gt;::&lt;/span&gt;&lt;span class="nb"&gt;DECIMAL&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Or, rather, something that keeps the precision in the number. The first number after the word &lt;code&gt;DECIMAL&lt;/code&gt; is the &lt;code&gt;precision&lt;/code&gt;, loosely meaning, "how many numbers total in the number (including after the decimal point)" and &lt;code&gt;scale&lt;/code&gt; is "how many numbers after the decimal point".&lt;/p&gt;
+&lt;p&gt;The above have a &lt;code&gt;scale&lt;/code&gt; of 0, which essentially makes them look like an &lt;code&gt;INTEGER&lt;/code&gt;; just add &lt;code&gt;scale&lt;/code&gt; to the mix and you should be good to go!&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Note:&lt;/strong&gt; I've seen inconsistent results with this truncation behavior, especially when I have queries containing aggregations upon aggregations. For example, even &lt;code&gt;SELECT NUMERATOR::DECIMAL/DENOMINATOR::DECIMAL&lt;/code&gt; returns as a &lt;code&gt;DECIMAL&lt;/code&gt;. The main point of this post is to be able to troubleshoot what the issue might be if you think you've casted data types properly and don't want to spend too much time pulling your hair out.&lt;/p&gt;
+&lt;/blockquote&gt;</content><category term="redshift"></category><category term="sql"></category></entry><entry><title>What's this in functools? reduce</title><link href="https://szuckerman.github.io/functools_reduce.html" rel="alternate"></link><published>2019-01-11T15:30:00-05:00</published><updated>2019-01-11T15:30:00-05:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2019-01-11:/functools_reduce.html</id><summary type="html">&lt;p&gt;There's a lot of cool stuff in the functools module. Some small additions to your functions will greatly increase your productivity and your code quality. &lt;code&gt;reduce&lt;/code&gt; is an easy way "reduce" an array of elements to a single value.&lt;/p&gt;</summary><content type="html">&lt;h1&gt;Why do I need reduce?&lt;/h1&gt;
 &lt;p&gt;Honestly, you don't really. &lt;code&gt;reduce&lt;/code&gt; was a built-in in Python 2 and was demoted to &lt;code&gt;functools&lt;/code&gt; in Python 3. &lt;/p&gt;
 &lt;p&gt;Most of the examples from &lt;code&gt;reduce&lt;/code&gt; can be done in an easier fashion using other built-ins.&lt;/p&gt;
 &lt;h1&gt;What does reduce do?&lt;/h1&gt;
@@ -431,7 +477,7 @@
       &lt;span class="k"&gt;FROM&lt;/span&gt; &lt;span class="n"&gt;MY_TABLE&lt;/span&gt; &lt;span class="n"&gt;T1&lt;/span&gt;
   &lt;span class="p"&gt;)&lt;/span&gt;
  &lt;span class="k"&gt;WHERE&lt;/span&gt; &lt;span class="k"&gt;ROW_COUNT&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;</content><category term="sql"></category><category term="redshift"></category><category term="postgresql"></category><category term="code snippet"></category></entry><entry><title>Using different styles with matplotlib</title><link href="https://szuckerman.github.io/different_styles_with_matplotlib.html" rel="alternate"></link><published>2018-11-19T15:30:00-05:00</published><updated>2018-11-19T15:30:00-05:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2018-11-19:/different_styles_with_matplotlib.html</id><summary type="html">&lt;p&gt;The default style for matplotlib charts looks nice, but sometimes you might want a change. It's not difficult to use a plethora of predefined alternate styles.&lt;/p&gt;</summary><content type="html">&lt;h1&gt;Getting the styles&lt;/h1&gt;
+&lt;/pre&gt;&lt;/div&gt;</content><category term="sql"></category><category term="redshift"></category><category term="postgres"></category><category term="code snippet"></category></entry><entry><title>Using different styles with matplotlib</title><link href="https://szuckerman.github.io/different_styles_with_matplotlib.html" rel="alternate"></link><published>2018-11-19T15:30:00-05:00</published><updated>2018-11-19T15:30:00-05:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2018-11-19:/different_styles_with_matplotlib.html</id><summary type="html">&lt;p&gt;The default style for matplotlib charts looks nice, but sometimes you might want a change. It's not difficult to use a plethora of predefined alternate styles.&lt;/p&gt;</summary><content type="html">&lt;h1&gt;Getting the styles&lt;/h1&gt;
 &lt;p&gt;To see what alternate styles are available for matplotlib charts, you would first run &lt;code&gt;plt.style.available&lt;/code&gt; to get the list of available styles.&lt;/p&gt;
 &lt;p&gt;This is assuming you've already run the following:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;matplotlib.pyplot&lt;/span&gt; &lt;span class="kn"&gt;as&lt;/span&gt; &lt;span class="nn"&gt;plt&lt;/span&gt;
