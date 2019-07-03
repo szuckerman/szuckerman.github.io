@@ -1,5 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>programming notes - Python</title><link href="https://szuckerman.github.io/" rel="alternate"></link><link href="https://szuckerman.github.io/feeds/python.atom.xml" rel="self"></link><id>https://szuckerman.github.io/</id><updated>2019-01-11T15:30:00-05:00</updated><entry><title>What's this in functools? reduce</title><link href="https://szuckerman.github.io/functools_reduce.html" rel="alternate"></link><published>2019-01-11T15:30:00-05:00</published><updated>2019-01-11T15:30:00-05:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2019-01-11:/functools_reduce.html</id><summary type="html">&lt;p&gt;There's a lot of cool stuff in the functools module. Some small additions to your functions will greatly increase your productivity and your code quality. &lt;code&gt;reduce&lt;/code&gt; is an easy way "reduce" an array of elements to a single value.&lt;/p&gt;</summary><content type="html">&lt;h1&gt;Why do I need reduce?&lt;/h1&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>programming notes - Python</title><link href="https://szuckerman.github.io/" rel="alternate"></link><link href="https://szuckerman.github.io/feeds/python.atom.xml" rel="self"></link><id>https://szuckerman.github.io/</id><updated>2019-07-03T15:30:00-04:00</updated><entry><title>What's this in functools? singledispatch</title><link href="https://szuckerman.github.io/functools_singledispatch.html" rel="alternate"></link><published>2019-07-03T15:30:00-04:00</published><updated>2019-07-03T15:30:00-04:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2019-07-03:/functools_singledispatch.html</id><summary type="html">&lt;p&gt;There's a lot of cool stuff in the functools module. Some small additions to your functions will greatly increase your productivity and your code quality. &lt;code&gt;singledispatch&lt;/code&gt; is an easy way to apply&lt;/p&gt;</summary><content type="html">&lt;h1&gt;Why do I need singledispatch?&lt;/h1&gt;
+&lt;p&gt;Other programming languages have native method or function overloading. For example, in Java one can make a class with methods that run different code depending on the datatype of the input.&lt;/p&gt;
+&lt;p&gt;With &lt;code&gt;singledispatch&lt;/code&gt; one can run a different function when running &lt;code&gt;my_func(&amp;lt;int&amp;gt;)&lt;/code&gt; vs &lt;code&gt;my_func(&amp;lt;str&amp;gt;)&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;The following example should help explain.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Note&lt;/strong&gt;: &lt;code&gt;singledispatch&lt;/code&gt; was only added in Python 3.4. Another reason to migrate!&lt;/p&gt;
+&lt;h1&gt;Example without singledispatch&lt;/h1&gt;
+&lt;p&gt;One common example I run into where data types matter is number formatting. Usually product unit sales are represented as integers and with revenue as a float.   &lt;/p&gt;
+&lt;p&gt;If I want to print currency figures on only the float values I would need to do something like this:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;print_currency&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="nb"&gt;isinstance&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;float&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;$&amp;#39;&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="nb"&gt;str&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nb"&gt;str&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="n"&gt;units&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;10&lt;/span&gt;
+&lt;span class="n"&gt;revenue&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mf"&gt;100.0&lt;/span&gt;
+&lt;span class="n"&gt;output&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;We sold {print_currency(units)} units for {print_currency(revenue)}.&amp;#39;&lt;/span&gt;
+
+&lt;span class="o"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;We sold 10 units for $100.0.&amp;#39;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h1&gt;Example with singledispatch&lt;/h1&gt;
+&lt;p&gt;&lt;strong&gt;Note&lt;/strong&gt;: The "dispatch" only happens &lt;a href="https://docs.python.org/3.7/library/functools.html"&gt;on the first argument&lt;/a&gt; (hence, "single" dispatch, applying to more arguments would be "multiple" dispatch [&lt;em&gt;Fluent Python&lt;/em&gt; by Luciano Ramalho]), &lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;functools&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;singledispatch&lt;/span&gt;
+
+&lt;span class="nd"&gt;@singledispatch&lt;/span&gt;
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;print_currency&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;arg&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;pass&lt;/span&gt;
+
+
+&lt;span class="nd"&gt;@print_currency.register&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;float&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;_&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;$&amp;#39;&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="nb"&gt;str&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+
+&lt;span class="nd"&gt;@print_currency.register&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;_&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nb"&gt;str&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="n"&gt;units&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;10&lt;/span&gt;
+&lt;span class="n"&gt;revenue&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mf"&gt;100.0&lt;/span&gt;
+&lt;span class="n"&gt;output&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;We sold {print_currency(units)} units for {print_currency(revenue)}.&amp;#39;&lt;/span&gt;
+
+&lt;span class="o"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;We sold 10 units for $100.0.&amp;#39;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h1&gt;Newer example&lt;/h1&gt;
+&lt;p&gt;In Python 3.7 &lt;code&gt;singledispatch&lt;/code&gt; was updated to allow for type annotations in function arguments. Therefore you don't need to use a "type" in the &lt;code&gt;register&lt;/code&gt; function. &lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;functools&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;singledispatch&lt;/span&gt;
+
+&lt;span class="nd"&gt;@singledispatch&lt;/span&gt;
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;print_currency&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;arg&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;pass&lt;/span&gt;
+
+
+&lt;span class="nd"&gt;@print_currency.register&lt;/span&gt;
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;_&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;::&lt;/span&gt; &lt;span class="nb"&gt;float&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;$&amp;#39;&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="nb"&gt;str&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+
+&lt;span class="nd"&gt;@print_currency.register&lt;/span&gt;
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;_&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;::&lt;/span&gt; &lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nb"&gt;str&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="n"&gt;units&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;10&lt;/span&gt;
+&lt;span class="n"&gt;revenue&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mf"&gt;100.0&lt;/span&gt;
+&lt;span class="n"&gt;output&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;We sold {print_currency(units)} units for {print_currency(revenue)}.&amp;#39;&lt;/span&gt;
+
+&lt;span class="o"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;We sold 10 units for $100.0.&amp;#39;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h1&gt;Conclusion&lt;/h1&gt;
+&lt;p&gt;While the above examples don't seem so necessary, since the original if/else may be sufficient, I feel the code looks a lot more clear when having different functions for different types as opposed to many chains of if/else which can easily get unweildy. I think Ramalho puts it well in &lt;em&gt;Fluent Python&lt;/em&gt;:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;@singledispatch is not designed to bring Java-style method overloading to Python. A single class with many overloaded variations of a method is better than a single function with a lengthy stretch of if/elif/elif/elif blocks. But both solutions are flawed because they concentrate too much responsibility in a single code unit the class or the function. The advantage of @singledispath is supporting modular extension: each module can register a specialized function for each type it supports.  &lt;em&gt;Ramalho, Luciano. Fluent Python: Clear, Concise, and Effective Programming (p. 211)&lt;/em&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;By using &lt;code&gt;singledispatch&lt;/code&gt; in your code you can make your code more readable and modular if you require a concept similar to function overloading.&lt;/p&gt;</content><category term="python"></category><category term="functools"></category><category term="functions"></category><category term="code snippet"></category></entry><entry><title>What's this in functools? reduce</title><link href="https://szuckerman.github.io/functools_reduce.html" rel="alternate"></link><published>2019-01-11T15:30:00-05:00</published><updated>2019-01-11T15:30:00-05:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2019-01-11:/functools_reduce.html</id><summary type="html">&lt;p&gt;There's a lot of cool stuff in the functools module. Some small additions to your functions will greatly increase your productivity and your code quality. &lt;code&gt;reduce&lt;/code&gt; is an easy way "reduce" an array of elements to a single value.&lt;/p&gt;</summary><content type="html">&lt;h1&gt;Why do I need reduce?&lt;/h1&gt;
 &lt;p&gt;Honestly, you don't really. &lt;code&gt;reduce&lt;/code&gt; was a built-in in Python 2 and was demoted to &lt;code&gt;functools&lt;/code&gt; in Python 3. &lt;/p&gt;
 &lt;p&gt;Most of the examples from &lt;code&gt;reduce&lt;/code&gt; can be done in an easier fashion using other built-ins.&lt;/p&gt;
 &lt;h1&gt;What does reduce do?&lt;/h1&gt;
