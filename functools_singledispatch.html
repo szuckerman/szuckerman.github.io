@@ -6,8 +6,8 @@
         <meta name="author" content="Sam Zuckerman" />
         <meta name="copyright" content="Sam Zuckerman" />
 
-<meta name="keywords" content="redshift, sql, Redshift, " />
-        <title>Integer Division in Redshift: Gotcha!  · programming notes
+<meta name="keywords" content="python, functools, functions, code snippet, Python, " />
+        <title>What's this in functools? singledispatch  · programming notes
 </title>
         <link href="http://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css">
         <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
@@ -68,66 +68,99 @@
 <article>
 <div class="row-fluid">
     <header class="page_header span10 offset2">
-    <h1><a href="https://szuckerman.github.io/integer_division_in_redshift.html"> Integer Division in Redshift: Gotcha!  </a></h1>
+    <h1><a href="https://szuckerman.github.io/functools_singledispatch.html"> What's this in functools? singledispatch  </a></h1>
     </header>
 </div>
 
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
 
-            <h1>What's the problem?</h1>
-<h2>Background to Integer Division</h2>
-<p>Usually when someone divides two numbers, which don't divide evenly, with a calculator or another software program, he expects there to be a decimal. </p>
-<p>For example, if I divide 3 by 2, I would expect to see 1.5.</p>
-<p>It's well known with some programming situations (like Python 2) that the answer to the above would be "1" since nothing after the decimal is preserved.</p>
-<p>The following Redshift code would also return 1.</p>
-<div class="highlight"><pre><span></span><span class="k">SELECT</span> <span class="mi">3</span><span class="o">/</span><span class="mi">2</span>
+            <h1>Why do I need singledispatch?</h1>
+<p>Other programming languages have native method or function overloading. For example, in Java one can make a class with methods that run different code depending on the datatype of the input.</p>
+<p>With <code>singledispatch</code> one can run a different function when running <code>my_func(&lt;int&gt;)</code> vs <code>my_func(&lt;str&gt;)</code>.</p>
+<p>The following example should help explain.</p>
+<p><strong>Note</strong>: <code>singledispatch</code> was only added in Python 3.4. Another reason to migrate!</p>
+<h1>Example without singledispatch</h1>
+<p>One common example I run into where data types matter is number formatting. Usually product unit sales are represented as integers and with revenue as a float.   </p>
+<p>If I want to print currency figures on only the float values I would need to do something like this:</p>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">print_currency</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;$&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+
+<span class="n">units</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">revenue</span> <span class="o">=</span> <span class="mf">100.0</span>
+<span class="n">output</span> <span class="o">=</span> <span class="n">f</span><span class="s1">&#39;We sold {print_currency(units)} units for {print_currency(revenue)}.&#39;</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="s1">&#39;We sold 10 units for $100.0.&#39;</span>
 </pre></div>
 
 
-<h2>What's the solution to get a decimal then?</h2>
-<p>If you cast the values to a <code>float</code>, then everything works nicely.</p>
-<p>For example, in Python 2 the following would both return 1.5:</p>
-<div class="highlight"><pre><span></span><span class="mf">3.0</span><span class="o">/</span><span class="mf">2.0</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="mf">1.5</span>
+<h1>Example with singledispatch</h1>
+<p><strong>Note</strong>: The "dispatch" only happens <a href="https://docs.python.org/3.7/library/functools.html">on the first argument</a> (hence, "single" dispatch, applying to more arguments would be "multiple" dispatch [<em>Fluent Python</em> by Luciano Ramalho]), </p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">singledispatch</span>
 
-<span class="nb">float</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="mf">1.5</span>
+<span class="nd">@singledispatch</span>
+<span class="k">def</span> <span class="nf">print_currency</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+
+<span class="nd">@print_currency.register</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+    <span class="k">return</span> <span class="s1">&#39;$&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+
+
+<span class="nd">@print_currency.register</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+
+<span class="n">units</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">revenue</span> <span class="o">=</span> <span class="mf">100.0</span>
+<span class="n">output</span> <span class="o">=</span> <span class="n">f</span><span class="s1">&#39;We sold {print_currency(units)} units for {print_currency(revenue)}.&#39;</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="s1">&#39;We sold 10 units for $100.0.&#39;</span>
 </pre></div>
 
 
-<h1>How to solve this in Redshift:</h1>
-<p>In Redshift, the answer is basically the same, you merely cast to a <code>float</code>, or <code>decimal</code>, but there's a big caveat.</p>
-<p>Let's say you try the following:</p>
-<div class="highlight"><pre><span></span><span class="k">SELECT</span> <span class="n">NUMERATOR</span><span class="p">::</span><span class="nb">DECIMAL</span><span class="o">/</span><span class="n">DENOMINATOR</span><span class="p">::</span><span class="nb">DECIMAL</span>
+<h1>Newer example</h1>
+<p>In Python 3.7 <code>singledispatch</code> was updated to allow for type annotations in function arguments. Therefore you don't need to use a "type" in the <code>register</code> function. </p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">singledispatch</span>
+
+<span class="nd">@singledispatch</span>
+<span class="k">def</span> <span class="nf">print_currency</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+
+<span class="nd">@print_currency.register</span>
+<span class="k">def</span> <span class="nf">_</span><span class="p">(</span><span class="n">val</span><span class="p">::</span> <span class="nb">float</span><span class="p">):</span>
+    <span class="k">return</span> <span class="s1">&#39;$&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+
+
+<span class="nd">@print_currency.register</span>
+<span class="k">def</span> <span class="nf">_</span><span class="p">(</span><span class="n">val</span><span class="p">::</span> <span class="nb">int</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+
+<span class="n">units</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">revenue</span> <span class="o">=</span> <span class="mf">100.0</span>
+<span class="n">output</span> <span class="o">=</span> <span class="n">f</span><span class="s1">&#39;We sold {print_currency(units)} units for {print_currency(revenue)}.&#39;</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="s1">&#39;We sold 10 units for $100.0.&#39;</span>
 </pre></div>
 
 
-<p>You might still have integer division! Why? Because toward the bottom of <a href="https://docs.aws.amazon.com/redshift/latest/dg/r_numeric_computations201.html">this AWS documentation on numeric computations in Redshift</a> it mentions that:</p>
+<h1>Conclusion</h1>
+<p>While the above examples don't seem so necessary, since the original if/else may be sufficient, I feel the code looks a lot more clear when having different functions for different types as opposed to many chains of if/else which can easily get unweildy. I think Ramalho puts it well in <em>Fluent Python</em>:</p>
 <blockquote>
-<p>When one of the operands in a calculation has an INTEGER data type and the other operand is DECIMAL, the INTEGER operand is implicitly cast as a DECIMAL:</p>
-<ul>
-<li>INT2 (SMALLINT) is cast as DECIMAL(5,0)</li>
-<li>INT4 (INTEGER) is cast as DECIMAL(10,0)</li>
-<li>INT8 (BIGINT) is cast as DECIMAL(19,0)</li>
-</ul>
+<p>@singledispatch is not designed to bring Java-style method overloading to Python. A single class with many overloaded variations of a method is better than a single function with a lengthy stretch of if/elif/elif/elif blocks. But both solutions are flawed because they concentrate too much responsibility in a single code unit the class or the function. The advantage of @singledispath is supporting modular extension: each module can register a specialized function for each type it supports.  <em>Ramalho, Luciano. Fluent Python: Clear, Concise, and Effective Programming (p. 211)</em></p>
 </blockquote>
-<p>Basically, instead of the above, you might want to cast as:</p>
-<div class="highlight"><pre><span></span><span class="k">SELECT</span> <span class="n">NUMERATOR</span><span class="p">::</span><span class="nb">DECIMAL</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">DENOMINATOR</span><span class="p">::</span><span class="nb">DECIMAL</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
-</pre></div>
-
-
-<p>Or, rather, something that keeps the precision in the number. The first number after the word <code>DECIMAL</code> is the <code>precision</code>, loosely meaning, "how many numbers total in the number (including after the decimal point)" and <code>scale</code> is "how many numbers after the decimal point".</p>
-<p>The above have a <code>scale</code> of 0, which essentially makes them look like an <code>INTEGER</code>; just add <code>scale</code> to the mix and you should be good to go!</p>
-<blockquote>
-<p><strong>Note:</strong> I've seen inconsistent results with this truncation behavior, especially when I have queries containing aggregations upon aggregations. For example, even <code>SELECT NUMERATOR::DECIMAL/DENOMINATOR::DECIMAL</code> returns as a <code>DECIMAL</code>. The main point of this post is to be able to troubleshoot what the issue might be if you think you've casted data types properly and don't want to spend too much time pulling your hair out.</p>
-</blockquote>
+<p>By using <code>singledispatch</code> in your code you can make your code more readable and modular if you require a concept similar to function overloading.</p>
 <section>
 <div class="accordion" id="accordion2">
     <div class="accordion-group">
         <div class="accordion-heading">
             <a class="accordion-toggle disqus-comment-count" data-toggle="collapse" data-parent="#accordion2"
-                href="https://szuckerman.github.io/integer_division_in_redshift.html#disqus_thread">
+                href="https://szuckerman.github.io/functools_singledispatch.html#disqus_thread">
                 Comments
             </a>
         </div>
@@ -137,8 +170,8 @@
 <div id="disqus_thread"></div>
 <script type="text/javascript">
     var disqus_shortname = 'szuckerman-github-io-1';
-        var disqus_identifier = 'https://szuckerman.github.io/integer_division_in_redshift.html';
-    var disqus_url = 'https://szuckerman.github.io/integer_division_in_redshift.html';
+        var disqus_identifier = 'https://szuckerman.github.io/functools_singledispatch.html';
+    var disqus_url = 'https://szuckerman.github.io/functools_singledispatch.html';
 
     (function() {
          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
@@ -158,9 +191,7 @@
             <nav>
             <ul class="articles_timeline">
  
-                <li class="previous_article">« <a href="https://szuckerman.github.io/functools_reduce.html" title="Previous: What's this in functools? reduce">What's this in functools? reduce</a></li>
- 
-                <li class="next_article"><a href="https://szuckerman.github.io/functools_singledispatch.html" title="Next: What's this in functools? singledispatch">What's this in functools? singledispatch</a> »</li>
+                <li class="previous_article">« <a href="https://szuckerman.github.io/integer_division_in_redshift.html" title="Previous: Integer Division in Redshift: Gotcha!">Integer Division in Redshift: Gotcha!</a></li>
             </ul>
             </nav>
             </aside>
@@ -169,19 +200,25 @@
         <div class="span2" style="float:right;font-size:0.9em;">
  
             <h4>Published</h4>
-            <time pubdate="pubdate" datetime="2019-01-17T15:30:00-05:00">Jan 17, 2019</time>
+            <time pubdate="pubdate" datetime="2019-07-03T15:30:00-04:00">Jul 3, 2019</time>
  
             <h4>Last Updated</h4>
-            <div class="last_updated">2019-01-17 15:30:00-05:00</div>
+            <div class="last_updated">2019-07-03 15:30:00-04:00</div>
             <h4>Category</h4>
-            <a class="category-link" href="/categories.html#Redshift-ref">Redshift</a> 
+            <a class="category-link" href="/categories.html#Python-ref">Python</a> 
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
-                <li><a href="/tags.html#redshift-ref">redshift
-                    <span>5</span>
+                <li><a href="/tags.html#code-snippet-ref">code snippet
+                    <span>13</span>
 </a></li>
-                <li><a href="/tags.html#sql-ref">sql
-                    <span>4</span>
+                <li><a href="/tags.html#functions-ref">functions
+                    <span>9</span>
+</a></li>
+                <li><a href="/tags.html#functools-ref">functools
+                    <span>8</span>
+</a></li>
+                <li><a href="/tags.html#python-ref">python
+                    <span>17</span>
 </a></li>
             </ul>
 
