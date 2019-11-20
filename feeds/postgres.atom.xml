@@ -45,4 +45,4 @@
 
 
 &lt;h1&gt;Further reading&lt;/h1&gt;
-&lt;p&gt;I found &lt;a href="http://www.sqlines.com/postgresql/how-to/datediff"&gt;this page on Sqlines useful&lt;/a&gt; if you need to perform a &lt;code&gt;DATE_DIFF&lt;/code&gt; using units other than dates. &lt;/p&gt;</content><category term="sql"></category><category term="postgres"></category></entry></feed>
+&lt;p&gt;I found &lt;a href="http://www.sqlines.com/postgresql/how-to/datediff"&gt;this page on Sqlines useful&lt;/a&gt; if you need to perform a &lt;code&gt;DATE_DIFF&lt;/code&gt; using units other than dates. &lt;/p&gt;</content><category term="Postgres"></category><category term="sql"></category><category term="postgres"></category></entry></feed>
