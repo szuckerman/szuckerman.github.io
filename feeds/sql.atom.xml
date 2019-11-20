@@ -33,4 +33,4 @@
       &lt;span class="k"&gt;FROM&lt;/span&gt; &lt;span class="n"&gt;MY_TABLE&lt;/span&gt; &lt;span class="n"&gt;T1&lt;/span&gt;
   &lt;span class="p"&gt;)&lt;/span&gt;
  &lt;span class="k"&gt;WHERE&lt;/span&gt; &lt;span class="k"&gt;ROW_COUNT&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;</content><category term="sql"></category><category term="redshift"></category><category term="postgres"></category><category term="code snippet"></category></entry></feed>
+&lt;/pre&gt;&lt;/div&gt;</content><category term="SQL"></category><category term="sql"></category><category term="redshift"></category><category term="postgres"></category><category term="code snippet"></category></entry></feed>
