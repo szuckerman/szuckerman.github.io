@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="Sam Zuckerman" />
+        <meta name="copyright" content="Sam Zuckerman" />
+
+<meta name="keywords" content="python, functools, functions, code snippet, Python, " />
+        <title>What's this in functools? cached_property  · programming notes
+</title>
+        <link href="http://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css">
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="/theme/css/solarizedlight.css" media="screen">
+        <link rel="shortcut icon" href="/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="/theme/images/apple-touch-icon-144x144.png" />
+    <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-128575468-1']);
+    _gaq.push(['_trackPageview']);
+    (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+    </script>
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="/"><span class=site-name>programming notes</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <!--<li ><a href="">Home</a></li>-->
+                            <li ><a href="/categories.html">Categories</a></li>
+                            <li ><a href="/tags.html">Tags</a></li>
+                            <li ><a href="/archives.html">Archives</a></li>
+                            <li><form class="navbar-search" action="/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article>
+<div class="row-fluid">
+    <header class="page_header span10 offset2">
+    <h1><a href="/functools_cached_property.html"> What's this in functools? cached_property  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+
+            <h1>Why do I need cached_property?</h1>
+<p>A big addition to Python classes was the inclusion of the <code>property</code> decorator for class methods.<sup id="fnref-1"><a class="footnote-ref" href="#fn-1">1</a></sup> What's great about the <code>property</code> decorator is that it allows a method to be called as an instance variable, essentially allowing a new calculated variable to be used that has some underlying calculation being performed under the hood. Even though this is really good for writing clean, concise code, if there's a long-running function behind the variable, such as a database query, then it can take some time to return what appears to be a small variable. <code>cached_property</code> ensures that once the function is run once, the results are cached and can be resused quickly later.</p>
+<p><strong>Note</strong>: <code>cached_property</code> is new in functools for 3.8! You can't use this in previous versions unless you install the <a href="https://pypi.org/project/cached-property/">cached-property</a> package.</p>
+<h1>Examples</h1>
+<p>The following example is taken from the <a href="https://docs.python.org/3/library/functools.html#functools.cached_property"><code>functools</code> documentation for <code>cached_propery</code></a>.</p>
+<h2>Using property</h2>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">statistics</span>
+
+<span class="k">class</span> <span class="nc">DataSet</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence_of_numbers</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">sequence_of_numbers</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">stdev</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">statistics</span><span class="o">.</span><span class="n">stdev</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">variance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">statistics</span><span class="o">.</span><span class="n">variance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="k">data</span> <span class="o">=</span> <span class="n">DataSet</span><span class="p">(</span><span class="n">range</span><span class="p">(</span><span class="mi">20</span><span class="p">))</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">data</span><span class="p">.</span><span class="n">stdev</span>
+<span class="mi">5</span><span class="p">.</span><span class="mi">916079783099616</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">data</span><span class="p">.</span><span class="n">variance</span>
+<span class="mi">35</span><span class="p">.</span><span class="mi">0</span>
+</pre></div>
+
+
+<h2>Using cached_property</h2>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">cached_property</span>
+<span class="kn">import</span> <span class="nn">statistics</span>
+
+<span class="k">class</span> <span class="nc">DataSet</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence_of_numbers</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">sequence_of_numbers</span>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">stdev</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">statistics</span><span class="o">.</span><span class="n">stdev</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">variance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">statistics</span><span class="o">.</span><span class="n">variance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="k">data</span> <span class="o">=</span> <span class="n">DataSet</span><span class="p">(</span><span class="n">range</span><span class="p">(</span><span class="mi">20</span><span class="p">))</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">data</span><span class="p">.</span><span class="n">stdev</span>
+<span class="mi">5</span><span class="p">.</span><span class="mi">916079783099616</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">data</span><span class="p">.</span><span class="n">variance</span>
+<span class="mi">35</span><span class="p">.</span><span class="mi">0</span>
+</pre></div>
+
+
+<p>Ok, they return the same information. What's the big deal? The above example is trivial, but if there was a long running process to caculate variance or standard deviation you wouldn't want to wait a few seconds just to return <code>data.stdev</code> or <code>data.variance</code>.</p>
+<h1>Pitfalls of cached_property</h1>
+<h2>Defining <strong>slots</strong></h2>
+<p>Since <code>cached_property</code> "requires that the <code>__dict__</code> attribute on each instance be a mutable mapping"<sup id="fnref-2"><a class="footnote-ref" href="#fn-2">2</a></sup> (i.e. there's a <code>__dict__</code> attribute for the instance) <code>cached_property</code> won't work in some cases. </p>
+<p>For example, if one defines <code>__slots__</code> in an object then there's no <code>__dict__</code> attribute and you'll raise a <code>ValueError</code>.</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">DataSet</span><span class="p">:</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;stdev&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence_of_numbers</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">sequence_of_numbers</span>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">stdev</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">statistics</span><span class="o">.</span><span class="n">stdev</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">variance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">statistics</span><span class="o">.</span><span class="n">variance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+  <span class="n">File</span> <span class="s2">&quot;&lt;stdin&gt;&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">1</span><span class="p">,</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span>
+<span class="ne">ValueError</span><span class="p">:</span> <span class="s1">&#39;stdev&#39;</span> <span class="ow">in</span> <span class="vm">__slots__</span> <span class="n">conflicts</span> <span class="k">with</span> <span class="k">class</span> <span class="nc">variable</span>
+</pre></div>
+
+
+<p>As you can see, this code won't even be executed due to the <code>ValueError</code>. This exception isn't special for <code>cached_property</code> though; the same error is raised if one merely uses a <code>property</code> decorator as well.</p>
+<h2>Changing the Data</h2>
+<p>If I go back to using just the <code>property</code> decorator like so:</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">DataSet</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence_of_numbers</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">sequence_of_numbers</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">stdev</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">statistics</span><span class="o">.</span><span class="n">stdev</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">variance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">statistics</span><span class="o">.</span><span class="n">variance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">data</span> <span class="o">=</span> <span class="n">DataSet</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">20</span><span class="p">))</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">data</span><span class="o">.</span><span class="n">stdev</span>
+<span class="mf">5.916079783099616</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">data</span><span class="o">.</span><span class="n">variance</span>
+<span class="mf">35.0</span>
+</pre></div>
+
+
+<p>If I decide to change the data, the other variables update accordingly.</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">data</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">data</span><span class="o">.</span><span class="n">stdev</span>
+<span class="mf">8.803408430829505</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">data</span><span class="o">.</span><span class="n">variance</span>
+<span class="mf">77.5</span>
+</pre></div>
+
+
+<p>Comparing this to the <code>cached_property</code> version:</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">DataSet</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence_of_numbers</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">sequence_of_numbers</span>
+    <span class="nd">@cached_property</span>
+
+    <span class="k">def</span> <span class="nf">stdev</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">statistics</span><span class="o">.</span><span class="n">stdev</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">variance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">statistics</span><span class="o">.</span><span class="n">variance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">data</span> <span class="o">=</span> <span class="n">DataSet</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">20</span><span class="p">))</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">data</span><span class="o">.</span><span class="n">stdev</span>
+<span class="mf">5.916079783099616</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">data</span><span class="o">.</span><span class="n">variance</span>
+<span class="mf">35.0</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">data</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">data</span><span class="o">.</span><span class="n">stdev</span>
+<span class="mf">5.916079783099616</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">data</span><span class="o">.</span><span class="n">variance</span>
+<span class="mf">35.0</span>
+</pre></div>
+
+
+<p><code>data.stddev</code> and <code>data.variance</code> didn't update because they're cached! What do we do now if the underlying data changes? The solution is to invalidate the cache.</p>
+<p>As you can see, from <code>data__dict__</code>, the cached data is in a dictionary. However, it only gets there once the <code>data.stdev</code> property method is run. Now, it looks like this:</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">data</span><span class="o">.</span><span class="vm">__dict__</span>
+<span class="p">{</span><span class="s1">&#39;_data&#39;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span> <span class="s1">&#39;stdev&#39;</span><span class="p">:</span> <span class="mf">5.916079783099616</span><span class="p">,</span> <span class="s1">&#39;variance&#39;</span><span class="p">:</span> <span class="mf">35.0</span><span class="p">}</span>
+</pre></div>
+
+
+<p>But before running <code>data.stdev</code> and <code>data.variance</code> it looks like this:</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">data</span> <span class="o">=</span> <span class="n">DataSet</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">20</span><span class="p">))</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">data</span><span class="o">.</span><span class="vm">__dict__</span>
+<span class="p">{</span><span class="s1">&#39;_data&#39;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">)}</span>
+</pre></div>
+
+
+<p>Therefore to invalidate (i.e. "fix") the cache, you merely need to delete the values from the dictionary.</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">data</span><span class="o">.</span><span class="n">stdev</span>
+<span class="mf">5.916079783099616</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">data</span><span class="o">.</span><span class="n">variance</span>
+<span class="mf">35.0</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">data</span><span class="o">.</span><span class="vm">__dict__</span>
+<span class="p">{</span><span class="s1">&#39;_data&#39;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span> <span class="s1">&#39;stdev&#39;</span><span class="p">:</span> <span class="mf">5.916079783099616</span><span class="p">,</span> <span class="s1">&#39;variance&#39;</span><span class="p">:</span> <span class="mf">35.0</span><span class="p">}</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">data</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">data</span><span class="o">.</span><span class="vm">__dict__</span>
+<span class="p">{</span><span class="s1">&#39;_data&#39;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span> <span class="s1">&#39;stdev&#39;</span><span class="p">:</span> <span class="mf">5.916079783099616</span><span class="p">,</span> <span class="s1">&#39;variance&#39;</span><span class="p">:</span> <span class="mf">35.0</span><span class="p">}</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">del</span> <span class="n">data</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;stdev&#39;</span><span class="p">]</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">data</span><span class="o">.</span><span class="vm">__dict__</span>
+<span class="p">{</span><span class="s1">&#39;_data&#39;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span> <span class="s1">&#39;variance&#39;</span><span class="p">:</span> <span class="mf">35.0</span><span class="p">}</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">data</span><span class="o">.</span><span class="n">stdev</span>
+<span class="mf">8.803408430829505</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">del</span> <span class="n">data</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;variance&#39;</span><span class="p">]</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">data</span><span class="o">.</span><span class="vm">__dict__</span>
+<span class="p">{</span><span class="s1">&#39;_data&#39;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span> <span class="s1">&#39;stdev&#39;</span><span class="p">:</span> <span class="mf">8.803408430829505</span><span class="p">}</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">data</span><span class="o">.</span><span class="n">variance</span>
+<span class="mf">77.5</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">data</span><span class="o">.</span><span class="vm">__dict__</span>
+<span class="p">{</span><span class="s1">&#39;_data&#39;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span> <span class="s1">&#39;stdev&#39;</span><span class="p">:</span> <span class="mf">8.803408430829505</span><span class="p">,</span> <span class="s1">&#39;variance&#39;</span><span class="p">:</span> <span class="mf">77.5</span><span class="p">}</span>
+</pre></div>
+
+
+<p>After deleting the values from <code>data.__dict__</code> we were able to regenerate the correct values.</p>
+<h1>Conclusion</h1>
+<p><code>property</code> is a very useful decorator for Python objects. <code>cached_property</code> is useful as well, but one should understand the tradeoffs when using this decorator. It might save some time on the backend, but could introduce some bugs due to caching. </p>
+<div class="footnote">
+<hr>
+<ol>
+<li id="fn-1">
+<p>Raymond Hettinger in <a href="https://www.youtube.com/watch?v=HTLu2DFOdTg">this Python talk</a>.&#160;<a class="footnote-backref" href="#fnref-1" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+<li id="fn-2">
+<p>https://docs.python.org/3/library/functools.html#functools.cached_property&#160;<a class="footnote-backref" href="#fnref-2" title="Jump back to footnote 2 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div>
+            <aside>
+            <hr/>
+            <nav>
+            <ul class="articles_timeline">
+ 
+                <li class="previous_article">« <a href="/functools_singledispatch.html" title="Previous: What's this in functools? singledispatch">What's this in functools? singledispatch</a></li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+ 
+            <h4>Published</h4>
+            <time pubdate="pubdate" datetime="2019-11-20T15:30:00-05:00">Nov 20, 2019</time>
+ 
+            <h4>Last Updated</h4>
+            <div class="last_updated">2019-11-20 15:30:00-05:00</div>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#Python-ref">Python</a> 
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article"> 
+                <li><a href="/tags.html#code-snippet-ref">code snippet
+                    <span>14</span>
+</a></li>
+                <li><a href="/tags.html#functions-ref">functions
+                    <span>10</span>
+</a></li>
+                <li><a href="/tags.html#functools-ref">functools
+                    <span>9</span>
+</a></li>
+                <li><a href="/tags.html#python-ref">python
+                    <span>18</span>
+</a></li>
+            </ul>
+
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="http://oncrashreboot.com/pelican-elegant" title="Theme Elegant Home Page">Elegant</a> by <a href="http://oncrashreboot.com" title="Talha Mansoor Home Page">Talha Mansoor</a></li>
+    </ul>
+</div>
+</footer>            <script src="http://code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    </body>
+</html>
