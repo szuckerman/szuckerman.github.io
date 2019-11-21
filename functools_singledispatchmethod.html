@@ -11,17 +11,17 @@
 
 <meta name="keywords" content="python, functools, functions, code snippet, Python, " />
 
-<meta property="og:title" content="What&#39;s this in functools? singledispatch "/>
-<meta property="og:url" content="https://szuckerman.github.io/functools_singledispatch.html" />
-<meta property="og:description" content="There&#39;s a lot of cool stuff in the functools module. Some small additions to your functions will greatly increase your productivity and your code quality. singledispatch is an easy way to apply overload functions based on an input argument&#39;s type." />
+<meta property="og:title" content="What&#39;s this in functools? singledispatchmethod "/>
+<meta property="og:url" content="https://szuckerman.github.io/functools_singledispatchmethod.html" />
+<meta property="og:description" content="There&#39;s a lot of cool stuff in the functools module. Some small additions to your functions will greatly increase your productivity and your code quality. singledispatchmethod is an easy way to apply overload methods based on an input argument&#39;s type." />
 <meta property="og:site_name" content="programming notes" />
 <meta property="og:article:author" content="Sam Zuckerman" />
-<meta property="og:article:published_time" content="2019-07-03T15:30:00-04:00" />
-<meta property="og:article:modified_time" content="2019-07-03T15:30:00-04:00" />
-<meta name="twitter:title" content="What&#39;s this in functools? singledispatch ">
-<meta name="twitter:description" content="There&#39;s a lot of cool stuff in the functools module. Some small additions to your functions will greatly increase your productivity and your code quality. singledispatch is an easy way to apply overload functions based on an input argument&#39;s type.">
+<meta property="og:article:published_time" content="2019-11-21T15:30:00-05:00" />
+<meta property="og:article:modified_time" content="2019-11-21T15:30:00-05:00" />
+<meta name="twitter:title" content="What&#39;s this in functools? singledispatchmethod ">
+<meta name="twitter:description" content="There&#39;s a lot of cool stuff in the functools module. Some small additions to your functions will greatly increase your productivity and your code quality. singledispatchmethod is an easy way to apply overload methods based on an input argument&#39;s type.">
 
-        <title>What&#39;s this in functools? singledispatch  · programming notes
+        <title>What&#39;s this in functools? singledispatchmethod  · programming notes
 </title>
         <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
         <link rel="stylesheet" type="text/css" href="https://szuckerman.github.io/theme/css/pygments.css" media="screen">
@@ -77,8 +77,8 @@
 <div class="row-fluid">
     <header class="page-header span10 offset2">
         <h1>
-            <a href="https://szuckerman.github.io/functools_singledispatch.html">
-                What's this in functools? singledispatch
+            <a href="https://szuckerman.github.io/functools_singledispatchmethod.html">
+                What's this in functools? singledispatchmethod
             </a>
         </h1>
     </header>
@@ -87,88 +87,80 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <h1>Why do I need singledispatch?</h1>
-<p>Other programming languages have native method or function overloading. For example, in Java one can make a class with methods that run different code depending on the datatype of the input.</p>
+            <h1>Why do I need singledispatchmethod?</h1>
+<p>As mentioned in <a href="https://szuckerman.github.io/functools_singledispatch.html">a previous post about <code>singledispatch</code></a>, other programming languages have native method or function overloading. For example, in Java one can make a class with methods that run different code depending on the datatype of the input.</p>
 <p>With <code>singledispatch</code> one can run a different function when running <code>my_func(&lt;int&gt;)</code> vs <code>my_func(&lt;str&gt;)</code>.</p>
-<p>The following example should help explain.</p>
-<p><strong>Note</strong>: <code>singledispatch</code> was only added in Python 3.4. Another reason to migrate!</p>
-<h1>Example without singledispatch</h1>
-<p>One common example I run into where data types matter is number formatting. Usually product unit sales are represented as integers and with revenue as a float.   </p>
-<p>If I want to print currency figures on only the float values I would need to do something like this:</p>
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">print_currency</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+<p>That's the main idea; see <a href="https://szuckerman.github.io/functools_singledispatch.html">the other post about <code>singledispatch</code></a> for more examples.</p>
+<p>Regarding <code>singledispatchmethod</code>, it's the same idea as <code>singledispatch</code> except to be used as a class method decorator rather than a function decorator.</p>
+<p><strong>Note</strong>: <code>singledispatchmethod</code> was added in Python 3.8. It makes sense that <code>singledispatch</code> was difficult to implement as a method decorator prior to Python 3.8 in that <code>singledispatch</code> works on the first element of a function, and the first element of a method refers to <code>self</code> or the instance of the object (i.e. not the first method argument). There are some workarounds, but they're quite ugly<sup id="fnref-1"><a class="footnote-ref" href="#fn-1">1</a></sup> and it would be recommended to merely upgrade to Python 3.8.</p>
+<h1>Example without singledispatchmethod</h1>
+<p>Building upon the example from the <a href="https://szuckerman.github.io/functools_singledispatch.html">the other post about <code>singledispatch</code></a>, we are now creating a class to print currency values.</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Currency</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">units</span><span class="p">,</span> <span class="n">revenue</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="n">units</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">revenue</span> <span class="o">=</span> <span class="n">revenue</span>
+
+    <span class="k">def</span> <span class="nf">print_currency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s1">&#39;$&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+
+
+<span class="n">units</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">revenue</span> <span class="o">=</span> <span class="mf">100.0</span>
+<span class="n">amount</span> <span class="o">=</span> <span class="n">Currency</span><span class="p">(</span><span class="n">units</span><span class="p">,</span> <span class="n">revenue</span><span class="p">)</span>
+<span class="n">output</span> <span class="o">=</span> <span class="n">f</span><span class="s1">&#39;We sold {amount.print_currency(amount.units)} units for {amount.print_currency(amount.revenue)}.&#39;</span>
+<span class="k">print</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="s1">&#39;We sold 10 units for $100.0.&#39;</span>
+</pre></div>
+
+
+<h1>Example with singledispatchmethod</h1>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">singledispatchmethod</span>
+<span class="k">class</span> <span class="nc">Currency</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">units</span><span class="p">,</span> <span class="n">revenue</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="n">units</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">revenue</span> <span class="o">=</span> <span class="n">revenue</span>
+
+    <span class="nd">@singledispatchmethod</span>
+    <span class="k">def</span> <span class="nf">print_currency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Incorrect type for print_currency&quot;</span><span class="p">)</span>
+
+    <span class="nd">@print_currency.register</span>
+    <span class="k">def</span> <span class="nf">_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
         <span class="k">return</span> <span class="s1">&#39;$&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
+
+    <span class="nd">@print_currency.register</span>
+    <span class="k">def</span> <span class="nf">_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">:</span><span class="nb">int</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
 
+
 <span class="n">units</span> <span class="o">=</span> <span class="mi">10</span>
 <span class="n">revenue</span> <span class="o">=</span> <span class="mf">100.0</span>
-<span class="n">output</span> <span class="o">=</span> <span class="n">f</span><span class="s1">&#39;We sold {print_currency(units)} units for {print_currency(revenue)}.&#39;</span>
+<span class="n">amount</span> <span class="o">=</span> <span class="n">Currency</span><span class="p">(</span><span class="n">units</span><span class="p">,</span> <span class="n">revenue</span><span class="p">)</span>
+<span class="n">output</span> <span class="o">=</span> <span class="n">f</span><span class="s1">&#39;We sold {amount.print_currency(amount.units)} units for {amount.print_currency(amount.revenue)}.&#39;</span>
 <span class="k">print</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
 
-<span class="o">&gt;&gt;&gt;</span> <span class="s1">&#39;We sold 10 units for $100.0.&#39;</span>
-</pre></div>
-
-
-<h1>Example with singledispatch</h1>
-<p><strong>Note</strong>: The "dispatch" only happens <a href="https://docs.python.org/3.7/library/functools.html">on the first argument</a> (hence, "single" dispatch, applying to more arguments would be "multiple" dispatch [<em>Fluent Python</em> by Luciano Ramalho]), </p>
-<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">singledispatch</span>
-
-<span class="nd">@singledispatch</span>
-<span class="k">def</span> <span class="nf">print_currency</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
-    <span class="k">pass</span>
-
-
-<span class="nd">@print_currency.register</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">_</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
-    <span class="k">return</span> <span class="s1">&#39;$&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
-
-
-<span class="nd">@print_currency.register</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">_</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
-    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
-
-<span class="n">units</span> <span class="o">=</span> <span class="mi">10</span>
-<span class="n">revenue</span> <span class="o">=</span> <span class="mf">100.0</span>
-<span class="n">output</span> <span class="o">=</span> <span class="n">f</span><span class="s1">&#39;We sold {print_currency(units)} units for {print_currency(revenue)}.&#39;</span>
-<span class="k">print</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
 
 <span class="o">&gt;&gt;&gt;</span> <span class="s1">&#39;We sold 10 units for $100.0.&#39;</span>
 </pre></div>
 
 
-<h1>Newer example</h1>
-<p>In Python 3.7 <code>singledispatch</code> was updated to allow for type annotations in function arguments. Therefore you don't need to use a "type" in the <code>register</code> function. </p>
-<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">singledispatch</span>
-
-<span class="nd">@singledispatch</span>
-<span class="k">def</span> <span class="nf">print_currency</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
-    <span class="k">pass</span>
-
-
-<span class="nd">@print_currency.register</span>
-<span class="k">def</span> <span class="nf">_</span><span class="p">(</span><span class="n">val</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
-    <span class="k">return</span> <span class="s1">&#39;$&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
-
-
-<span class="nd">@print_currency.register</span>
-<span class="k">def</span> <span class="nf">_</span><span class="p">(</span><span class="n">val</span><span class="p">:</span><span class="nb">int</span><span class="p">):</span>
-    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
-
-<span class="n">units</span> <span class="o">=</span> <span class="mi">10</span>
-<span class="n">revenue</span> <span class="o">=</span> <span class="mf">100.0</span>
-<span class="n">output</span> <span class="o">=</span> <span class="n">f</span><span class="s1">&#39;We sold {print_currency(units)} units for {print_currency(revenue)}.&#39;</span>
-
-<span class="o">&gt;&gt;&gt;</span> <span class="s1">&#39;We sold 10 units for $100.0.&#39;</span>
-</pre></div>
-
-
+<p>I feel that even though the example with <code>singledispatchmethod</code> adds many more lines to the code, it's much more readable and makes more sense quicker than the first example. Without using <code>singledispatchmethod</code> I need to look through a group of nested if/else statements and understand what is trying to be done. <code>singledispatchmethod</code> is specifically used to dispatch to different types, so the reasoning is clear.</p>
 <h1>Conclusion</h1>
-<p>While the above examples don't seem so necessary, since the original if/else may be sufficient, I feel the code looks a lot more clear when having different functions for different types as opposed to many chains of if/else which can easily get unweildy. I think Ramalho puts it well in <em>Fluent Python</em>:</p>
-<blockquote>
-<p>@singledispatch is not designed to bring Java-style method overloading to Python. A single class with many overloaded variations of a method is better than a single function with a lengthy stretch of if/elif/elif/elif blocks. But both solutions are flawed because they concentrate too much responsibility in a single code unit the class or the function. The advantage of @singledispath is supporting modular extension: each module can register a specialized function for each type it supports.  <em>Ramalho, Luciano. Fluent Python: Clear, Concise, and Effective Programming (p. 211)</em></p>
-</blockquote>
-<p>By using <code>singledispatch</code> in your code you can make your code more readable and modular if you require a concept similar to function overloading.</p>
+<p>By using <code>singledispatchmethod</code> in your code you can make your code more readable and modular if you require a concept similar to function overloading within class definitions.</p>
+<div class="footnote">
+<hr>
+<ol>
+<li id="fn-1">
+<p>See <a href="https://stackoverflow.com/questions/24063788/python3-singledispatch-in-class-how-to-dispatch-self-type">the answer to this stackoverflow question</a>.&#160;<a class="footnote-backref" href="#fnref-1" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div>
 
 
             
@@ -190,8 +182,8 @@
                 <a class="accordion-toggle disqus-comment-count comment-count"
                    data-toggle="collapse"
                    data-parent="#accordion2"
-                   data-disqus-identifier="https://szuckerman.github.io/functools_singledispatch.html"
-                   href="https://szuckerman.github.io/functools_singledispatch.html#comment_thread"
+                   data-disqus-identifier="https://szuckerman.github.io/functools_singledispatchmethod.html"
+                   href="https://szuckerman.github.io/functools_singledispatchmethod.html#comment_thread"
                    id="comment-accordion-toggle">
                     Comments
                 </a>
@@ -209,8 +201,8 @@
         (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
     }());
 
-    var disqus_identifier = 'https://szuckerman.github.io/functools_singledispatch.html';
-    var disqus_url = 'https://szuckerman.github.io/functools_singledispatch.html';
+    var disqus_identifier = 'https://szuckerman.github.io/functools_singledispatchmethod.html';
+    var disqus_url = 'https://szuckerman.github.io/functools_singledispatchmethod.html';
 
     (function() {
         var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
@@ -235,7 +227,7 @@
         <section>
         <div class="span2" style="float:right;font-size:0.9em;">
             <h4>Published</h4>
-            <time itemprop="dateCreated" datetime="2019-07-03T15:30:00-04:00">Jul 3, 2019</time>
+            <time itemprop="dateCreated" datetime="2019-11-21T15:30:00-05:00">Nov 21, 2019</time>
 
             <h4>Category</h4>
             <a class="category-link" href="https://szuckerman.github.io/categories.html#python-ref">Python</a>
