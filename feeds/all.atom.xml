@@ -1,5 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>programming notes</title><link href="https://szuckerman.github.io/" rel="alternate"></link><link href="https://szuckerman.github.io/feeds/all.atom.xml" rel="self"></link><id>https://szuckerman.github.io/</id><updated>2019-11-20T15:30:00-05:00</updated><entry><title>What's this in functools? cached_property</title><link href="https://szuckerman.github.io/functools_cached_property.html" rel="alternate"></link><published>2019-11-20T15:30:00-05:00</published><updated>2019-11-20T15:30:00-05:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2019-11-20:/functools_cached_property.html</id><summary type="html">&lt;p&gt;There's a lot of cool stuff in the functools module. Some small additions to your functions will greatly increase your productivity and your code quality. &lt;code&gt;cached_property&lt;/code&gt; is an easy way to add caching to methods in a Python object originally decorated with the &lt;code&gt;property&lt;/code&gt; decorator.&lt;/p&gt;</summary><content type="html">&lt;h1&gt;Why do I need cached_property?&lt;/h1&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>programming notes</title><link href="https://szuckerman.github.io/" rel="alternate"></link><link href="https://szuckerman.github.io/feeds/all.atom.xml" rel="self"></link><id>https://szuckerman.github.io/</id><updated>2019-11-21T15:30:00-05:00</updated><entry><title>What's this in functools? singledispatchmethod</title><link href="https://szuckerman.github.io/functools_singledispatchmethod.html" rel="alternate"></link><published>2019-11-21T15:30:00-05:00</published><updated>2019-11-21T15:30:00-05:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2019-11-21:/functools_singledispatchmethod.html</id><summary type="html">&lt;p&gt;There's a lot of cool stuff in the functools module. Some small additions to your functions will greatly increase your productivity and your code quality. &lt;code&gt;singledispatchmethod&lt;/code&gt; is an easy way to apply overload methods based on an input argument's type.&lt;/p&gt;</summary><content type="html">&lt;h1&gt;Why do I need singledispatchmethod?&lt;/h1&gt;
+&lt;p&gt;As mentioned in &lt;a href="https://szuckerman.github.io/functools_singledispatch.html"&gt;a previous post about &lt;code&gt;singledispatch&lt;/code&gt;&lt;/a&gt;, other programming languages have native method or function overloading. For example, in Java one can make a class with methods that run different code depending on the datatype of the input.&lt;/p&gt;
+&lt;p&gt;With &lt;code&gt;singledispatch&lt;/code&gt; one can run a different function when running &lt;code&gt;my_func(&amp;lt;int&amp;gt;)&lt;/code&gt; vs &lt;code&gt;my_func(&amp;lt;str&amp;gt;)&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;That's the main idea; see &lt;a href="https://szuckerman.github.io/functools_singledispatch.html"&gt;the other post about &lt;code&gt;singledispatch&lt;/code&gt;&lt;/a&gt; for more examples.&lt;/p&gt;
+&lt;p&gt;Regarding &lt;code&gt;singledispatchmethod&lt;/code&gt;, it's the same idea as &lt;code&gt;singledispatch&lt;/code&gt; except to be used as a class method decorator rather than a function decorator.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Note&lt;/strong&gt;: &lt;code&gt;singledispatchmethod&lt;/code&gt; was added in Python 3.8. It makes sense that &lt;code&gt;singledispatch&lt;/code&gt; was difficult to implement as a method decorator prior to Python 3.8 in that &lt;code&gt;singledispatch&lt;/code&gt; works on the first element of a function, and the first element of a method refers to &lt;code&gt;self&lt;/code&gt; or the instance of the object (i.e. not the first method argument). There are some workarounds, but they're quite ugly&lt;sup id="fnref-1"&gt;&lt;a class="footnote-ref" href="#fn-1"&gt;1&lt;/a&gt;&lt;/sup&gt; and it would be recommended to merely upgrade to Python 3.8.&lt;/p&gt;
+&lt;h1&gt;Example without singledispatchmethod&lt;/h1&gt;
+&lt;p&gt;Building upon the example from the &lt;a href="https://szuckerman.github.io/functools_singledispatch.html"&gt;the other post about &lt;code&gt;singledispatch&lt;/code&gt;&lt;/a&gt;, we are now creating a class to print currency values.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Currency&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;units&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;revenue&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;units&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;units&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;revenue&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;revenue&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;print_currency&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="nb"&gt;isinstance&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;float&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+            &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;$&amp;#39;&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="nb"&gt;str&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nb"&gt;str&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+
+&lt;span class="n"&gt;units&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;10&lt;/span&gt;
+&lt;span class="n"&gt;revenue&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mf"&gt;100.0&lt;/span&gt;
+&lt;span class="n"&gt;amount&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Currency&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;units&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;revenue&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;output&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;We sold {amount.print_currency(amount.units)} units for {amount.print_currency(amount.revenue)}.&amp;#39;&lt;/span&gt;
+&lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;output&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="o"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;We sold 10 units for $100.0.&amp;#39;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h1&gt;Example with singledispatchmethod&lt;/h1&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;functools&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;singledispatchmethod&lt;/span&gt;
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Currency&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;units&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;revenue&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;units&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;units&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;revenue&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;revenue&lt;/span&gt;
+
+    &lt;span class="nd"&gt;@singledispatchmethod&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;print_currency&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;raise&lt;/span&gt; &lt;span class="ne"&gt;NotImplementedError&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Incorrect type for print_currency&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="nd"&gt;@print_currency.register&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;_&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="nb"&gt;float&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;$&amp;#39;&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="nb"&gt;str&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="nd"&gt;@print_currency.register&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;_&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nb"&gt;str&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+
+&lt;span class="n"&gt;units&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;10&lt;/span&gt;
+&lt;span class="n"&gt;revenue&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mf"&gt;100.0&lt;/span&gt;
+&lt;span class="n"&gt;amount&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Currency&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;units&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;revenue&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;output&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;We sold {amount.print_currency(amount.units)} units for {amount.print_currency(amount.revenue)}.&amp;#39;&lt;/span&gt;
+&lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;output&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+
+&lt;span class="o"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;We sold 10 units for $100.0.&amp;#39;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;I feel that even though the example with &lt;code&gt;singledispatchmethod&lt;/code&gt; adds many more lines to the code, it's much more readable and makes more sense quicker than the first example. Without using &lt;code&gt;singledispatchmethod&lt;/code&gt; I need to look through a group of nested if/else statements and understand what is trying to be done. &lt;code&gt;singledispatchmethod&lt;/code&gt; is specifically used to dispatch to different types, so the reasoning is clear.&lt;/p&gt;
+&lt;h1&gt;Conclusion&lt;/h1&gt;
+&lt;p&gt;By using &lt;code&gt;singledispatchmethod&lt;/code&gt; in your code you can make your code more readable and modular if you require a concept similar to function overloading within class definitions.&lt;/p&gt;
+&lt;div class="footnote"&gt;
+&lt;hr&gt;
+&lt;ol&gt;
+&lt;li id="fn-1"&gt;
+&lt;p&gt;See &lt;a href="https://stackoverflow.com/questions/24063788/python3-singledispatch-in-class-how-to-dispatch-self-type"&gt;the answer to this stackoverflow question&lt;/a&gt;.&amp;#160;&lt;a class="footnote-backref" href="#fnref-1" title="Jump back to footnote 1 in the text"&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;</content><category term="Python"></category><category term="python"></category><category term="functools"></category><category term="functions"></category><category term="code snippet"></category></entry><entry><title>What's this in functools? cached_property</title><link href="https://szuckerman.github.io/functools_cached_property.html" rel="alternate"></link><published>2019-11-20T15:30:00-05:00</published><updated>2019-11-20T15:30:00-05:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2019-11-20:/functools_cached_property.html</id><summary type="html">&lt;p&gt;There's a lot of cool stuff in the functools module. Some small additions to your functions will greatly increase your productivity and your code quality. &lt;code&gt;cached_property&lt;/code&gt; is an easy way to add caching to methods in a Python object originally decorated with the &lt;code&gt;property&lt;/code&gt; decorator.&lt;/p&gt;</summary><content type="html">&lt;h1&gt;Why do I need cached_property?&lt;/h1&gt;
 &lt;p&gt;A big addition to Python classes was the inclusion of the &lt;code&gt;property&lt;/code&gt; decorator for class methods.&lt;sup id="fnref-1"&gt;&lt;a class="footnote-ref" href="#fn-1"&gt;1&lt;/a&gt;&lt;/sup&gt; What's great about the &lt;code&gt;property&lt;/code&gt; decorator is that it allows a method to be called as an instance variable, essentially allowing a new calculated variable to be used that has some underlying calculation being performed under the hood. Even though this is really good for writing clean, concise code, if there's a long-running function behind the variable, such as a database query, then it can take some time to return what appears to be a small variable. &lt;code&gt;cached_property&lt;/code&gt; ensures that once the function is run once, the results are cached and can be resused quickly later.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Note&lt;/strong&gt;: &lt;code&gt;cached_property&lt;/code&gt; is new in functools for 3.8! You can't use this in previous versions unless you install the &lt;a href="https://pypi.org/project/cached-property/"&gt;cached-property&lt;/a&gt; package.&lt;/p&gt;
 &lt;h1&gt;Examples&lt;/h1&gt;
@@ -200,7 +273,7 @@
 &lt;p&gt;https://docs.python.org/3/library/functools.html#functools.cached_property&amp;#160;&lt;a class="footnote-backref" href="#fnref-2" title="Jump back to footnote 2 in the text"&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ol&gt;
-&lt;/div&gt;</content><category term="Python"></category><category term="python"></category><category term="functools"></category><category term="functions"></category><category term="code snippet"></category></entry><entry><title>What's this in functools? singledispatch</title><link href="https://szuckerman.github.io/functools_singledispatch.html" rel="alternate"></link><published>2019-07-03T15:30:00-04:00</published><updated>2019-07-03T15:30:00-04:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2019-07-03:/functools_singledispatch.html</id><summary type="html">&lt;p&gt;There's a lot of cool stuff in the functools module. Some small additions to your functions will greatly increase your productivity and your code quality. &lt;code&gt;singledispatch&lt;/code&gt; is an easy way to apply&lt;/p&gt;</summary><content type="html">&lt;h1&gt;Why do I need singledispatch?&lt;/h1&gt;
+&lt;/div&gt;</content><category term="Python"></category><category term="python"></category><category term="functools"></category><category term="functions"></category><category term="code snippet"></category></entry><entry><title>What's this in functools? singledispatch</title><link href="https://szuckerman.github.io/functools_singledispatch.html" rel="alternate"></link><published>2019-07-03T15:30:00-04:00</published><updated>2019-07-03T15:30:00-04:00</updated><author><name>Sam Zuckerman</name></author><id>tag:szuckerman.github.io,2019-07-03:/functools_singledispatch.html</id><summary type="html">&lt;p&gt;There's a lot of cool stuff in the functools module. Some small additions to your functions will greatly increase your productivity and your code quality. &lt;code&gt;singledispatch&lt;/code&gt; is an easy way to apply overload functions based on an input argument's type.&lt;/p&gt;</summary><content type="html">&lt;h1&gt;Why do I need singledispatch?&lt;/h1&gt;
 &lt;p&gt;Other programming languages have native method or function overloading. For example, in Java one can make a class with methods that run different code depending on the datatype of the input.&lt;/p&gt;
 &lt;p&gt;With &lt;code&gt;singledispatch&lt;/code&gt; one can run a different function when running &lt;code&gt;my_func(&amp;lt;int&amp;gt;)&lt;/code&gt; vs &lt;code&gt;my_func(&amp;lt;str&amp;gt;)&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;The following example should help explain.&lt;/p&gt;
@@ -217,6 +290,7 @@
 &lt;span class="n"&gt;units&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;10&lt;/span&gt;
 &lt;span class="n"&gt;revenue&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mf"&gt;100.0&lt;/span&gt;
 &lt;span class="n"&gt;output&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;We sold {print_currency(units)} units for {print_currency(revenue)}.&amp;#39;&lt;/span&gt;
+&lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;output&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 
 &lt;span class="o"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;We sold 10 units for $100.0.&amp;#39;&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
@@ -243,6 +317,7 @@
 &lt;span class="n"&gt;units&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;10&lt;/span&gt;
 &lt;span class="n"&gt;revenue&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mf"&gt;100.0&lt;/span&gt;
 &lt;span class="n"&gt;output&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;We sold {print_currency(units)} units for {print_currency(revenue)}.&amp;#39;&lt;/span&gt;
+&lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;output&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 
 &lt;span class="o"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;We sold 10 units for $100.0.&amp;#39;&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
@@ -258,12 +333,12 @@
 
 
 &lt;span class="nd"&gt;@print_currency.register&lt;/span&gt;
-&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;_&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;::&lt;/span&gt; &lt;span class="nb"&gt;float&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;_&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="nb"&gt;float&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
     &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;$&amp;#39;&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="nb"&gt;str&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 
 
 &lt;span class="nd"&gt;@print_currency.register&lt;/span&gt;
-&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;_&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;::&lt;/span&gt; &lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;_&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
     &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nb"&gt;str&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 
 &lt;span class="n"&gt;units&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;10&lt;/span&gt;
