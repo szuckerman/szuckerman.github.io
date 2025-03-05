@@ -4,6 +4,12 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="/theme/css/elegant.prod.9e9d5ce754.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="/theme/css/custom.css" media="screen">
+
+        <link rel="dns-prefetch" href="//fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+
         <meta name="author" content="Sam Zuckerman" />
 
         <meta property="og:type" content="article" />
@@ -12,7 +18,7 @@
 <meta name="keywords" content="python, functools, functions, code snippet, Python, " />
 
 <meta property="og:title" content="What&#39;s this in functools? reduce "/>
-<meta property="og:url" content="https://szuckerman.github.io/functools_reduce.html" />
+<meta property="og:url" content="/functools_reduce.html" />
 <meta property="og:description" content="There&#39;s a lot of cool stuff in the functools module. Some small additions to your functions will greatly increase your productivity and your code quality. reduce is an easy way &#34;reduce&#34; an array of elements to a single value." />
 <meta property="og:site_name" content="programming notes" />
 <meta property="og:article:author" content="Sam Zuckerman" />
@@ -23,14 +29,7 @@
 
         <title>What&#39;s this in functools? reduce  · programming notes
 </title>
-        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
-        <link rel="stylesheet" type="text/css" href="https://szuckerman.github.io/theme/css/pygments.css" media="screen">
-        <link rel="stylesheet" type="text/css" href="https://szuckerman.github.io/theme/tipuesearch/tipuesearch.css" media="screen">
-        <link rel="stylesheet" type="text/css" href="https://szuckerman.github.io/theme/css/elegant.css" media="screen">
-        <link rel="stylesheet" type="text/css" href="https://szuckerman.github.io/theme/css/admonition.css" media="screen">
-        <link rel="stylesheet" type="text/css" href="https://szuckerman.github.io/theme/css/custom.css" media="screen">
 
-        <link href="https://szuckerman.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="programming notes - Full Atom Feed" />
 <script>
     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -52,18 +51,18 @@
                             <span class="icon-bar"></span>
                             <span class="icon-bar"></span>
                         </a>
-                        <a class="brand" href="https://szuckerman.github.io/"><span class=site-name>programming notes</span></a>
+                        <a class="brand" href="/"><span class=site-name>programming notes</span></a>
                         <div class="nav-collapse collapse">
                             <ul class="nav pull-right top-menu">
                                 <li >
                                     <a href=
-                                       https://szuckerman.github.io
+                                       "/"
                                     >Home</a>
                                 </li>
-                                <li ><a href="https://szuckerman.github.io/categories.html">Categories</a></li>
-                                <li ><a href="https://szuckerman.github.io/tags.html">Tags</a></li>
-                                <li ><a href="https://szuckerman.github.io/archives.html">Archives</a></li>
-                                <li><form class="navbar-search" action="https://szuckerman.github.io/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                                <li ><a href="/categories.html">Categories</a></li>
+                                <li ><a href="/tags.html">Tags</a></li>
+                                <li ><a href="/archives.html">Archives</a></li>
+                                <li><form class="navbar-search" action="/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
                             </ul>
                         </div>
                     </div>
@@ -77,7 +76,7 @@
 <div class="row-fluid">
     <header class="page-header span10 offset2">
         <h1>
-            <a href="https://szuckerman.github.io/functools_reduce.html">
+            <a href="/functools_reduce.html">
                 What's this in functools? reduce
             </a>
         </h1>
@@ -93,16 +92,15 @@
 <h1>What does reduce do?</h1>
 <p><code>reduce</code> works the same way as most "reduce" functions in Computer Science. It "reduces" an array of numbers to one number, adding the first number to the second, and adding subsequent numbers to each intermittent total.</p>
 <h1>Example 1: Implementing a "sum" function using reduce</h1>
-<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="nb">reduce</span>
-<span class="kn">import</span> <span class="nn">operator</span> <span class="kn">as</span> <span class="nn">o</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">reduce</span>
+<span class="kn">import</span> <span class="nn">operator</span> <span class="k">as</span> <span class="nn">o</span>
 
 <span class="n">my_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">]</span>
 
-<span class="nb">reduce</span><span class="p">(</span><span class="n">o</span><span class="o">.</span><span class="n">add</span><span class="p">,</span> <span class="n">my_list</span><span class="p">)</span>
+<span class="n">reduce</span><span class="p">(</span><span class="n">o</span><span class="o">.</span><span class="n">add</span><span class="p">,</span> <span class="n">my_list</span><span class="p">)</span>
 
 <span class="o">&gt;&gt;&gt;</span> <span class="mi">15</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>The above example works the same way as running <code>sum(my_list)</code>. </p>
 <p>What the above example is doing:</p>
@@ -111,40 +109,37 @@
 <li><code>o.add</code> takes two arguments, <code>reduce</code> adds the next value to the current subtotal.</li>
 </ol>
 <p>It works the same way as:</p>
-<div class="highlight"><pre><span></span><span class="n">total</span> <span class="o">=</span> <span class="mi">1</span>
+<div class="highlight"><pre><span></span><code><span class="n">total</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="n">next_numbers</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
 
 <span class="k">for</span> <span class="n">next_number</span> <span class="ow">in</span> <span class="n">next_numbers</span><span class="p">:</span>
     <span class="n">total</span> <span class="o">=</span> <span class="n">total</span> <span class="o">+</span> <span class="n">next_number</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>Basically, there's always a function with two parameters used, with one of the parameters being the next value and the other being the intermediate total value.</p>
 <h1>Example 2: Implementing a "factorial" function using reduce</h1>
-<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="nb">reduce</span>
-<span class="kn">import</span> <span class="nn">operator</span> <span class="kn">as</span> <span class="nn">o</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">reduce</span>
+<span class="kn">import</span> <span class="nn">operator</span> <span class="k">as</span> <span class="nn">o</span>
 
 <span class="n">my_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">]</span>
 
-<span class="nb">reduce</span><span class="p">(</span><span class="n">o</span><span class="o">.</span><span class="n">mul</span><span class="p">,</span> <span class="n">my_list</span><span class="p">)</span>
+<span class="n">reduce</span><span class="p">(</span><span class="n">o</span><span class="o">.</span><span class="n">mul</span><span class="p">,</span> <span class="n">my_list</span><span class="p">)</span>
 
 <span class="o">&gt;&gt;&gt;</span> <span class="mi">120</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>As you can see, it's similar to the loop we mentioned before, except that the addition operator is replaced with a multiplication operator:</p>
-<div class="highlight"><pre><span></span><span class="n">total</span> <span class="o">=</span> <span class="mi">1</span>
+<div class="highlight"><pre><span></span><code><span class="n">total</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="n">next_numbers</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
 
 <span class="k">for</span> <span class="n">next_number</span> <span class="ow">in</span> <span class="n">next_numbers</span><span class="p">:</span>
     <span class="n">total</span> <span class="o">=</span> <span class="n">total</span> <span class="o">*</span> <span class="n">next_number</span>
-</pre></div>
-
+</code></pre></div>
 
 <h1>Which is faster? reduce or the loops?</h1>
-<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">timeit</span>
-<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="nb">reduce</span>
-<span class="kn">import</span> <span class="nn">operator</span> <span class="kn">as</span> <span class="nn">o</span>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">timeit</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">reduce</span>
+<span class="kn">import</span> <span class="nn">operator</span> <span class="k">as</span> <span class="nn">o</span>
 
 <span class="k">def</span> <span class="nf">factorial</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
     <span class="n">total</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -161,8 +156,7 @@
 
 <span class="n">timeit</span><span class="o">.</span><span class="n">timeit</span><span class="p">(</span><span class="s1">&#39;reduce(o.mul, [1,2,3,4,5])&#39;</span><span class="p">,</span> <span class="n">setup</span><span class="o">=</span><span class="s2">&quot;from functools import reduce</span><span class="se">\n</span><span class="s2">import operator as o&quot;</span><span class="p">,</span> <span class="n">number</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="mf">0.000527281008544378</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>From the above, it appears that our own <code>factorial</code> implementation has similar performance to using <code>reduce</code>.</p>
 <h1>Conclusion</h1>
@@ -171,9 +165,12 @@
 <p>As we saw above, the time difference for a user defined function or a similar version with <code>reduce</code> yield similar results. In this case one should obviously opt for whatever appears to be more clean/verbose/understandable code.  </p>
 
 
+             
+ 
             
             
             
+
 
 
 
@@ -187,11 +184,11 @@
     <div class="accordion" id="accordion2">
         <div class="accordion-group">
             <div class="accordion-heading">
-                <a class="accordion-toggle disqus-comment-count comment-count"
+                <a class="accordion-toggle disqus-comment-count comment-count collapsed"
                    data-toggle="collapse"
                    data-parent="#accordion2"
-                   data-disqus-identifier="https://szuckerman.github.io/functools_reduce.html"
-                   href="https://szuckerman.github.io/functools_reduce.html#comment_thread"
+                   data-disqus-identifier="/functools_reduce.html"
+                   href="/functools_reduce.html#comment_thread"
                    id="comment-accordion-toggle">
                     Comments
                 </a>
@@ -209,8 +206,8 @@
         (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
     }());
 
-    var disqus_identifier = 'https://szuckerman.github.io/functools_reduce.html';
-    var disqus_url = 'https://szuckerman.github.io/functools_reduce.html';
+    var disqus_identifier = '/functools_reduce.html';
+    var disqus_url = '/functools_reduce.html';
 
     (function() {
         var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
@@ -223,6 +220,8 @@
 <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
 
 
+
+
                     </div>
                 </div>
             </div>
@@ -232,26 +231,25 @@
 
             <hr/>
         </div>
-        <section>
-        <div class="span2" style="float:right;font-size:0.9em;">
+        <section id="article-sidebar" class="span2">
             <h4>Published</h4>
-            <time itemprop="dateCreated" datetime="2019-01-11T15:30:00-05:00">Jan 11, 2019</time>
+            <time itemprop="dateCreated" datetime="2019-01-11T15:30:00-05:00">Fri 11 January 2019</time>
 
             <h4>Category</h4>
-            <a class="category-link" href="https://szuckerman.github.io/categories.html#python-ref">Python</a>
+            <a class="category-link" href="/categories.html#python-ref">Python</a>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article">
-                <li><a href="https://szuckerman.github.io/tags.html#code-snippet-ref">code snippet
-                    <span>15</span>
+                <li><a href="/tags.html#code-snippet-ref">code snippet
+                    <span class="superscript">18</span>
 </a></li>
-                <li><a href="https://szuckerman.github.io/tags.html#functions-ref">functions
-                    <span>11</span>
+                <li><a href="/tags.html#functions-ref">functions
+                    <span class="superscript">14</span>
 </a></li>
-                <li><a href="https://szuckerman.github.io/tags.html#functools-ref">functools
-                    <span>10</span>
+                <li><a href="/tags.html#functools-ref">functools
+                    <span class="superscript">10</span>
 </a></li>
-                <li><a href="https://szuckerman.github.io/tags.html#python-ref">python
-                    <span>19</span>
+                <li><a href="/tags.html#python-ref">python
+                    <span class="superscript">22</span>
 </a></li>
             </ul>
 <h4>Contact</h4>
@@ -269,11 +267,75 @@
 
 
 
-        </div>
         </section>
 </div>
 </article>
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe.
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides.
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo https://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
                     </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>                    </div>
                     <div class="span1"></div>
                 </div>
             </div>
@@ -284,11 +346,12 @@
 
 
     <div id="fpowered">
-        Powered by: <a href="http://getpelican.com/" title="Pelican Home Page" target="_blank" rel="nofollow">Pelican</a>
-        Theme: <a href="https://elegant.oncrashreboot.com/" title="Theme Elegant Home Page" target="_blank" rel="nofollow">Elegant</a>
+        Powered by: <a href="http://getpelican.com/" title="Pelican Home Page" target="_blank" rel="nofollow noopener noreferrer">Pelican</a>
+        Theme: <a href="https://elegant.oncrashreboot.com/" title="Theme Elegant Home Page" target="_blank" rel="nofollow noopener noreferrer">Elegant</a>
     </div>
 </footer>            <script src="//code.jquery.com/jquery.min.js"></script>
         <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="/theme/js/elegant.prod.9e9d5ce754.js"></script>
         <script>
             function validateForm(query)
             {
