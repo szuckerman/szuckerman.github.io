@@ -4,6 +4,12 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="/theme/css/elegant.prod.9e9d5ce754.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="/theme/css/custom.css" media="screen">
+
+        <link rel="dns-prefetch" href="//fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+
         <meta name="author" content="Sam Zuckerman" />
 
         <meta property="og:type" content="article" />
@@ -12,7 +18,7 @@
 <meta name="keywords" content="python, functools, functions, code snippet, Python, " />
 
 <meta property="og:title" content="What&#39;s this in functools? singledispatchmethod "/>
-<meta property="og:url" content="https://szuckerman.github.io/functools_singledispatchmethod.html" />
+<meta property="og:url" content="/functools_singledispatchmethod.html" />
 <meta property="og:description" content="There&#39;s a lot of cool stuff in the functools module. Some small additions to your functions will greatly increase your productivity and your code quality. singledispatchmethod is an easy way to apply overload methods based on an input argument&#39;s type." />
 <meta property="og:site_name" content="programming notes" />
 <meta property="og:article:author" content="Sam Zuckerman" />
@@ -23,14 +29,7 @@
 
         <title>What&#39;s this in functools? singledispatchmethod  · programming notes
 </title>
-        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
-        <link rel="stylesheet" type="text/css" href="https://szuckerman.github.io/theme/css/pygments.css" media="screen">
-        <link rel="stylesheet" type="text/css" href="https://szuckerman.github.io/theme/tipuesearch/tipuesearch.css" media="screen">
-        <link rel="stylesheet" type="text/css" href="https://szuckerman.github.io/theme/css/elegant.css" media="screen">
-        <link rel="stylesheet" type="text/css" href="https://szuckerman.github.io/theme/css/admonition.css" media="screen">
-        <link rel="stylesheet" type="text/css" href="https://szuckerman.github.io/theme/css/custom.css" media="screen">
 
-        <link href="https://szuckerman.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="programming notes - Full Atom Feed" />
 <script>
     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -52,18 +51,18 @@
                             <span class="icon-bar"></span>
                             <span class="icon-bar"></span>
                         </a>
-                        <a class="brand" href="https://szuckerman.github.io/"><span class=site-name>programming notes</span></a>
+                        <a class="brand" href="/"><span class=site-name>programming notes</span></a>
                         <div class="nav-collapse collapse">
                             <ul class="nav pull-right top-menu">
                                 <li >
                                     <a href=
-                                       https://szuckerman.github.io
+                                       "/"
                                     >Home</a>
                                 </li>
-                                <li ><a href="https://szuckerman.github.io/categories.html">Categories</a></li>
-                                <li ><a href="https://szuckerman.github.io/tags.html">Tags</a></li>
-                                <li ><a href="https://szuckerman.github.io/archives.html">Archives</a></li>
-                                <li><form class="navbar-search" action="https://szuckerman.github.io/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                                <li ><a href="/categories.html">Categories</a></li>
+                                <li ><a href="/tags.html">Tags</a></li>
+                                <li ><a href="/archives.html">Archives</a></li>
+                                <li><form class="navbar-search" action="/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
                             </ul>
                         </div>
                     </div>
@@ -77,7 +76,7 @@
 <div class="row-fluid">
     <header class="page-header span10 offset2">
         <h1>
-            <a href="https://szuckerman.github.io/functools_singledispatchmethod.html">
+            <a href="/functools_singledispatchmethod.html">
                 What's this in functools? singledispatchmethod
             </a>
         </h1>
@@ -88,14 +87,14 @@
         <div class="span8 offset2 article-content">
             
             <h1>Why do I need singledispatchmethod?</h1>
-<p>As mentioned in <a href="https://szuckerman.github.io/functools_singledispatch.html">a previous post about <code>singledispatch</code></a>, other programming languages have native method or function overloading. For example, in Java one can make a class with methods that run different code depending on the datatype of the input.</p>
+<p>As mentioned in <a href="/functools_singledispatch.html">a previous post about <code>singledispatch</code></a>, other programming languages have native method or function overloading. For example, in Java one can make a class with methods that run different code depending on the datatype of the input.</p>
 <p>With <code>singledispatch</code> one can run a different function when running <code>my_func(&lt;int&gt;)</code> vs <code>my_func(&lt;str&gt;)</code>.</p>
-<p>That's the main idea; see <a href="https://szuckerman.github.io/functools_singledispatch.html">the other post about <code>singledispatch</code></a> for more examples.</p>
+<p>That's the main idea; see <a href="/functools_singledispatch.html">the other post about <code>singledispatch</code></a> for more examples.</p>
 <p>Regarding <code>singledispatchmethod</code>, it's the same idea as <code>singledispatch</code> except to be used as a class method decorator rather than a function decorator.</p>
-<p><strong>Note</strong>: <code>singledispatchmethod</code> was added in Python 3.8. It makes sense that <code>singledispatch</code> was difficult to implement as a method decorator prior to Python 3.8 in that <code>singledispatch</code> works on the first element of a function, and the first element of a method refers to <code>self</code> or the instance of the object (i.e. not the first method argument). There are some workarounds, but they're quite ugly<sup id="fnref-1"><a class="footnote-ref" href="#fn-1">1</a></sup> and it would be recommended to merely upgrade to Python 3.8.</p>
+<p><strong>Note</strong>: <code>singledispatchmethod</code> was added in Python 3.8. It makes sense that <code>singledispatch</code> was difficult to implement as a method decorator prior to Python 3.8 in that <code>singledispatch</code> works on the first element of a function, and the first element of a method refers to <code>self</code> or the instance of the object (i.e. not the first method argument). There are some workarounds, but they're quite ugly<sup id="fnref:1"><a class="footnote-ref" href="#fn:1">1</a></sup> and it would be recommended to merely upgrade to Python 3.8.</p>
 <h1>Example without singledispatchmethod</h1>
-<p>Building upon the example from the <a href="https://szuckerman.github.io/functools_singledispatch.html">the other post about <code>singledispatch</code></a>, we are now creating a class to print currency values.</p>
-<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Currency</span><span class="p">:</span>
+<p>Building upon the example from the <a href="/functools_singledispatch.html">the other post about <code>singledispatch</code></a>, we are now creating a class to print currency values.</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">Currency</span><span class="p">:</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">units</span><span class="p">,</span> <span class="n">revenue</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="n">units</span>
@@ -111,15 +110,14 @@
 <span class="n">units</span> <span class="o">=</span> <span class="mi">10</span>
 <span class="n">revenue</span> <span class="o">=</span> <span class="mf">100.0</span>
 <span class="n">amount</span> <span class="o">=</span> <span class="n">Currency</span><span class="p">(</span><span class="n">units</span><span class="p">,</span> <span class="n">revenue</span><span class="p">)</span>
-<span class="n">output</span> <span class="o">=</span> <span class="n">f</span><span class="s1">&#39;We sold {amount.print_currency(amount.units)} units for {amount.print_currency(amount.revenue)}.&#39;</span>
-<span class="k">print</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+<span class="n">output</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;We sold </span><span class="si">{</span><span class="n">amount</span><span class="o">.</span><span class="n">print_currency</span><span class="p">(</span><span class="n">amount</span><span class="o">.</span><span class="n">units</span><span class="p">)</span><span class="si">}</span><span class="s1"> units for </span><span class="si">{</span><span class="n">amount</span><span class="o">.</span><span class="n">print_currency</span><span class="p">(</span><span class="n">amount</span><span class="o">.</span><span class="n">revenue</span><span class="p">)</span><span class="si">}</span><span class="s1">.&#39;</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
 
 <span class="o">&gt;&gt;&gt;</span> <span class="s1">&#39;We sold 10 units for $100.0.&#39;</span>
-</pre></div>
-
+</code></pre></div>
 
 <h1>Example with singledispatchmethod</h1>
-<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">singledispatchmethod</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">singledispatchmethod</span>
 <span class="k">class</span> <span class="nc">Currency</span><span class="p">:</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">units</span><span class="p">,</span> <span class="n">revenue</span><span class="p">):</span>
@@ -130,11 +128,11 @@
     <span class="k">def</span> <span class="nf">print_currency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Incorrect type for print_currency&quot;</span><span class="p">)</span>
 
-    <span class="nd">@print_currency.register</span>
+    <span class="nd">@print_currency</span><span class="o">.</span><span class="n">register</span>
     <span class="k">def</span> <span class="nf">_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
         <span class="k">return</span> <span class="s1">&#39;$&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
 
-    <span class="nd">@print_currency.register</span>
+    <span class="nd">@print_currency</span><span class="o">.</span><span class="n">register</span>
     <span class="k">def</span> <span class="nf">_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">:</span><span class="nb">int</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
 
@@ -142,13 +140,12 @@
 <span class="n">units</span> <span class="o">=</span> <span class="mi">10</span>
 <span class="n">revenue</span> <span class="o">=</span> <span class="mf">100.0</span>
 <span class="n">amount</span> <span class="o">=</span> <span class="n">Currency</span><span class="p">(</span><span class="n">units</span><span class="p">,</span> <span class="n">revenue</span><span class="p">)</span>
-<span class="n">output</span> <span class="o">=</span> <span class="n">f</span><span class="s1">&#39;We sold {amount.print_currency(amount.units)} units for {amount.print_currency(amount.revenue)}.&#39;</span>
-<span class="k">print</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+<span class="n">output</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;We sold </span><span class="si">{</span><span class="n">amount</span><span class="o">.</span><span class="n">print_currency</span><span class="p">(</span><span class="n">amount</span><span class="o">.</span><span class="n">units</span><span class="p">)</span><span class="si">}</span><span class="s1"> units for </span><span class="si">{</span><span class="n">amount</span><span class="o">.</span><span class="n">print_currency</span><span class="p">(</span><span class="n">amount</span><span class="o">.</span><span class="n">revenue</span><span class="p">)</span><span class="si">}</span><span class="s1">.&#39;</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
 
 
 <span class="o">&gt;&gt;&gt;</span> <span class="s1">&#39;We sold 10 units for $100.0.&#39;</span>
-</pre></div>
-
+</code></pre></div>
 
 <p>I feel that even though the example with <code>singledispatchmethod</code> adds many more lines to the code, it's much more readable and makes more sense quicker than the first example. Without using <code>singledispatchmethod</code> I need to look through a group of nested if/else statements and understand what is trying to be done. <code>singledispatchmethod</code> is specifically used to dispatch to different types, so the reasoning is clear.</p>
 <h1>Conclusion</h1>
@@ -156,16 +153,19 @@
 <div class="footnote">
 <hr>
 <ol>
-<li id="fn-1">
-<p>See <a href="https://stackoverflow.com/questions/24063788/python3-singledispatch-in-class-how-to-dispatch-self-type">the answer to this stackoverflow question</a>.&#160;<a class="footnote-backref" href="#fnref-1" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+<li id="fn:1">
+<p>See <a href="https://stackoverflow.com/questions/24063788/python3-singledispatch-in-class-how-to-dispatch-self-type">the answer to this stackoverflow question</a>.&#160;<a class="footnote-backref" href="#fnref:1" title="Jump back to footnote 1 in the text">&#8617;</a></p>
 </li>
 </ol>
 </div>
 
 
+             
+ 
             
             
             
+
 
 
 
@@ -179,11 +179,11 @@
     <div class="accordion" id="accordion2">
         <div class="accordion-group">
             <div class="accordion-heading">
-                <a class="accordion-toggle disqus-comment-count comment-count"
+                <a class="accordion-toggle disqus-comment-count comment-count collapsed"
                    data-toggle="collapse"
                    data-parent="#accordion2"
-                   data-disqus-identifier="https://szuckerman.github.io/functools_singledispatchmethod.html"
-                   href="https://szuckerman.github.io/functools_singledispatchmethod.html#comment_thread"
+                   data-disqus-identifier="/functools_singledispatchmethod.html"
+                   href="/functools_singledispatchmethod.html#comment_thread"
                    id="comment-accordion-toggle">
                     Comments
                 </a>
@@ -201,8 +201,8 @@
         (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
     }());
 
-    var disqus_identifier = 'https://szuckerman.github.io/functools_singledispatchmethod.html';
-    var disqus_url = 'https://szuckerman.github.io/functools_singledispatchmethod.html';
+    var disqus_identifier = '/functools_singledispatchmethod.html';
+    var disqus_url = '/functools_singledispatchmethod.html';
 
     (function() {
         var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
@@ -215,6 +215,8 @@
 <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
 
 
+
+
                     </div>
                 </div>
             </div>
@@ -224,26 +226,25 @@
 
             <hr/>
         </div>
-        <section>
-        <div class="span2" style="float:right;font-size:0.9em;">
+        <section id="article-sidebar" class="span2">
             <h4>Published</h4>
-            <time itemprop="dateCreated" datetime="2019-11-21T15:30:00-05:00">Nov 21, 2019</time>
+            <time itemprop="dateCreated" datetime="2019-11-21T15:30:00-05:00">Thu 21 November 2019</time>
 
             <h4>Category</h4>
-            <a class="category-link" href="https://szuckerman.github.io/categories.html#python-ref">Python</a>
+            <a class="category-link" href="/categories.html#python-ref">Python</a>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article">
-                <li><a href="https://szuckerman.github.io/tags.html#code-snippet-ref">code snippet
-                    <span>15</span>
+                <li><a href="/tags.html#code-snippet-ref">code snippet
+                    <span class="superscript">18</span>
 </a></li>
-                <li><a href="https://szuckerman.github.io/tags.html#functions-ref">functions
-                    <span>11</span>
+                <li><a href="/tags.html#functions-ref">functions
+                    <span class="superscript">14</span>
 </a></li>
-                <li><a href="https://szuckerman.github.io/tags.html#functools-ref">functools
-                    <span>10</span>
+                <li><a href="/tags.html#functools-ref">functools
+                    <span class="superscript">10</span>
 </a></li>
-                <li><a href="https://szuckerman.github.io/tags.html#python-ref">python
-                    <span>19</span>
+                <li><a href="/tags.html#python-ref">python
+                    <span class="superscript">22</span>
 </a></li>
             </ul>
 <h4>Contact</h4>
@@ -261,11 +262,75 @@
 
 
 
-        </div>
         </section>
 </div>
 </article>
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe.
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides.
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo https://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
                     </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>                    </div>
                     <div class="span1"></div>
                 </div>
             </div>
@@ -276,11 +341,12 @@
 
 
     <div id="fpowered">
-        Powered by: <a href="http://getpelican.com/" title="Pelican Home Page" target="_blank" rel="nofollow">Pelican</a>
-        Theme: <a href="https://elegant.oncrashreboot.com/" title="Theme Elegant Home Page" target="_blank" rel="nofollow">Elegant</a>
+        Powered by: <a href="http://getpelican.com/" title="Pelican Home Page" target="_blank" rel="nofollow noopener noreferrer">Pelican</a>
+        Theme: <a href="https://elegant.oncrashreboot.com/" title="Theme Elegant Home Page" target="_blank" rel="nofollow noopener noreferrer">Elegant</a>
     </div>
 </footer>            <script src="//code.jquery.com/jquery.min.js"></script>
         <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="/theme/js/elegant.prod.9e9d5ce754.js"></script>
         <script>
             function validateForm(query)
             {

@@ -4,6 +4,12 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="/theme/css/elegant.prod.9e9d5ce754.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="/theme/css/custom.css" media="screen">
+
+        <link rel="dns-prefetch" href="//fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+
         <meta name="author" content="Sam Zuckerman" />
 
         <meta property="og:type" content="article" />
@@ -12,7 +18,7 @@
 <meta name="keywords" content="python, redshift, code snippet, Python, " />
 
 <meta property="og:title" content="Creating a Python UDF in Redshift "/>
-<meta property="og:url" content="https://szuckerman.github.io/python_udf_in_redshift.html" />
+<meta property="og:url" content="/python_udf_in_redshift.html" />
 <meta property="og:description" content="Here&#39;s some basic code on how to directly insert a Python function into your Redshift instance." />
 <meta property="og:site_name" content="programming notes" />
 <meta property="og:article:author" content="Sam Zuckerman" />
@@ -23,14 +29,7 @@
 
         <title>Creating a Python UDF in Redshift  · programming notes
 </title>
-        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
-        <link rel="stylesheet" type="text/css" href="https://szuckerman.github.io/theme/css/pygments.css" media="screen">
-        <link rel="stylesheet" type="text/css" href="https://szuckerman.github.io/theme/tipuesearch/tipuesearch.css" media="screen">
-        <link rel="stylesheet" type="text/css" href="https://szuckerman.github.io/theme/css/elegant.css" media="screen">
-        <link rel="stylesheet" type="text/css" href="https://szuckerman.github.io/theme/css/admonition.css" media="screen">
-        <link rel="stylesheet" type="text/css" href="https://szuckerman.github.io/theme/css/custom.css" media="screen">
 
-        <link href="https://szuckerman.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="programming notes - Full Atom Feed" />
 <script>
     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -52,18 +51,18 @@
                             <span class="icon-bar"></span>
                             <span class="icon-bar"></span>
                         </a>
-                        <a class="brand" href="https://szuckerman.github.io/"><span class=site-name>programming notes</span></a>
+                        <a class="brand" href="/"><span class=site-name>programming notes</span></a>
                         <div class="nav-collapse collapse">
                             <ul class="nav pull-right top-menu">
                                 <li >
                                     <a href=
-                                       https://szuckerman.github.io
+                                       "/"
                                     >Home</a>
                                 </li>
-                                <li ><a href="https://szuckerman.github.io/categories.html">Categories</a></li>
-                                <li ><a href="https://szuckerman.github.io/tags.html">Tags</a></li>
-                                <li ><a href="https://szuckerman.github.io/archives.html">Archives</a></li>
-                                <li><form class="navbar-search" action="https://szuckerman.github.io/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                                <li ><a href="/categories.html">Categories</a></li>
+                                <li ><a href="/tags.html">Tags</a></li>
+                                <li ><a href="/archives.html">Archives</a></li>
+                                <li><form class="navbar-search" action="/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
                             </ul>
                         </div>
                     </div>
@@ -77,7 +76,7 @@
 <div class="row-fluid">
     <header class="page-header span10 offset2">
         <h1>
-            <a href="https://szuckerman.github.io/python_udf_in_redshift.html">
+            <a href="/python_udf_in_redshift.html">
                 Creating a Python UDF in Redshift
             </a>
         </h1>
@@ -115,37 +114,37 @@
 <p>Basically, Python 2.7 is already "there" with the packages I listed above.</p>
 <h1>How do permissions work?</h1>
 <p>In Redshift, Python is referred to as <code>plpythonu</code>. To allow users (besides the superuser) to use the language, the following command must be run:</p>
-<div class="highlight"><pre><span></span><span class="k">GRANT</span> <span class="k">USAGE</span> <span class="k">ON</span> <span class="k">LANGUAGE</span> <span class="n">plpythonu</span> <span class="k">TO</span> <span class="n">USERNAME</span><span class="p">;</span>
-</pre></div>
-
+<div class="highlight"><pre><span></span><code><span class="k">GRANT</span><span class="w"> </span><span class="k">USAGE</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="k">LANGUAGE</span><span class="w"> </span><span class="n">plpythonu</span><span class="w"> </span><span class="k">TO</span><span class="w"> </span><span class="n">USERNAME</span><span class="p">;</span>
+</code></pre></div>
 
 <h1>Making the Function</h1>
 <p>After the permissions are added, you can add a function like so:</p>
-<div class="highlight"><pre><span></span><span class="k">create</span> <span class="k">function</span> <span class="n">add_three_numbers</span><span class="p">(</span><span class="n">num1</span> <span class="nb">float</span><span class="p">,</span> <span class="n">num2</span> <span class="nb">float</span><span class="p">,</span> <span class="n">num3</span> <span class="nb">float</span><span class="p">)</span>
-<span class="k">RETURNS</span> <span class="nb">float</span>
-<span class="k">STABLE</span> 
-<span class="k">AS</span> <span class="err">$$</span>
-<span class="k">return</span> <span class="n">num1</span> <span class="o">+</span> <span class="n">num2</span> <span class="o">+</span> <span class="n">num3</span>
-<span class="err">$$</span> <span class="k">LANGUAGE</span> <span class="n">plpythonu</span><span class="p">;</span>
-</pre></div>
-
+<div class="highlight"><pre><span></span><code><span class="k">create</span><span class="w"> </span><span class="k">function</span><span class="w"> </span><span class="n">add_three_numbers</span><span class="p">(</span><span class="n">num1</span><span class="w"> </span><span class="nb">float</span><span class="p">,</span><span class="w"> </span><span class="n">num2</span><span class="w"> </span><span class="nb">float</span><span class="p">,</span><span class="w"> </span><span class="n">num3</span><span class="w"> </span><span class="nb">float</span><span class="p">)</span>
+<span class="k">RETURNS</span><span class="w"> </span><span class="nb">float</span>
+<span class="k">STABLE</span><span class="w"> </span>
+<span class="k">AS</span><span class="w"> </span><span class="err">$$</span>
+<span class="k">return</span><span class="w"> </span><span class="n">num1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">num2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">num3</span>
+<span class="err">$$</span><span class="w"> </span><span class="k">LANGUAGE</span><span class="w"> </span><span class="n">plpythonu</span><span class="p">;</span>
+</code></pre></div>
 
 <p>This function adds three numbers and returns their result. In the definition, all the data types (parameters and return value) must be specified. Remember, these are Redshift datatypes, but it just so happens that <code>float</code> exists in both languages.</p>
 <p>Everything between the <code>$$</code>'s is the Python code. If you wanted to use <code>pandas</code> at this point you would <code>import pandas as pd</code> at the beginning of the function definition.</p>
 <p><code>STABLE</code> in this case deals with the query optimizer and how it should evaluate the function. <a href="https://docs.aws.amazon.com/redshift/latest/dg/r_CREATE_FUNCTION.html">The Redshift documentation goes into more detail on this for its different values</a>, but for the time being you should be OK keeping it with <code>STABLE</code>.</p>
 <p><strong>Note:</strong> This doesn't currently work for aggregation. I.e. you can't use <code>group by</code> and your Python function like you would <code>sum</code> or <code>avg</code>. We're going to discuss a workaround in a later post.</p>
 <h1>Output</h1>
-<div class="highlight"><pre><span></span><span class="k">SELECT</span> <span class="n">add_three_numbers</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
-</pre></div>
-
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">add_three_numbers</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+</code></pre></div>
 
 <p>Would output 6. Remember, Redshift doesn't require a <code>FROM</code> clause.</p>
 <p>Now you should have a basic understanding of how to add a Python function to your Redshift database.</p>
 
 
+             
+ 
             
             
             
+
 
 
 
@@ -159,11 +158,11 @@
     <div class="accordion" id="accordion2">
         <div class="accordion-group">
             <div class="accordion-heading">
-                <a class="accordion-toggle disqus-comment-count comment-count"
+                <a class="accordion-toggle disqus-comment-count comment-count collapsed"
                    data-toggle="collapse"
                    data-parent="#accordion2"
-                   data-disqus-identifier="https://szuckerman.github.io/python_udf_in_redshift.html"
-                   href="https://szuckerman.github.io/python_udf_in_redshift.html#comment_thread"
+                   data-disqus-identifier="/python_udf_in_redshift.html"
+                   href="/python_udf_in_redshift.html#comment_thread"
                    id="comment-accordion-toggle">
                     Comments
                 </a>
@@ -181,8 +180,8 @@
         (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
     }());
 
-    var disqus_identifier = 'https://szuckerman.github.io/python_udf_in_redshift.html';
-    var disqus_url = 'https://szuckerman.github.io/python_udf_in_redshift.html';
+    var disqus_identifier = '/python_udf_in_redshift.html';
+    var disqus_url = '/python_udf_in_redshift.html';
 
     (function() {
         var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
@@ -195,6 +194,8 @@
 <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
 
 
+
+
                     </div>
                 </div>
             </div>
@@ -204,23 +205,22 @@
 
             <hr/>
         </div>
-        <section>
-        <div class="span2" style="float:right;font-size:0.9em;">
+        <section id="article-sidebar" class="span2">
             <h4>Published</h4>
-            <time itemprop="dateCreated" datetime="2018-11-01T15:30:00-04:00">Nov 1, 2018</time>
+            <time itemprop="dateCreated" datetime="2018-11-01T15:30:00-04:00">Thu 01 November 2018</time>
 
             <h4>Category</h4>
-            <a class="category-link" href="https://szuckerman.github.io/categories.html#python-ref">Python</a>
+            <a class="category-link" href="/categories.html#python-ref">Python</a>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article">
-                <li><a href="https://szuckerman.github.io/tags.html#code-snippet-ref">code snippet
-                    <span>15</span>
+                <li><a href="/tags.html#code-snippet-ref">code snippet
+                    <span class="superscript">18</span>
 </a></li>
-                <li><a href="https://szuckerman.github.io/tags.html#python-ref">python
-                    <span>19</span>
+                <li><a href="/tags.html#python-ref">python
+                    <span class="superscript">22</span>
 </a></li>
-                <li><a href="https://szuckerman.github.io/tags.html#redshift-ref">redshift
-                    <span>5</span>
+                <li><a href="/tags.html#redshift-ref">redshift
+                    <span class="superscript">5</span>
 </a></li>
             </ul>
 <h4>Contact</h4>
@@ -238,11 +238,75 @@
 
 
 
-        </div>
         </section>
 </div>
 </article>
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe.
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides.
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo https://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
                     </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>                    </div>
                     <div class="span1"></div>
                 </div>
             </div>
@@ -253,11 +317,12 @@
 
 
     <div id="fpowered">
-        Powered by: <a href="http://getpelican.com/" title="Pelican Home Page" target="_blank" rel="nofollow">Pelican</a>
-        Theme: <a href="https://elegant.oncrashreboot.com/" title="Theme Elegant Home Page" target="_blank" rel="nofollow">Elegant</a>
+        Powered by: <a href="http://getpelican.com/" title="Pelican Home Page" target="_blank" rel="nofollow noopener noreferrer">Pelican</a>
+        Theme: <a href="https://elegant.oncrashreboot.com/" title="Theme Elegant Home Page" target="_blank" rel="nofollow noopener noreferrer">Elegant</a>
     </div>
 </footer>            <script src="//code.jquery.com/jquery.min.js"></script>
         <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="/theme/js/elegant.prod.9e9d5ce754.js"></script>
         <script>
             function validateForm(query)
             {
