@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="/theme/css/elegant.prod.9e9d5ce754.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="/theme/css/custom.css" media="screen">
+
+        <link rel="dns-prefetch" href="//fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+
+        <meta name="author" content="Sam Zuckerman" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="python, itertools, combinations, code snippet, Python, " />
+
+<meta property="og:title" content="What&#39;s this in itertools? combinations and combinations_with_replacement "/>
+<meta property="og:url" content="/itertools_combinations.html" />
+<meta property="og:description" content="The itertools module is packed with powerful tools for working with iterators. Among them, combinations and combinations_with_replacement stand out as elegant solutions for generating subsets from a collection. Whether you’re solving math problems or building efficient algorithms, these functions can save you time and effort." />
+<meta property="og:site_name" content="programming notes" />
+<meta property="og:article:author" content="Sam Zuckerman" />
+<meta property="og:article:published_time" content="2025-03-06T10:00:00-05:00" />
+<meta property="og:article:modified_time" content="2025-03-06T10:00:00-05:00" />
+<meta name="twitter:title" content="What&#39;s this in itertools? combinations and combinations_with_replacement ">
+<meta name="twitter:description" content="The itertools module is packed with powerful tools for working with iterators. Among them, combinations and combinations_with_replacement stand out as elegant solutions for generating subsets from a collection. Whether you’re solving math problems or building efficient algorithms, these functions can save you time and effort.">
+
+        <title>What&#39;s this in itertools? combinations and combinations_with_replacement  · programming notes
+</title>
+
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+     (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+     m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+     })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-128575468-1', 'auto');
+    ga('send', 'pageview');
+</script>
+
+
+    </head>
+    <body>
+        <div id="content">
+            <div class="navbar navbar-static-top">
+                <div class="navbar-inner">
+                    <div class="container-fluid">
+                        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </a>
+                        <a class="brand" href="/"><span class=site-name>programming notes</span></a>
+                        <div class="nav-collapse collapse">
+                            <ul class="nav pull-right top-menu">
+                                <li >
+                                    <a href=
+                                       "/"
+                                    >Home</a>
+                                </li>
+                                <li ><a href="/categories.html">Categories</a></li>
+                                <li ><a href="/tags.html">Tags</a></li>
+                                <li ><a href="/archives.html">Archives</a></li>
+                                <li><form class="navbar-search" action="/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <div class="span1"></div>
+                    <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+        <h1>
+            <a href="/itertools_combinations.html">
+                What's this in itertools? combinations and combinations_with_replacement
+            </a>
+        </h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+            
+            <h1>Why do I need combinations and combinations_with_replacement?</h1>
+<p>In Python, generating all possible combinations of items from a list is a common task—think of picking teams, selecting
+lottery numbers, or even solving combinatorial puzzles. Without <code>itertools</code>, you’d likely end up writing nested loops or
+recursive functions, which can get messy fast.</p>
+<p>With <code>itertools.combinations</code> and <code>itertools.combinations_with_replacement</code>, you get clean, efficient, and built-in ways
+to handle these scenarios. The key difference? <code>combinations</code> picks unique subsets without repeating elements,
+while <code>combinations_with_replacement</code> allows elements to be reused. Let’s break it down with examples.</p>
+<h1>Example without itertools</h1>
+<p>Suppose you’re organizing a dinner party and need to pick 2 dishes from a menu of 3: salad, pasta, and steak.
+Without <code>itertools</code>, you might write something like this:</p>
+<div class="highlight"><pre><span></span><code><span class="n">menu</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;salad&#39;</span><span class="p">,</span> <span class="s1">&#39;pasta&#39;</span><span class="p">,</span> <span class="s1">&#39;steak&#39;</span><span class="p">]</span>
+<span class="n">pairs</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">menu</span><span class="p">)):</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">menu</span><span class="p">)):</span>  <span class="c1"># i + 1 to avoid duplicates and self-pairs</span>
+        <span class="n">pairs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">menu</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">menu</span><span class="p">[</span><span class="n">j</span><span class="p">]))</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">pairs</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>Output:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="p">[(</span><span class="s1">&#39;salad&#39;</span><span class="p">,</span> <span class="s1">&#39;pasta&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;salad&#39;</span><span class="p">,</span> <span class="s1">&#39;steak&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;pasta&#39;</span><span class="p">,</span> <span class="s1">&#39;steak&#39;</span><span class="p">)]</span>
+</code></pre></div>
+
+<p>This works, but it’s clunky. What if you need 3 dishes instead of 2? The code gets uglier with more loops. Now imagine
+you’re okay with repeats—like serving two salads. You’d need even more logic to handle that case.</p>
+<h1>Example with itertools.combinations</h1>
+<p>Here’s how <code>itertools.combinations</code> simplifies the same task:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">combinations</span>
+
+<span class="n">menu</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;salad&#39;</span><span class="p">,</span> <span class="s1">&#39;pasta&#39;</span><span class="p">,</span> <span class="s1">&#39;steak&#39;</span><span class="p">]</span>
+<span class="n">pairs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">combinations</span><span class="p">(</span><span class="n">menu</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>  <span class="c1"># 2 is the size of each combination</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">pairs</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>Output:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="p">[(</span><span class="s1">&#39;salad&#39;</span><span class="p">,</span> <span class="s1">&#39;pasta&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;salad&#39;</span><span class="p">,</span> <span class="s1">&#39;steak&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;pasta&#39;</span><span class="p">,</span> <span class="s1">&#39;steak&#39;</span><span class="p">)]</span>
+</code></pre></div>
+
+<p>Boom—done in one line. The <code>combinations</code> function takes an iterable (like a list) and an integer <code>r</code> (the size of each
+subset) and returns an iterator of all possible combinations, where order doesn’t matter and elements aren’t repeated
+within a combination. No loops, no fuss.</p>
+<h1>Example with itertools.combinations_with_replacement</h1>
+<p>Now, what if you’re fine with repeating dishes—like two salads? Enter <code>combinations_with_replacement</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">combinations_with_replacement</span>
+
+<span class="n">menu</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;salad&#39;</span><span class="p">,</span> <span class="s1">&#39;pasta&#39;</span><span class="p">,</span> <span class="s1">&#39;steak&#39;</span><span class="p">]</span>
+<span class="n">pairs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">combinations_with_replacement</span><span class="p">(</span><span class="n">menu</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">pairs</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>Output:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="p">[(</span><span class="s1">&#39;salad&#39;</span><span class="p">,</span> <span class="s1">&#39;salad&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;salad&#39;</span><span class="p">,</span> <span class="s1">&#39;pasta&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;salad&#39;</span><span class="p">,</span> <span class="s1">&#39;steak&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;pasta&#39;</span><span class="p">,</span> <span class="s1">&#39;pasta&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;pasta&#39;</span><span class="p">,</span> <span class="s1">&#39;steak&#39;</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;steak&#39;</span><span class="p">,</span> <span class="s1">&#39;steak&#39;</span><span class="p">)]</span>
+</code></pre></div>
+
+<p>Notice how it includes pairs like <code>('salad', 'salad')</code>. This function works like <code>combinations</code>, but it allows elements
+to be reused within each subset. It’s perfect for scenarios where repetition is valid, like picking multiple scoops of
+ice cream (two vanillas? Why not!).</p>
+<h1>Digging deeper</h1>
+<p>Both functions are memory-efficient because they return iterators—you can process results one at a time instead of
+building a full list upfront (just drop the <code>list()</code> call if you don’t need everything at once). The Python docs explain
+their behavior clearly:</p>
+<ul>
+<li><code>combinations(iterable, r)</code>: Returns r-length tuples in sorted order, no repeated elements.</li>
+<li><code>combinations_with_replacement(iterable, r)</code>: Same, but allows individual elements to be repeated.</li>
+</ul>
+<p>For example, with <code>combinations('ABC', 2)</code>, you get <code>('A', 'B'), ('A', 'C'), ('B', 'C')</code>.</p>
+<p>With <code>combinations_with_replacement('ABC', 2)</code>, you get </p>
+<p><code>('A', 'A'), ('A', 'B'), ('A', 'C'), ('B', 'B'), ('B', 'C'), ('C', 'C')</code>.</p>
+<h1>Conclusion</h1>
+<p>While you <em>could</em> write your own combination logic, why reinvent the wheel? <code>itertools.combinations</code>
+and <code>combinations_with_replacement</code> offer concise, readable, and efficient solutions for generating subsets. They’re
+especially handy in mathematical computations, data analysis, or any situation where you need to explore possibilities
+without drowning in loops.</p>
+<p>As the <code>itertools</code> docs put it, these functions are “roughly equivalent to” nested loops or recursive algorithms—but
+optimized and battle-tested. By using them, you keep your code clean and let Python’s standard library do the heavy
+lifting. So next time you’re picking pairs, teams, or flavors, give <code>itertools</code> a spin!</p>
+
+
+             
+ 
+            
+            
+            
+
+
+
+
+
+
+
+<section>
+    <h6 style="display:none;">Comments</h6>
+    <p id="comment-message"> </p>
+
+    <div class="accordion" id="accordion2">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                <a class="accordion-toggle disqus-comment-count comment-count collapsed"
+                   data-toggle="collapse"
+                   data-parent="#accordion2"
+                   data-disqus-identifier="/itertools_combinations.html"
+                   href="/itertools_combinations.html#comment_thread"
+                   id="comment-accordion-toggle">
+                    Comments
+                </a>
+            </div>
+            <div id="comment_thread" class="accordion-body collapse">
+                <div class="accordion-inner">
+                    <div class="comments">
+                        <div id="disqus_thread"></div>
+                        <script>
+    var disqus_shortname = 'szuckerman-github-io-1';
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+
+    var disqus_identifier = '/itertools_combinations.html';
+    var disqus_url = '/itertools_combinations.html';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+
+<noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+            <hr/>
+        </div>
+        <section id="article-sidebar" class="span2">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2025-03-06T10:00:00-05:00">Thu 06 March 2025</time>
+
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#python-ref">Python</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="/tags.html#code-snippet-ref">code snippet
+                    <span class="superscript">19</span>
+</a></li>
+                <li><a href="/tags.html#combinations-ref">combinations
+                    <span class="superscript">1</span>
+</a></li>
+                <li><a href="/tags.html#itertools-ref">itertools
+                    <span class="superscript">4</span>
+</a></li>
+                <li><a href="/tags.html#python-ref">python
+                    <span class="superscript">23</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+<div id="sidebar-social-link">
+</div>
+            
+
+
+
+
+
+            
+
+
+
+
+
+        </section>
+</div>
+</article>
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe.
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides.
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo https://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>                    </div>
+                    <div class="span1"></div>
+                </div>
+            </div>
+        </div>
+<footer>
+
+
+
+
+    <div id="fpowered">
+        Powered by: <a href="http://getpelican.com/" title="Pelican Home Page" target="_blank" rel="nofollow noopener noreferrer">Pelican</a>
+        Theme: <a href="https://elegant.oncrashreboot.com/" title="Theme Elegant Home Page" target="_blank" rel="nofollow noopener noreferrer">Elegant</a>
+    </div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="/theme/js/elegant.prod.9e9d5ce754.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    <script>
+    (function () {
+        if (window.location.hash.match(/^#comment-\d+$/)) {
+            $('#comment_thread').collapse('show');
+        }
+    })();
+    window.onhashchange=function(){
+        if (window.location.hash.match(/^#comment-\d+$/))
+            window.location.reload(true);
+    }
+    $('#comment_thread').on('shown', function () {
+        var link = document.getElementById('comment-accordion-toggle');
+        var old_innerHTML = link.innerHTML;
+        $(link).fadeOut(200, function() {
+            $(this).text('Click here to hide comments').fadeIn(200);
+        });
+        $('#comment_thread').on('hidden', function () {
+            $(link).fadeOut(200, function() {
+                $(this).text(old_innerHTML).fadeIn(200);
+            });
+        })
+    })
+</script>
+
+    </body>
+    <!-- Theme: Elegant built for Pelican
+        License : MIT -->
+</html>
