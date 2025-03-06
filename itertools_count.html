@@ -15,19 +15,19 @@
         <meta property="og:type" content="article" />
         <meta name="twitter:card" content="summary">
 
-<meta name="keywords" content="python, packages, Python, " />
+<meta name="keywords" content="python, itertools, iteration, code snippet, Python, " />
 
-<meta property="og:title" content="Finding local python packages "/>
-<meta property="og:url" content="/finding-local-python-packages.html" />
-<meta property="og:description" content="Finding Local Python Packages" />
+<meta property="og:title" content="What&#39;s this in itertools? count "/>
+<meta property="og:url" content="/itertools_count.html" />
+<meta property="og:description" content="Python&#39;s itertools module provides powerful tools for efficient looping. The count function from itertools offers a clean way to create infinite iterators, useful for generating sequences effortlessly." />
 <meta property="og:site_name" content="programming notes" />
 <meta property="og:article:author" content="Sam Zuckerman" />
-<meta property="og:article:published_time" content="2017-12-21T12:45:00-05:00" />
-<meta property="og:article:modified_time" content="2017-12-21T12:45:00-05:00" />
-<meta name="twitter:title" content="Finding local python packages ">
-<meta name="twitter:description" content="Finding Local Python Packages">
+<meta property="og:article:published_time" content="2024-07-06T10:30:00-04:00" />
+<meta property="og:article:modified_time" content="2024-07-06T10:30:00-04:00" />
+<meta name="twitter:title" content="What&#39;s this in itertools? count ">
+<meta name="twitter:description" content="Python&#39;s itertools module provides powerful tools for efficient looping. The count function from itertools offers a clean way to create infinite iterators, useful for generating sequences effortlessly.">
 
-        <title>Finding local python packages  · programming notes
+        <title>What&#39;s this in itertools? count  · programming notes
 </title>
 
 <script>
@@ -76,8 +76,8 @@
 <div class="row-fluid">
     <header class="page-header span10 offset2">
         <h1>
-            <a href="/finding-local-python-packages.html">
-                Finding local python packages
+            <a href="/itertools_count.html">
+                What's this in itertools? count
             </a>
         </h1>
     </header>
@@ -86,25 +86,67 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <h2>Problem</h2>
-<p>I had a problem where I couldn't get Python to notice a package I just made.</p>
-<p>What's great about Python is that you can work on a module, say <code>my_file.py</code>, and in another script write 'import my_file' to include that script in the current one. To include this module in a package, you merely add a blank <code>__init__.py</code> file to the folder the script is in. If the script is in a folder called 'my_folder', adding a <code>__init__.py</code> file to that folder will allow you to run:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">my_folder</span> <span class="kn">import</span> <span class="n">my_script</span>
+            <h1>Why do I need itertools.count?</h1>
+<p>Sometimes you need an endless stream of numbers or an infinite iterator. Writing loops or generator functions for such simple tasks can become cumbersome or unclear. Thankfully, Python's built-in <code>itertools</code> module provides a neat and readable solution with <code>count</code>.</p>
+<p>Let's see an example.</p>
+<h1>Example without itertools.count</h1>
+<p>A common example is when you need continuous incremental indices. Without <code>count</code>, you might write something like this:</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">index_generator</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">start</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">n</span>
+        <span class="n">n</span> <span class="o">+=</span> <span class="n">step</span>
+
+<span class="n">counter</span> <span class="o">=</span> <span class="n">index_generator</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">counter</span><span class="p">))</span>
 </code></pre></div>
 
-<p>However, Python only knows about this package if it's in the same directory. I was trying to run some tests recently by having a separate 'tests' folder and I kept on getting an error of <code>ModuleNotFoundError: No module named my_folder</code>.</p>
-<p>The reason it can't find the package is because Python only knows about packages loaded into the site-packages section of your Python installation.</p>
-<p>For example, I use a virtual environment on my mac which loads all my packages (such as pandas, scipy, etc) here:</p>
-<p><code>/Users/my_username/.virtualenvs/virtualenv_name/lib/python3.6/site-packages</code></p>
-<p>When you install with pip, the packages get loaded there.</p>
-<p>If I decided to build the package, then it would go there too, but I don't really want to do that while I'm just doing some brief testing.</p>
-<h2>Solution</h2>
-<p>Add a .pth file to the site-packages/ directory.</p>
-<p>It's fairly simple. Let's say my <code>my_folder</code> package is in the following <code>my_folder</code> directory (it's a common design to have a package in a folder of the same name).</p>
-<p><code>/Users/my_username/Documents/my_folder/my_folder/</code></p>
-<p>I would take this line and put it in a file called <code>my_folder.pth</code> (it can be named anything, though) and put that pth file in the site-packages/ directory. It might seem odd to just have a text file with that one line of a directory, but it works.</p>
-<p>The file's location would be <code>/Users/my_username/.virtualenvs/virtualenv_name/lib/python3.6/site-packages/my_folder.pth</code>.</p>
-<p>Now you can run <code>from my_folder import my_script</code> without any errors!</p>
+<p><strong>Output:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="mf">5</span>
+<span class="mf">7</span>
+<span class="mf">9</span>
+<span class="mf">11</span>
+<span class="mf">13</span>
+</code></pre></div>
+
+<p>This works, but Python gives us a better built-in way.</p>
+<h1>Example with itertools.count</h1>
+<p><code>itertools.count</code> makes this significantly simpler and cleaner.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">count</span>
+
+<span class="n">counter</span> <span class="o">=</span> <span class="n">count</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">counter</span><span class="p">))</span>
+</code></pre></div>
+
+<p><strong>Output:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="mf">5</span>
+<span class="mf">7</span>
+<span class="mf">9</span>
+<span class="mf">11</span>
+<span class="mf">13</span>
+</code></pre></div>
+
+<h1>Practical use-case</h1>
+<p><code>count</code> is also very handy when pairing with other tools like <code>zip()</code> to effortlessly create indexed lists:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">count</span>
+
+<span class="n">fruits</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;apple&#39;</span><span class="p">,</span> <span class="s1">&#39;banana&#39;</span><span class="p">,</span> <span class="s1">&#39;orange&#39;</span><span class="p">]</span>
+<span class="n">indexed_fruits</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">count</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">fruits</span><span class="p">))</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">indexed_fruits</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>Output:</strong></p>
+<div class="highlight"><pre><span></span><code>[(1, &#39;apple&#39;), (2, &#39;banana&#39;), (3, &#39;orange&#39;)]
+</code></pre></div>
+
+<p>Compared to manually managing counters, this approach is concise, readable, and reliable.</p>
+<h1>Conclusion</h1>
+<p>While creating a manual counter is straightforward, using <code>itertools.count</code> makes your code more expressive and reduces potential bugs or inconsistencies in managing loop indices or incremental counts. As a general rule, whenever you find yourself creating a custom incremental generator or manually incrementing a variable repeatedly, consider using <code>count</code> from itertools instead.</p>
 
 
              
@@ -129,8 +171,8 @@
                 <a class="accordion-toggle disqus-comment-count comment-count collapsed"
                    data-toggle="collapse"
                    data-parent="#accordion2"
-                   data-disqus-identifier="/finding-local-python-packages.html"
-                   href="/finding-local-python-packages.html#comment_thread"
+                   data-disqus-identifier="/itertools_count.html"
+                   href="/itertools_count.html#comment_thread"
                    id="comment-accordion-toggle">
                     Comments
                 </a>
@@ -148,8 +190,8 @@
         (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
     }());
 
-    var disqus_identifier = '/finding-local-python-packages.html';
-    var disqus_url = '/finding-local-python-packages.html';
+    var disqus_identifier = '/itertools_count.html';
+    var disqus_url = '/itertools_count.html';
 
     (function() {
         var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
@@ -175,14 +217,20 @@
         </div>
         <section id="article-sidebar" class="span2">
             <h4>Published</h4>
-            <time itemprop="dateCreated" datetime="2017-12-21T12:45:00-05:00">Thu 21 December 2017</time>
+            <time itemprop="dateCreated" datetime="2024-07-06T10:30:00-04:00">Sat 06 July 2024</time>
 
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#python-ref">Python</a>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article">
-                <li><a href="/tags.html#packages-ref">packages
+                <li><a href="/tags.html#code-snippet-ref">code snippet
+                    <span class="superscript">20</span>
+</a></li>
+                <li><a href="/tags.html#iteration-ref">iteration
                     <span class="superscript">1</span>
+</a></li>
+                <li><a href="/tags.html#itertools-ref">itertools
+                    <span class="superscript">5</span>
 </a></li>
                 <li><a href="/tags.html#python-ref">python
                     <span class="superscript">24</span>
