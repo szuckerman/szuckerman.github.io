@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="/theme/css/elegant.prod.9e9d5ce754.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="/theme/css/custom.css" media="screen">
+
+        <link rel="dns-prefetch" href="//fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+
+        <meta name="author" content="Sam Zuckerman" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="swagger, api, documentation, development, fastapi, APIs, " />
+
+<meta property="og:title" content="What&#39;s this about Swagger? "/>
+<meta property="og:url" content="/swagger_api_intro.html" />
+<meta property="og:description" content="Swagger makes it easy to create, document, and test your APIs. It&#39;s especially useful for anyone new to APIs who wants clear, visual documentation and interactive testing tools." />
+<meta property="og:site_name" content="programming notes" />
+<meta property="og:article:author" content="Sam Zuckerman" />
+<meta property="og:article:published_time" content="2025-03-07T09:00:00-05:00" />
+<meta property="og:article:modified_time" content="2025-03-07T09:00:00-05:00" />
+<meta name="twitter:title" content="What&#39;s this about Swagger? ">
+<meta name="twitter:description" content="Swagger makes it easy to create, document, and test your APIs. It&#39;s especially useful for anyone new to APIs who wants clear, visual documentation and interactive testing tools.">
+
+        <title>What&#39;s this about Swagger?  · programming notes
+</title>
+
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+     (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+     m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+     })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-128575468-1', 'auto');
+    ga('send', 'pageview');
+</script>
+
+
+    </head>
+    <body>
+        <div id="content">
+            <div class="navbar navbar-static-top">
+                <div class="navbar-inner">
+                    <div class="container-fluid">
+                        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </a>
+                        <a class="brand" href="/"><span class=site-name>programming notes</span></a>
+                        <div class="nav-collapse collapse">
+                            <ul class="nav pull-right top-menu">
+                                <li >
+                                    <a href=
+                                       "/"
+                                    >Home</a>
+                                </li>
+                                <li ><a href="/categories.html">Categories</a></li>
+                                <li ><a href="/tags.html">Tags</a></li>
+                                <li ><a href="/archives.html">Archives</a></li>
+                                <li><form class="navbar-search" action="/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <div class="span1"></div>
+                    <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+        <h1>
+            <a href="/swagger_api_intro.html">
+                What's this about Swagger?
+            </a>
+        </h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+            
+            <h1>Why should I care about Swagger?</h1>
+<p>If you've worked with APIs before, you probably know how quickly things can get messy. Keeping track of endpoints, request parameters, and responses can become overwhelming—especially if you're new to API development.</p>
+<p>Swagger is here to help by providing clear, visual, and interactive documentation for your APIs.</p>
+<p>Let's dive into why it's useful and how easy it is to get started!</p>
+<h1>APIs without Swagger</h1>
+<p>Imagine you've created an API with several endpoints, each requiring specific parameters. Without Swagger, documenting and understanding your API usually means maintaining a manual document or spending lots of time explaining your API to new users or teammates:</p>
+<div class="highlight"><pre><span></span><code>GET /users/{user_id}
+Parameters:
+  <span class="k">-</span> user_id: integer (required)
+Response:
+  <span class="k">-</span> 200 OK: Returns user details in JSON format
+  <span class="k">-</span> 404 Not Found: User doesn&#39;t exist
+
+POST /users
+Parameters:
+  <span class="k">-</span> name: string
+  <span class="k">-</span> email: string
+Response:
+  <span class="k">-</span> 201 Created: Successfully created user
+  <span class="k">-</span> 400 Bad Request: Missing or invalid parameters
+</code></pre></div>
+
+<p>This manual approach becomes a nightmare as your API grows or changes.</p>
+<h1>APIs with Swagger</h1>
+<p>Swagger solves this problem by clearly defining and visually representing your API structure. It also lets you test APIs directly through an interactive web interface.</p>
+<p>Here's a brief YAML example of what your API documentation could look like using the OpenAPI specification:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">openapi</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3.0.3</span>
+<span class="nt">info</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Sample Petstore API</span>
+<span class="w">  </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0.0</span>
+<span class="nt">paths</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">/pets</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">get</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">summary</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">List all pets</span>
+<span class="w">      </span><span class="nt">responses</span><span class="p">:</span>
+<span class="w">        </span><span class="s">&#39;200&#39;</span><span class="p p-Indicator">:</span>
+<span class="w">          </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">An array of pets</span>
+</code></pre></div>
+
+<p>This YAML file is simple, readable, and best of all—Swagger automatically generates beautiful documentation:</p>
+<ul>
+<li>Interactive UI with clearly documented endpoints.</li>
+<li>Easily testable endpoints directly from your browser.</li>
+</ul>
+<h1>Swagger vs. OpenAPI: What's the difference?</h1>
+<p>Swagger was originally the name of both the specification and the suite of tools built around it. However, since version 3.0, the specification has been renamed "OpenAPI," and Swagger now primarily refers to the set of tools for working with the OpenAPI specification.</p>
+<ul>
+<li><strong>Swagger:</strong> Refers to the tooling ecosystem (Swagger UI, Swagger Editor, SwaggerHub).</li>
+<li><strong>OpenAPI:</strong> Refers specifically to the specification format (e.g., OpenAPI 3.0).</li>
+</ul>
+<p>So, when someone mentions Swagger today, they usually mean the tooling around the OpenAPI specification.</p>
+<h1>Generating Swagger documentation from a YAML file</h1>
+<p>You can easily generate Swagger UI documentation from your YAML file using Swagger tools. Here's how:</p>
+<ol>
+<li>Save your YAML file (e.g., <code>api_spec.yaml</code>).</li>
+<li>Visit the <a href="https://swagger.io/tools/swagger-editor/">Swagger Editor</a> and upload your YAML file.</li>
+<li>Instantly view interactive documentation and even host your documentation online using SwaggerHub.</li>
+</ol>
+<p>Here's an example of what it will look like after rendering the above YAML file using the Swagger Editor.</p>
+<p><img alt="Swagger UI" src="/images/swagger_intro_api.png"></p>
+<p>Alternatively, use tools like <code>swagger-ui</code> locally:</p>
+<div class="highlight"><pre><span></span><code>npm<span class="w"> </span>install<span class="w"> </span>swagger-ui-dist
+</code></pre></div>
+
+<p>Then host it using a simple web server:</p>
+<div class="highlight"><pre><span></span><code>npx<span class="w"> </span>http-server<span class="w"> </span>path/to/swagger-ui-dist
+</code></pre></div>
+
+<h1>How Swagger works with frameworks like FastAPI</h1>
+<p>One fantastic aspect of Swagger is its seamless integration with modern web frameworks such as FastAPI. FastAPI automatically generates Swagger documentation for you based on your code, without any additional configuration.</p>
+<p>Here's how simple it is to document an API with FastAPI and Swagger:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">fastapi</span> <span class="kn">import</span> <span class="n">FastAPI</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">()</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/users/</span><span class="si">{user_id}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">get_user</span><span class="p">(</span><span class="n">user_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;user_id&quot;</span><span class="p">:</span> <span class="n">user_id</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Sam&quot;</span><span class="p">}</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/users&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">create_user</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">email</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="n">email</span><span class="p">}</span>
+</code></pre></div>
+
+<p>Just run your FastAPI app, and visit <code>/docs</code>. You’ll see an instantly generated Swagger UI!</p>
+<h1>Practical use-case</h1>
+<p>Imagine you're onboarding a new developer or sharing your API with a client. With Swagger, you simply send them a link, and they immediately have:</p>
+<ul>
+<li>A clear understanding of your API structure.</li>
+<li>Instant ability to test endpoints.</li>
+<li>Reduced confusion, back-and-forth, and documentation headaches.</li>
+</ul>
+<p>This speeds up collaboration and reduces misunderstandings.</p>
+<h1>Conclusion</h1>
+<p>Swagger makes your API development life easier by providing automated, interactive documentation. It not only simplifies your API management but also greatly enhances clarity and ease of use.</p>
+<p>Don't waste your time on manual documentation. Use Swagger and make your API user-friendly and maintainable!</p>
+<p>Check out the official <a href="https://swagger.io/docs/">Swagger documentation</a> for more information, and look at the <a href="https://swagger.io/docs/specification/v3_0/basic-structure/">OpenAPI specification</a> for examples on that too.  </p>
+
+
+             
+ 
+            
+            
+            
+
+
+
+
+
+
+
+<section>
+    <h6 style="display:none;">Comments</h6>
+    <p id="comment-message"> </p>
+
+    <div class="accordion" id="accordion2">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                <a class="accordion-toggle disqus-comment-count comment-count collapsed"
+                   data-toggle="collapse"
+                   data-parent="#accordion2"
+                   data-disqus-identifier="/swagger_api_intro.html"
+                   href="/swagger_api_intro.html#comment_thread"
+                   id="comment-accordion-toggle">
+                    Comments
+                </a>
+            </div>
+            <div id="comment_thread" class="accordion-body collapse">
+                <div class="accordion-inner">
+                    <div class="comments">
+                        <div id="disqus_thread"></div>
+                        <script>
+    var disqus_shortname = 'szuckerman-github-io-1';
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+
+    var disqus_identifier = '/swagger_api_intro.html';
+    var disqus_url = '/swagger_api_intro.html';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+
+<noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+            <hr/>
+        </div>
+        <section id="article-sidebar" class="span2">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2025-03-07T09:00:00-05:00">Fri 07 March 2025</time>
+
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#apis-ref">APIs</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="/tags.html#api-ref">api
+                    <span class="superscript">1</span>
+</a></li>
+                <li><a href="/tags.html#development-ref">development
+                    <span class="superscript">1</span>
+</a></li>
+                <li><a href="/tags.html#documentation-ref">documentation
+                    <span class="superscript">1</span>
+</a></li>
+                <li><a href="/tags.html#fastapi-ref">fastapi
+                    <span class="superscript">1</span>
+</a></li>
+                <li><a href="/tags.html#swagger-ref">swagger
+                    <span class="superscript">1</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+<div id="sidebar-social-link">
+</div>
+            
+
+
+
+
+
+            
+
+
+
+
+
+        </section>
+</div>
+</article>
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe.
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides.
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo https://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>                    </div>
+                    <div class="span1"></div>
+                </div>
+            </div>
+        </div>
+<footer>
+
+
+
+
+    <div id="fpowered">
+        Powered by: <a href="http://getpelican.com/" title="Pelican Home Page" target="_blank" rel="nofollow noopener noreferrer">Pelican</a>
+        Theme: <a href="https://elegant.oncrashreboot.com/" title="Theme Elegant Home Page" target="_blank" rel="nofollow noopener noreferrer">Elegant</a>
+    </div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="/theme/js/elegant.prod.9e9d5ce754.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    <script>
+    (function () {
+        if (window.location.hash.match(/^#comment-\d+$/)) {
+            $('#comment_thread').collapse('show');
+        }
+    })();
+    window.onhashchange=function(){
+        if (window.location.hash.match(/^#comment-\d+$/))
+            window.location.reload(true);
+    }
+    $('#comment_thread').on('shown', function () {
+        var link = document.getElementById('comment-accordion-toggle');
+        var old_innerHTML = link.innerHTML;
+        $(link).fadeOut(200, function() {
+            $(this).text('Click here to hide comments').fadeIn(200);
+        });
+        $('#comment_thread').on('hidden', function () {
+            $(link).fadeOut(200, function() {
+                $(this).text(old_innerHTML).fadeIn(200);
+            });
+        })
+    })
+</script>
+
+    </body>
+    <!-- Theme: Elegant built for Pelican
+        License : MIT -->
+</html>
