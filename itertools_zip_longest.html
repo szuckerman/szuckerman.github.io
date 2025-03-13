@@ -15,19 +15,19 @@
         <meta property="og:type" content="article" />
         <meta name="twitter:card" content="summary">
 
-<meta name="keywords" content="python, itertools, iteration, code snippet, Python, " />
+<meta name="keywords" content="python, itertools, code snippet, zip_longest, Python, " />
 
-<meta property="og:title" content="What&#39;s this in itertools? count "/>
-<meta property="og:url" content="/itertools_count.html" />
-<meta property="og:description" content="Python&#39;s itertools module provides powerful tools for efficient looping. The count function from itertools offers a clean way to create infinite iterators, useful for generating sequences effortlessly." />
+<meta property="og:title" content="What&#39;s this in itertools? zip_longest "/>
+<meta property="og:url" content="/itertools_zip_longest.html" />
+<meta property="og:description" content="Python&#39;s itertools module is packed with useful functions that make your coding life easier. zip_longest is an elegant solution when working with unevenly sized iterables." />
 <meta property="og:site_name" content="programming notes" />
 <meta property="og:article:author" content="Sam Zuckerman" />
-<meta property="og:article:published_time" content="2024-07-06T10:30:00-04:00" />
-<meta property="og:article:modified_time" content="2024-07-06T10:30:00-04:00" />
-<meta name="twitter:title" content="What&#39;s this in itertools? count ">
-<meta name="twitter:description" content="Python&#39;s itertools module provides powerful tools for efficient looping. The count function from itertools offers a clean way to create infinite iterators, useful for generating sequences effortlessly.">
+<meta property="og:article:published_time" content="2024-03-13T10:00:00-04:00" />
+<meta property="og:article:modified_time" content="2024-03-13T10:00:00-04:00" />
+<meta name="twitter:title" content="What&#39;s this in itertools? zip_longest ">
+<meta name="twitter:description" content="Python&#39;s itertools module is packed with useful functions that make your coding life easier. zip_longest is an elegant solution when working with unevenly sized iterables.">
 
-        <title>What&#39;s this in itertools? count  · programming notes
+        <title>What&#39;s this in itertools? zip_longest  · programming notes
 </title>
 
 <script>
@@ -76,8 +76,8 @@
 <div class="row-fluid">
     <header class="page-header span10 offset2">
         <h1>
-            <a href="/itertools_count.html">
-                What's this in itertools? count
+            <a href="/itertools_zip_longest.html">
+                What's this in itertools? zip_longest
             </a>
         </h1>
     </header>
@@ -86,67 +86,59 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <h1>Why do I need itertools.count?</h1>
-<p>Sometimes you need an endless stream of numbers or an infinite iterator. Writing loops or generator functions for such simple tasks can become cumbersome or unclear. Thankfully, Python's built-in <code>itertools</code> module provides a neat and readable solution with <code>count</code>.</p>
-<p>Let's see an example.</p>
-<h1>Example without itertools.count</h1>
-<p>A common example is when you need continuous incremental indices. Without <code>count</code>, you might write something like this:</p>
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">index_generator</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-    <span class="n">n</span> <span class="o">=</span> <span class="n">start</span>
-    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="k">yield</span> <span class="n">n</span>
-        <span class="n">n</span> <span class="o">+=</span> <span class="n">step</span>
+            <h1>Why do I need zip_longest?</h1>
+<p>When you're working with Python's built-in <code>zip</code>, it pairs elements from multiple iterables together until the shortest iterable is exhausted, discarding any leftover elements in the longer iterables. But what if you need to keep those remaining elements?</p>
+<p>This is exactly what <code>zip_longest</code> is made for. It extends the zipping to include every element from the longest iterable, filling missing values with a user-defined placeholder (<code>fillvalue</code>).</p>
+<h1>Example without zip_longest</h1>
+<p>Suppose you're matching customer IDs with customer names, but your data isn't perfectly aligned—maybe some IDs are missing corresponding names. Here's how you'd struggle without <code>zip_longest</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="n">ids</span> <span class="o">=</span> <span class="p">[</span><span class="mi">101</span><span class="p">,</span> <span class="mi">102</span><span class="p">,</span> <span class="mi">103</span><span class="p">,</span> <span class="mi">104</span><span class="p">]</span>
+<span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Alice&#39;</span><span class="p">,</span> <span class="s1">&#39;Bob&#39;</span><span class="p">]</span>
 
-<span class="n">counter</span> <span class="o">=</span> <span class="n">index_generator</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">zipped</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="n">names</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">zipped</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 
-<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">counter</span><span class="p">))</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="p">[(</span><span class="mi">101</span><span class="p">,</span> <span class="s1">&#39;Alice&#39;</span><span class="p">),</span> <span class="p">(</span><span class="mi">102</span><span class="p">,</span> <span class="s1">&#39;Bob&#39;</span><span class="p">)]</span>
 </code></pre></div>
 
-<p><strong>Output:</strong></p>
-<div class="highlight"><pre><span></span><code><span class="mf">5</span>
-<span class="mf">7</span>
-<span class="mf">9</span>
-<span class="mf">11</span>
-<span class="mf">13</span>
+<p>Notice that customer IDs <code>103</code> and <code>104</code> are silently discarded! Not ideal.</p>
+<h1>Example with zip_longest</h1>
+<p>Here's the solution using <code>zip_longest</code> from itertools, which elegantly handles uneven data:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">zip_longest</span>
+
+<span class="n">ids</span> <span class="o">=</span> <span class="p">[</span><span class="mi">101</span><span class="p">,</span> <span class="mi">102</span><span class="p">,</span> <span class="mi">103</span><span class="p">,</span> <span class="mi">104</span><span class="p">]</span>
+<span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Alice&#39;</span><span class="p">,</span> <span class="s1">&#39;Bob&#39;</span><span class="p">]</span>
+
+<span class="n">zipped</span> <span class="o">=</span> <span class="n">zip_longest</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">fillvalue</span><span class="o">=</span><span class="s1">&#39;[No Name]&#39;</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">zipped</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="p">[(</span><span class="mi">101</span><span class="p">,</span> <span class="s1">&#39;Alice&#39;</span><span class="p">),</span> <span class="p">(</span><span class="mi">102</span><span class="p">,</span> <span class="s1">&#39;Bob&#39;</span><span class="p">),</span> <span class="p">(</span><span class="mi">103</span><span class="p">,</span> <span class="s1">&#39;[No Name]&#39;</span><span class="p">),</span> <span class="p">(</span><span class="mi">104</span><span class="p">,</span> <span class="s1">&#39;[No Name]&#39;</span><span class="p">)]</span>
 </code></pre></div>
 
-<p>This works, but Python gives us a better built-in way.</p>
-<h1>Example with itertools.count</h1>
-<p><code>itertools.count</code> makes this significantly simpler and cleaner.</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">count</span>
+<h1>Customizing fillvalue</h1>
+<p>By default, <code>zip_longest</code> uses <code>None</code> as its fill value, but you can easily customize this:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">zip_longest</span>
 
-<span class="n">counter</span> <span class="o">=</span> <span class="n">count</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">fruits</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;apple&#39;</span><span class="p">,</span> <span class="s1">&#39;banana&#39;</span><span class="p">]</span>
+<span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">]</span>
 
-<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">counter</span><span class="p">))</span>
+<span class="n">paired</span> <span class="o">=</span> <span class="n">zip_longest</span><span class="p">(</span><span class="n">fruits</span><span class="p">,</span> <span class="n">colors</span><span class="p">,</span> <span class="n">fillvalue</span><span class="o">=</span><span class="s1">&#39;unknown&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">paired</span><span class="p">))</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="p">[(</span><span class="s1">&#39;apple&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;banana&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;unknown&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)]</span>
 </code></pre></div>
 
-<p><strong>Output:</strong></p>
-<div class="highlight"><pre><span></span><code><span class="mf">5</span>
-<span class="mf">7</span>
-<span class="mf">9</span>
-<span class="mf">11</span>
-<span class="mf">13</span>
-</code></pre></div>
-
-<h1>Practical use-case</h1>
-<p><code>count</code> is also very handy when pairing with other tools like <code>zip()</code> to effortlessly create indexed lists:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">count</span>
-
-<span class="n">fruits</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;apple&#39;</span><span class="p">,</span> <span class="s1">&#39;banana&#39;</span><span class="p">,</span> <span class="s1">&#39;orange&#39;</span><span class="p">]</span>
-<span class="n">indexed_fruits</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">count</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">fruits</span><span class="p">))</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="n">indexed_fruits</span><span class="p">)</span>
-</code></pre></div>
-
-<p><strong>Output:</strong></p>
-<div class="highlight"><pre><span></span><code>[(1, &#39;apple&#39;), (2, &#39;banana&#39;), (3, &#39;orange&#39;)]
-</code></pre></div>
-
-<p>Compared to manually managing counters, this approach is concise, readable, and reliable.</p>
+<h1>When is zip_longest most useful?</h1>
+<p><code>zip_longest</code> shines in scenarios such as:</p>
+<ul>
+<li>Aligning mismatched data sources</li>
+<li>Data migration tasks</li>
+<li>Combining unevenly-sized datasets</li>
+<li>Ensuring no data is lost in processing</li>
+</ul>
 <h1>Conclusion</h1>
-<p>While creating a manual counter is straightforward, using <code>itertools.count</code> makes your code more expressive and reduces potential bugs or inconsistencies in managing loop indices or incremental counts. As a general rule, whenever you find yourself creating a custom incremental generator or manually incrementing a variable repeatedly, consider using <code>count</code> from itertools instead.</p>
+<p><code>zip_longest</code> offers an elegant and Pythonic approach to a common and frustrating problem: iterating over uneven data structures. By handling mismatches gracefully, your code becomes more robust, readable, and error-resistant.</p>
 
 
              
@@ -171,8 +163,8 @@
                 <a class="accordion-toggle disqus-comment-count comment-count collapsed"
                    data-toggle="collapse"
                    data-parent="#accordion2"
-                   data-disqus-identifier="/itertools_count.html"
-                   href="/itertools_count.html#comment_thread"
+                   data-disqus-identifier="/itertools_zip_longest.html"
+                   href="/itertools_zip_longest.html#comment_thread"
                    id="comment-accordion-toggle">
                     Comments
                 </a>
@@ -190,8 +182,8 @@
         (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
     }());
 
-    var disqus_identifier = '/itertools_count.html';
-    var disqus_url = '/itertools_count.html';
+    var disqus_identifier = '/itertools_zip_longest.html';
+    var disqus_url = '/itertools_zip_longest.html';
 
     (function() {
         var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
@@ -217,7 +209,7 @@
         </div>
         <section id="article-sidebar" class="span2">
             <h4>Published</h4>
-            <time itemprop="dateCreated" datetime="2024-07-06T10:30:00-04:00">Sat 06 July 2024</time>
+            <time itemprop="dateCreated" datetime="2024-03-13T10:00:00-04:00">Wed 13 March 2024</time>
 
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#python-ref">Python</a>
@@ -226,14 +218,14 @@
                 <li><a href="/tags.html#code-snippet-ref">code snippet
                     <span class="superscript">22</span>
 </a></li>
-                <li><a href="/tags.html#iteration-ref">iteration
-                    <span class="superscript">1</span>
-</a></li>
                 <li><a href="/tags.html#itertools-ref">itertools
                     <span class="superscript">7</span>
 </a></li>
                 <li><a href="/tags.html#python-ref">python
                     <span class="superscript">26</span>
+</a></li>
+                <li><a href="/tags.html#zip_longest-ref">zip_longest
+                    <span class="superscript">1</span>
 </a></li>
             </ul>
 <h4>Contact</h4>
